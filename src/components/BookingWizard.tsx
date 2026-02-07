@@ -20,6 +20,7 @@ const services = [
 ];
 
 export default function BookingWizard() {
+  const apiBase = process.env.NEXT_PUBLIC_BOOKING_API_BASE || "";
   const [step, setStep] = useState(0);
   const [service, setService] = useState("");
   const [date, setDate] = useState("");
@@ -49,7 +50,9 @@ export default function BookingWizard() {
     setSlotsError("");
     setSelectedSlot(null);
 
-    fetch(`/api/booking/availability?date=${date}&service=${encodeURIComponent(service)}`)
+    fetch(
+      `${apiBase}/api/booking/availability?date=${date}&service=${encodeURIComponent(service)}`,
+    )
       .then(async (response) => {
         if (!response.ok) {
           const data = await response.json();
@@ -68,7 +71,7 @@ export default function BookingWizard() {
     setMessage("");
 
     try {
-      const response = await fetch(`/api/booking`, {
+      const response = await fetch(`${apiBase}/api/booking`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,6 +112,11 @@ export default function BookingWizard() {
 
   return (
     <div className="space-y-8">
+      {!apiBase ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Configura NEXT_PUBLIC_BOOKING_API_BASE per abilitare le prenotazioni.
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         {["Servizio", "Data & Ora", "Dati", "Conferma"].map((label, index) => (
           <div key={label} className="flex items-center gap-2">
