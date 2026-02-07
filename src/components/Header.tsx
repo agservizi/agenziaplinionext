@@ -1,20 +1,84 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Container from "./Container";
 import { navigation } from "@/lib/site-data";
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const trackContactClick = () => {
+    if (typeof window === "undefined") return;
+    const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
+    gtag?.("event", "click_contatti", { event_category: "contatti" });
+  };
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    if (mobileOpen) {
+      root.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
+    } else {
+      root.style.overflow = "";
+      body.style.overflow = "";
+      body.style.touchAction = "";
+    }
+    return () => {
+      root.style.overflow = "";
+      body.style.overflow = "";
+      body.style.touchAction = "";
+    };
+  }, [mobileOpen]);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/70 backdrop-blur">
+    <header
+      className={
+        scrolled
+          ? "fixed top-0 left-0 z-30 w-full bg-white/80 text-slate-900 shadow-[0_10px_40px_rgba(15,23,42,0.08)] backdrop-blur"
+          : "fixed top-0 left-0 z-30 w-full text-white navbar-ghost"
+      }
+    >
       <Container className="flex items-center justify-between py-5">
-        <Link href="/" className="text-lg font-semibold text-white">
-          AG SERVIZI
+        <Link href="/" className="inline-flex items-center">
+          <img
+            src="/logo.png"
+            alt="AG SERVIZI"
+            width={140}
+            height={36}
+            className="h-8 w-auto"
+          />
+          <span className="sr-only">AG SERVIZI</span>
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-200 transition hover:text-white"
+              className={
+                scrolled
+                  ? "relative text-sm font-medium text-slate-600 transition hover:text-slate-900 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-cyan-600 after:transition-transform after:duration-300 hover:after:scale-x-100"
+                  : "relative text-sm font-medium text-white/80 transition hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-white/80 after:transition-transform after:duration-300 hover:after:scale-x-100"
+              }
             >
               {item.label}
             </Link>
@@ -23,25 +87,105 @@ export default function Header() {
         <div className="hidden md:flex">
           <Link
             href="/contatti"
-            className="rounded-full bg-cyan-500 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+            className={
+              scrolled
+                ? "rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-400"
+                : "rounded-full border border-white/40 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/70 hover:bg-white/20"
+            }
+            onClick={trackContactClick}
           >
             Contattaci
           </Link>
         </div>
+        <button
+          type="button"
+          onClick={() => setMobileOpen((open) => !open)}
+          className={
+            scrolled
+              ? "md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900"
+              : "md:hidden inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white"
+          }
+          aria-label={mobileOpen ? "Chiudi menu" : "Apri menu"}
+        >
+          <span className="relative flex h-4 w-5 flex-col justify-between">
+            <span
+              className={
+                mobileOpen
+                  ? "h-0.5 w-full translate-y-1.5 rotate-45 rounded-full bg-current transition"
+                  : "h-0.5 w-full rounded-full bg-current transition"
+              }
+            />
+            <span
+              className={
+                mobileOpen
+                  ? "h-0.5 w-full opacity-0 transition"
+                  : "h-0.5 w-full rounded-full bg-current transition"
+              }
+            />
+            <span
+              className={
+                mobileOpen
+                  ? "h-0.5 w-full -translate-y-1.5 -rotate-45 rounded-full bg-current transition"
+                  : "h-0.5 w-full rounded-full bg-current transition"
+              }
+            />
+          </span>
+        </button>
       </Container>
-      <div className="border-t border-white/10 md:hidden">
-        <Container className="flex flex-wrap items-center gap-4 py-4 text-sm">
+      <div
+        className={
+          mobileOpen
+            ? "fixed inset-0 z-40 bg-black/40 opacity-100 transition-opacity md:hidden"
+            : "pointer-events-none fixed inset-0 z-40 bg-black/40 opacity-0 transition-opacity md:hidden"
+        }
+        onClick={() => setMobileOpen(false)}
+      />
+      <aside
+        className={
+          mobileOpen
+            ? "fixed right-0 top-0 z-50 h-[100svh] w-[80%] max-w-xs translate-x-0 overflow-y-auto overscroll-contain bg-white p-6 text-slate-900 shadow-2xl transition-transform md:hidden"
+            : "fixed right-0 top-0 z-50 h-[100svh] w-[80%] max-w-xs translate-x-full overflow-y-auto overscroll-contain bg-white p-6 text-slate-900 shadow-2xl transition-transform md:hidden"
+        }
+        aria-hidden={!mobileOpen}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Menu
+          </p>
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            className="rounded-full border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-600"
+            aria-label="Chiudi menu"
+          >
+            Chiudi
+          </button>
+        </div>
+        <nav className="mt-8 flex flex-col gap-4">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="font-medium text-slate-200"
+              onClick={() => setMobileOpen(false)}
+              className="text-base font-semibold text-slate-900"
             >
               {item.label}
             </Link>
           ))}
-        </Container>
-      </div>
+        </nav>
+        <div className="mt-8">
+          <Link
+            href="/contatti"
+            onClick={() => {
+              setMobileOpen(false);
+              trackContactClick();
+            }}
+            className="inline-flex w-full items-center justify-center rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white"
+          >
+            Contattaci
+          </Link>
+        </div>
+      </aside>
     </header>
   );
 }

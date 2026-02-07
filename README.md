@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AG SERVIZI – Sito istituzionale
 
-## Getting Started
+Sito istituzionale professionale per AG SERVIZI, sviluppato con Next.js (App Router), UI moderna e palette dark con accento professionale.
 
-First, run the development server:
+## Stack
+- Next.js (App Router)
+- Tailwind CSS
+- API routes (Next.js)
+- MySQL (mysql2)
 
-```bash
+## Comandi principali
+
+Avvio in sviluppo:
+
+```
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Build produzione:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Export statico:
 
-## Learn More
+```
+npm run export
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Export statico (Hostinger)
+Il progetto è configurato con `output: "export"`, quindi la build genera la cartella `out`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Per il deploy su hosting statico:
+1. Esegui `npm install`
+2. Esegui `npm run export`
+3. Carica il contenuto della cartella `out` in `public_html`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Nota: le API server-side non sono disponibili in hosting statico. Il form contatti richiede un backend serverless o un endpoint esterno.
 
-## Deploy on Vercel
+## Variabili d’ambiente
+Crea un file `.env` con:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+MYSQL_HOST=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_DATABASE=
+MYSQL_PORT=3306
+RESEND_API_KEY=
+RESEND_FROM=
+RESEND_TO=
+NEXT_PUBLIC_GA_ID=
+NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> `NEXT_PUBLIC_GA_ID` è opzionale e serve solo se vuoi attivare Google Analytics dopo consenso.
+> `NEXT_PUBLIC_SITE_URL` è l’URL pubblico del sito (usato per canonical, sitemap e Open Graph).
+> `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` è opzionale per la verifica Search Console.
+
+## Database (log consensi cookie)
+Per salvare i consensi cookie nel database MySQL, crea la tabella `consent_logs`:
+
+```
+CREATE TABLE consent_logs (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	consent_version VARCHAR(10) NOT NULL,
+	consent_payload JSON NOT NULL,
+	consent_date DATETIME NOT NULL,
+	ip_address VARCHAR(64),
+	user_agent VARCHAR(255)
+);
+```

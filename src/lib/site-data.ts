@@ -5,12 +5,16 @@ export const company = {
   vat: "08442881218",
   sdi: "KRRH6B9",
   openedYear: 2016,
+  googleBusinessUrl:
+    "https://www.google.com/maps/search/?api=1&query=Via%20Plinio%20il%20Vecchio%2072%2C%2080053%20Castellammare%20di%20Stabia",
 };
 
 export const navigation = [
   { label: "Home", href: "/" },
   { label: "Chi Siamo", href: "/chi-siamo" },
   { label: "Servizi", href: "/servizi" },
+  { label: "Web Agency", href: "/web-agency" },
+  { label: "Prenota", href: "/prenota" },
   { label: "Contatti", href: "/contatti" },
 ];
 

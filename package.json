@@ -6,17 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export": "next build"
   },
   "dependencies": {
+    "googleapis": "^155.0.0",
+    "luxon": "^3.5.0",
     "mysql2": "^3.16.3",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "resend": "^6.9.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/luxon": "^3.4.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

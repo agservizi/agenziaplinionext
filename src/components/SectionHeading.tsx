@@ -5,12 +5,15 @@ export default function SectionHeading({
   title,
   description,
   align = "left",
+  tone = "light",
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   align?: "left" | "center";
+  tone?: "light" | "dark";
 }) {
+  const isDark = tone === "dark";
   return (
     <div
       className={cx(
@@ -19,15 +22,32 @@ export default function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+        <p
+          className={cx(
+            "text-sm font-semibold uppercase tracking-[0.2em]",
+            isDark ? "text-cyan-600" : "text-cyan-400",
+          )}
+        >
           {eyebrow}
         </p>
       ) : null}
-      <h2 className="text-3xl font-semibold text-white md:text-4xl">
+      <h2
+        className={cx(
+          "text-3xl font-semibold md:text-4xl",
+          isDark ? "text-slate-900" : "text-white",
+        )}
+      >
         {title}
       </h2>
       {description ? (
-        <p className="text-base text-slate-300 md:text-lg">{description}</p>
+        <p
+          className={cx(
+            "text-base md:text-lg",
+            isDark ? "text-slate-600" : "text-slate-300",
+          )}
+        >
+          {description}
+        </p>
       ) : null}
     </div>
   );
