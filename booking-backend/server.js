@@ -157,48 +157,7 @@ function normalizeProductId(value, fallback = "") {
 }
 
 const INTERNAL_STORE_PRODUCTS = [
-  {
-    id: "spid",
-    name: "Attivazione SPID",
-    amountCents: 2900,
-    currency: "eur",
-    assetPath: "/downloads/spid-guida.pdf",
-  },
-  {
-    id: "pec",
-    name: "Attivazione PEC",
-    amountCents: 1900,
-    currency: "eur",
-    assetPath: "/downloads/pec-guida.pdf",
-  },
-  {
-    id: "firma-digitale",
-    name: "Firma Digitale",
-    amountCents: 3900,
-    currency: "eur",
-    assetPath: "/downloads/firma-digitale-guida.pdf",
-  },
-  {
-    id: "telefonia",
-    name: "Consulenza Telefonia",
-    amountCents: 2500,
-    currency: "eur",
-    assetPath: "/downloads/telefonia-checklist.pdf",
-  },
-  {
-    id: "energia",
-    name: "Consulenza Energia",
-    amountCents: 2500,
-    currency: "eur",
-    assetPath: "/downloads/energia-checklist.pdf",
-  },
-  {
-    id: "pagamenti",
-    name: "Servizi di Pagamento",
-    amountCents: 1500,
-    currency: "eur",
-    assetPath: "/downloads/pagamenti-guida.pdf",
-  },
+  
 ];
 
 function getInternalStoreProducts() {
