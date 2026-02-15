@@ -13,5 +13,8 @@
     "googleapis": "^155.0.0",
     "luxon": "^3.5.0",
     "mysql2": "^3.16.3"
+  },
+  "devDependencies": {
+    "@ljharb/tsconfig": "^0.3.2"
   }
 }
