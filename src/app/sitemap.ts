@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/servizi/spid-pec-firma-digitale",
     "/servizi/web-agency",
     "/store",
+    "/checkout",
     "/contatti",
     "/cookie-policy",
     "/privacy-policy",

@@ -54,7 +54,6 @@ NEXT_PUBLIC_GA_ID=
 NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
 NEXT_PUBLIC_PAYHIP_STORE_URL=
-NEXT_PUBLIC_PAYHIP_EMBED_URL=
 NEXT_PUBLIC_PAYHIP_CHECKOUT_URL=
 PAYHIP_WEBHOOK_SECRET=
 ```
@@ -63,8 +62,7 @@ PAYHIP_WEBHOOK_SECRET=
 > `NEXT_PUBLIC_SITE_URL` è l’URL pubblico del sito (usato per canonical, sitemap e Open Graph).
 > `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` è opzionale per la verifica Search Console.
 > `NEXT_PUBLIC_PAYHIP_STORE_URL` è l’URL pubblico del tuo store Payhip (apertura in nuova scheda).
-> `NEXT_PUBLIC_PAYHIP_EMBED_URL` è l’URL embed di Payhip per mostrare il catalogo direttamente in `/store`.
-> `NEXT_PUBLIC_PAYHIP_CHECKOUT_URL` è l’URL checkout/carrello usato dall’icona carrello nella header (fallback automatico a `/store`).
+> `NEXT_PUBLIC_PAYHIP_CHECKOUT_URL` è l’URL usato dalla pagina interna `/checkout` (raggiunta dall’icona carrello nella header).
 > `PAYHIP_WEBHOOK_SECRET` protegge l’endpoint backend `/api/payhip/webhook` (consigliato).
 
 ## Webhook Payhip (ordini)

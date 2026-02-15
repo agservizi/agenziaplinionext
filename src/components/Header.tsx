@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Container from "./Container";
 import { navigation } from "@/lib/site-data";
 
-const cartCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL || "/store";
+const cartCheckoutUrl = "/checkout";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
