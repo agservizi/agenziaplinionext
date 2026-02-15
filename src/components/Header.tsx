@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import Container from "./Container";
 import { navigation } from "@/lib/site-data";
 
+const cartCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL || "/store";
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -84,7 +86,29 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div className="hidden md:flex">
+        <div className="hidden items-center gap-3 md:flex">
+          <Link
+            href={cartCheckoutUrl}
+            aria-label="Vai al checkout"
+            className={
+              scrolled
+                ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-400"
+                : "inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white transition hover:border-white/70 hover:bg-white/20"
+            }
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="20" r="1.5" />
+              <circle cx="18" cy="20" r="1.5" />
+              <path d="M2 3h2.2a1 1 0 0 1 .97.76L6.2 8.2a1 1 0 0 0 .97.76h12.1a1 1 0 0 1 .98 1.2l-1.1 5.2a1 1 0 0 1-.98.8H8.4" />
+            </svg>
+          </Link>
           <Link
             href="/contatti"
             className={
@@ -173,7 +197,26 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div className="mt-8">
+        <div className="mt-8 flex items-center gap-3">
+          <Link
+            href={cartCheckoutUrl}
+            onClick={() => setMobileOpen(false)}
+            aria-label="Vai al checkout"
+            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              className="h-5 w-5"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="20" r="1.5" />
+              <circle cx="18" cy="20" r="1.5" />
+              <path d="M2 3h2.2a1 1 0 0 1 .97.76L6.2 8.2a1 1 0 0 0 .97.76h12.1a1 1 0 0 1 .98 1.2l-1.1 5.2a1 1 0 0 1-.98.8H8.4" />
+            </svg>
+          </Link>
           <Link
             href="/contatti"
             onClick={() => {
