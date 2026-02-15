@@ -93,6 +93,45 @@ function normalizeProductId(value, fallback = "") {
     .replace(/^-+|-+$/g, "");
 }
 
+function parseStoreProductFromJsonLd(node, output) {
+  if (!node) return;
+
+  if (Array.isArray(node)) {
+    node.forEach((item) => parseStoreProductFromJsonLd(item, output));
+    return;
+  }
+
+  if (typeof node !== "object") return;
+  const source = node;
+
+  if (source["@graph"]) parseStoreProductFromJsonLd(source["@graph"], output);
+  if (source.itemListElement) parseStoreProductFromJsonLd(source.itemListElement, output);
+  if (source.item) parseStoreProductFromJsonLd(source.item, output);
+
+  const type = String(source["@type"] || "").toLowerCase();
+  if (type !== "product") return;
+
+  const url = String(source.url || "").trim();
+  if (!url) return;
+
+  const name = String(source.name || "Prodotto").trim();
+  const offers = typeof source.offers === "object" && source.offers ? source.offers : {};
+  const rawAmount = Number(offers.price || 0);
+  const amountCents = Number.isFinite(rawAmount) && rawAmount > 0 ? Math.round(rawAmount * 100) : 0;
+  const currency = String(offers.priceCurrency || "eur").trim().toLowerCase();
+
+  let idFromUrl = "";
+  try {
+    const parsed = new URL(url);
+    idFromUrl = parsed.pathname.split("/").filter(Boolean).at(-1) || "";
+  } catch {
+    idFromUrl = "";
+  }
+
+  const id = normalizeProductId(idFromUrl || name, `payhip-${output.length + 1}`);
+  output.push({ id, name, amountCents, currency });
+}
+
 function parsePayhipProductForPayment(product, index = 0) {
   const id = normalizeProductId(
     product?.id || product?.product_id || product?.slug || product?.title,
@@ -144,6 +183,39 @@ async function fetchPayhipProductsForPayment() {
         .filter((item) => item.id && item.amountCents > 0);
     } catch {
       continue;
+    }
+  }
+
+  const storeUrl = String(process.env.NEXT_PUBLIC_PAYHIP_STORE_URL || "").trim();
+  if (storeUrl) {
+    try {
+      const response = await fetch(storeUrl);
+      if (response.ok) {
+        const html = await response.text();
+        const scriptRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+        const collected = [];
+        const seen = new Set();
+        let match;
+        while ((match = scriptRegex.exec(html)) !== null) {
+          const rawJson = (match[1] || "").trim();
+          if (!rawJson) continue;
+          try {
+            parseStoreProductFromJsonLd(JSON.parse(rawJson), collected);
+          } catch {
+            continue;
+          }
+        }
+
+        const normalized = collected.filter((item) => {
+          if (!item.id || seen.has(item.id) || item.amountCents <= 0) return false;
+          seen.add(item.id);
+          return true;
+        });
+
+        if (normalized.length > 0) return normalized;
+      }
+    } catch {
+      // ignore
     }
   }
 
