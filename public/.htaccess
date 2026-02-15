@@ -1,9 +1,19 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
+# Skip rewrite for existing files and folders
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
 # Proxy API traffic from main domain to Node backend
 RewriteCond %{REQUEST_URI} ^/api/ [NC]
 RewriteRule ^api/(.*)$ https://cyan-gnu-934636.hostingersite.com/api/$1 [P,L,QSA]
+
+# Serve static-export pages with clean URLs (e.g. /store -> /store.html)
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
 
 # Preserve Host header for upstream services if needed
 <IfModule mod_headers.c>

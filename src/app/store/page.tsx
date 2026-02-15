@@ -4,6 +4,7 @@ import { buildMetadata } from "@/lib/seo";
 
 const payhipStoreUrl = process.env.NEXT_PUBLIC_PAYHIP_STORE_URL ?? "";
 const payhipEmbedUrl = process.env.NEXT_PUBLIC_PAYHIP_EMBED_URL ?? "";
+const embeddedStoreUrl = payhipEmbedUrl || payhipStoreUrl;
 
 export function generateMetadata() {
   return buildMetadata({
@@ -28,25 +29,16 @@ export default function StorePage() {
             </h1>
             <p className="text-base text-slate-300 md:text-lg">
               Qui trovi i prodotti e servizi disponibili all’acquisto online.
-              Pagamenti gestiti su Payhip in ambiente protetto.
+              Pagamenti gestiti in pagina senza uscire da agenziaplinio.it.
             </p>
-            {payhipStoreUrl ? (
-              <Link
-                href={payhipStoreUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
-              >
-                Apri lo store completo
-              </Link>
-            ) : (
+            {!embeddedStoreUrl ? (
               <Link
                 href="/contatti"
                 className="inline-flex rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200"
               >
                 Contattaci per attivare lo store
               </Link>
-            )}
+            ) : null}
           </div>
           <div className="glass-card rounded-4xl p-8">
             <div className="space-y-4">
@@ -69,31 +61,22 @@ export default function StorePage() {
             <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl">
               Catalogo online
             </h2>
-            {payhipEmbedUrl ? (
+            {embeddedStoreUrl ? (
               <div className="lux-card overflow-hidden rounded-2xl border border-slate-200 bg-white">
                 <iframe
-                  src={payhipEmbedUrl}
+                  src={embeddedStoreUrl}
                   title="Store Payhip AG SERVIZI"
                   loading="lazy"
-                  className="h-[900px] w-full"
+                  className="h-[1100px] w-full"
                 />
               </div>
             ) : (
               <div className="lux-card rounded-2xl p-6">
                 <p className="text-sm text-slate-600">
-                  Configura <strong>NEXT_PUBLIC_PAYHIP_EMBED_URL</strong> per mostrare lo
-                  store incorporato in questa pagina.
+                  Configura <strong>NEXT_PUBLIC_PAYHIP_EMBED_URL</strong> (o
+                  <strong> NEXT_PUBLIC_PAYHIP_STORE_URL</strong>) per mostrare lo
+                  store direttamente in questa pagina.
                 </p>
-                {payhipStoreUrl ? (
-                  <Link
-                    href={payhipStoreUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex rounded-full bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-500"
-                  >
-                    Vai allo store Payhip
-                  </Link>
-                ) : null}
               </div>
             )}
           </Container>
