@@ -1,0 +1,29 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Proxy API traffic from main domain to Node backend
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^api/(.*)$ https://cyan-gnu-934636.hostingersite.com/api/$1 [P,L,QSA]
+
+# Canonical URL: remove trailing slash on exported pages (e.g. /store/ -> /store)
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
+RewriteCond %{REQUEST_URI} !^/$
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# Serve static-export pages with clean URLs (e.g. /store -> /store.html)
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# Skip rewrite for existing files and folders
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Preserve Host header for upstream services if needed
+<IfModule mod_headers.c>
+RequestHeader set X-Forwarded-Host "%{HTTP_HOST}s"
+RequestHeader set X-Forwarded-Proto "https"
+</IfModule>
+</IfModule>

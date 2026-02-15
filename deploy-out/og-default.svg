@@ -1,0 +1,19 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect x="80" y="80" width="1040" height="470" rx="48" fill="rgba(15,23,42,0.6)" stroke="#22D3EE" stroke-width="2" />
+  <text x="140" y="240" fill="#E2E8F0" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="700">
+    AG SERVIZI
+  </text>
+  <text x="140" y="310" fill="#94A3B8" font-family="Inter, Arial, sans-serif" font-size="28">
+    Consulenze Telefonia · Energia · Servizi Digitali
+  </text>
+  <text x="140" y="380" fill="#67E8F9" font-family="Inter, Arial, sans-serif" font-size="28">
+    Castellammare di Stabia (NA)
+  </text>
+</svg>
