@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/servizi/energia",
     "/servizi/spid-pec-firma-digitale",
     "/servizi/web-agency",
+    "/store",
     "/contatti",
     "/cookie-policy",
     "/privacy-policy",

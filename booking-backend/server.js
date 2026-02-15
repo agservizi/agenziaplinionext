@@ -6,7 +6,13 @@ import mysql from "mysql2/promise";
 import { DateTime, Interval } from "luxon";
 
 const app = express();
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      req.rawBody = buf.toString("utf8");
+    },
+  }),
+);
 app.use(
   cors({
     origin: ["https://agenziaplinio.it", "https://www.agenziaplinio.it"],
@@ -25,6 +31,7 @@ const config = {
 
 const OPEN_HOUR = 9;
 const CLOSE_HOUR = 18;
+const payhipWebhookSecret = String(process.env.PAYHIP_WEBHOOK_SECRET || "").trim();
 
 let pool = null;
 function getPool() {
@@ -39,6 +46,129 @@ function getPool() {
     });
   }
   return pool;
+}
+
+async function ensurePayhipOrdersTable() {
+  if (!process.env.MYSQL_HOST) return;
+  const pool = getPool();
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS payhip_orders (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      external_id VARCHAR(191) NOT NULL,
+      event_type VARCHAR(120) DEFAULT '',
+      product_title VARCHAR(255) DEFAULT '',
+      buyer_email VARCHAR(191) DEFAULT '',
+      currency VARCHAR(20) DEFAULT '',
+      total_amount DECIMAL(10,2) DEFAULT NULL,
+      status VARCHAR(60) DEFAULT '',
+      payload_json JSON NOT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uk_payhip_external_id (external_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+}
+
+function toObject(value) {
+  if (!value) return {};
+  if (typeof value === "object") return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+function normalizePayhipPayload(body) {
+  const payload = body?.payload
+    ? toObject(body.payload)
+    : body && typeof body === "object"
+      ? body
+      : {};
+  const data = toObject(payload?.data);
+  const sale = toObject(payload?.sale);
+  const order = toObject(payload?.order);
+  const customer = toObject(payload?.customer);
+  const buyer = toObject(payload?.buyer);
+  const product = toObject(payload?.product);
+
+  const externalId = String(
+    payload?.id ||
+      payload?.sale_id ||
+      payload?.order_id ||
+      data?.id ||
+      sale?.id ||
+      order?.id ||
+      payload?.transaction_id ||
+      payload?.txid ||
+      payload?.reference ||
+      "",
+  ).trim();
+
+  const eventType = String(
+    payload?.event || payload?.event_type || body?.event || body?.type || "sale.created",
+  ).trim();
+
+  const productTitle = String(
+    product?.title || payload?.product_name || payload?.product || data?.product_name || "",
+  ).trim();
+
+  const buyerEmail = String(
+    customer?.email || buyer?.email || payload?.email || data?.email || "",
+  ).trim();
+
+  const status = String(
+    payload?.status || sale?.status || order?.status || data?.status || "paid",
+  ).trim();
+
+  const currency = String(
+    payload?.currency || sale?.currency || order?.currency || data?.currency || "",
+  ).trim();
+
+  const rawAmount =
+    payload?.price ||
+    payload?.amount ||
+    payload?.total ||
+    sale?.price ||
+    sale?.amount ||
+    order?.total ||
+    data?.price ||
+    data?.amount ||
+    "";
+  const amount = Number(rawAmount);
+  const totalAmount = Number.isFinite(amount) ? Number(amount.toFixed(2)) : null;
+
+  return {
+    externalId,
+    eventType,
+    productTitle,
+    buyerEmail,
+    currency,
+    totalAmount,
+    status,
+    payload,
+  };
+}
+
+function isWebhookAuthorized(req) {
+  if (!payhipWebhookSecret) return true;
+
+  const headerSecret = String(
+    req.get("x-payhip-secret") || req.get("payhip-secret") || "",
+  ).trim();
+  if (headerSecret && headerSecret === payhipWebhookSecret) return true;
+
+  const querySecret = String(req.query?.secret || "").trim();
+  if (querySecret && querySecret === payhipWebhookSecret) return true;
+
+  const bodySecret = String(req.body?.secret || req.body?.webhook_secret || "").trim();
+  if (bodySecret && bodySecret === payhipWebhookSecret) return true;
+
+  return false;
 }
 
 function decodeCredentials() {
@@ -119,6 +249,16 @@ app.get("/api/booking/health", (_req, res) => {
       duration: Boolean(config.defaultDuration),
       invite: Boolean(config.inviteClient),
       updates: Boolean(config.sendUpdates),
+    },
+  });
+});
+
+app.get("/api/payhip/health", (_req, res) => {
+  res.json({
+    ok: Boolean(process.env.MYSQL_HOST),
+    checks: {
+      webhookSecret: Boolean(payhipWebhookSecret),
+      database: Boolean(process.env.MYSQL_HOST),
     },
   });
 });
@@ -267,6 +407,64 @@ app.post("/api/booking", async (req, res) => {
     });
   } catch {
     return res.status(500).json({ message: "Errore nella creazione appuntamento" });
+  }
+});
+
+app.post("/api/payhip/webhook", async (req, res) => {
+  if (!isWebhookAuthorized(req)) {
+    return res.status(401).json({ message: "Webhook Payhip non autorizzato" });
+  }
+
+  const normalized = normalizePayhipPayload(req.body || {});
+  if (!normalized.externalId) {
+    return res.status(400).json({ message: "Payload Payhip non valido: id mancante" });
+  }
+
+  if (!process.env.MYSQL_HOST) {
+    return res.status(202).json({
+      ok: true,
+      saved: false,
+      externalId: normalized.externalId,
+      message: "Webhook ricevuto, database non configurato",
+    });
+  }
+
+  try {
+    await ensurePayhipOrdersTable();
+    const pool = getPool();
+    await pool.execute(
+      `INSERT INTO payhip_orders
+        (external_id, event_type, product_title, buyer_email, currency, total_amount, status, payload_json, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE
+        event_type = VALUES(event_type),
+        product_title = VALUES(product_title),
+        buyer_email = VALUES(buyer_email),
+        currency = VALUES(currency),
+        total_amount = VALUES(total_amount),
+        status = VALUES(status),
+        payload_json = VALUES(payload_json),
+        updated_at = NOW()`,
+      [
+        normalized.externalId,
+        normalized.eventType,
+        normalized.productTitle,
+        normalized.buyerEmail,
+        normalized.currency,
+        normalized.totalAmount,
+        normalized.status,
+        JSON.stringify(normalized.payload),
+      ],
+    );
+
+    return res.json({
+      ok: true,
+      saved: true,
+      externalId: normalized.externalId,
+      eventType: normalized.eventType,
+    });
+  } catch {
+    return res.status(500).json({ message: "Errore salvataggio webhook Payhip" });
   }
 });
 

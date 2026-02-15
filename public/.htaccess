@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Proxy API traffic from main domain to Node backend
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^api/(.*)$ https://cyan-gnu-934636.hostingersite.com/api/$1 [P,L,QSA]
+
+# Preserve Host header for upstream services if needed
+<IfModule mod_headers.c>
+RequestHeader set X-Forwarded-Host "%{HTTP_HOST}s"
+RequestHeader set X-Forwarded-Proto "https"
+</IfModule>
+</IfModule>

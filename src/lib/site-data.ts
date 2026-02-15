@@ -13,8 +13,8 @@ export const navigation = [
   { label: "Home", href: "/" },
   { label: "Chi Siamo", href: "/chi-siamo" },
   { label: "Servizi", href: "/servizi" },
+  { label: "Store", href: "/store" },
   { label: "Web Agency", href: "/web-agency" },
-  { label: "Prenota", href: "/prenota" },
   { label: "Contatti", href: "/contatti" },
 ];
 

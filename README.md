@@ -53,11 +53,31 @@ RESEND_TO=
 NEXT_PUBLIC_GA_ID=
 NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
+NEXT_PUBLIC_PAYHIP_STORE_URL=
+NEXT_PUBLIC_PAYHIP_EMBED_URL=
+PAYHIP_WEBHOOK_SECRET=
 ```
 
 > `NEXT_PUBLIC_GA_ID` è opzionale e serve solo se vuoi attivare Google Analytics dopo consenso.
 > `NEXT_PUBLIC_SITE_URL` è l’URL pubblico del sito (usato per canonical, sitemap e Open Graph).
 > `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` è opzionale per la verifica Search Console.
+> `NEXT_PUBLIC_PAYHIP_STORE_URL` è l’URL pubblico del tuo store Payhip (apertura in nuova scheda).
+> `NEXT_PUBLIC_PAYHIP_EMBED_URL` è l’URL embed di Payhip per mostrare il catalogo direttamente in `/store`.
+> `PAYHIP_WEBHOOK_SECRET` protegge l’endpoint backend `/api/payhip/webhook` (consigliato).
+
+## Webhook Payhip (ordini)
+
+Il backend in `booking-backend/server.js` espone:
+
+- `POST /api/payhip/webhook`
+- `GET /api/payhip/health`
+
+Configurazione consigliata su Payhip:
+
+1. URL webhook: `https://TUO_BACKEND/api/payhip/webhook?secret=PAYHIP_WEBHOOK_SECRET`
+2. Imposta lo stesso valore anche in `.env` alla voce `PAYHIP_WEBHOOK_SECRET`
+
+Il backend salva i webhook in MySQL nella tabella `payhip_orders` (creata automaticamente al primo evento), con idempotenza su `external_id`.
 
 ## Database (log consensi cookie)
 Per salvare i consensi cookie nel database MySQL, crea la tabella `consent_logs`:
