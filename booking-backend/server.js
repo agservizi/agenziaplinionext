@@ -5,6 +5,8 @@ import { google } from "googleapis";
 import mysql from "mysql2/promise";
 import { DateTime, Interval } from "luxon";
 import Stripe from "stripe";
+import crypto from "crypto";
+import { Readable } from "stream";
 
 const app = express();
 app.use(
@@ -34,6 +36,9 @@ const OPEN_HOUR = 9;
 const CLOSE_HOUR = 18;
 const payhipWebhookSecret = String(process.env.PAYHIP_WEBHOOK_SECRET || "").trim();
 const stripeSecretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
+const stripeWebhookSecret = String(process.env.STRIPE_WEBHOOK_SECRET || "").trim();
+const stripeWebhookSecretSecondary = String(process.env.STRIPE_WEBHOOK_SECRET_SECONDARY || "").trim();
+const deliveryBaseUrl = String(process.env.DIGITAL_DELIVERY_BASE_URL || "").trim();
 
 let pool = null;
 function getPool() {
@@ -71,6 +76,64 @@ async function ensurePayhipOrdersTable() {
   `);
 }
 
+async function ensureDigitalOrdersTable() {
+  if (!process.env.MYSQL_HOST) return;
+  const pool = getPool();
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS digital_orders (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      stripe_payment_intent_id VARCHAR(191) NOT NULL,
+      product_id VARCHAR(120) NOT NULL,
+      product_name VARCHAR(255) NOT NULL,
+      customer_email VARCHAR(191) NOT NULL,
+      amount_cents INT NOT NULL,
+      currency VARCHAR(20) NOT NULL,
+      status VARCHAR(40) NOT NULL DEFAULT 'paid',
+      metadata_json JSON NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uk_digital_orders_pi (stripe_payment_intent_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+}
+
+async function ensureDigitalDeliveryTokensTable() {
+  if (!process.env.MYSQL_HOST) return;
+  const pool = getPool();
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS digital_delivery_tokens (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      token_hash VARCHAR(191) NOT NULL,
+      order_id INT NOT NULL,
+      product_id VARCHAR(120) NOT NULL,
+      customer_email VARCHAR(191) NOT NULL,
+      asset_path VARCHAR(255) NOT NULL,
+      expires_at DATETIME NOT NULL,
+      max_downloads INT NOT NULL DEFAULT 3,
+      download_count INT NOT NULL DEFAULT 0,
+      revoked TINYINT(1) NOT NULL DEFAULT 0,
+      last_download_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uk_delivery_token_hash (token_hash),
+      KEY idx_delivery_order (order_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+}
+
+async function ensureDigitalCommerceTables() {
+  await ensureDigitalOrdersTable();
+  await ensureDigitalDeliveryTokensTable();
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+function generateDeliveryToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
 function toObject(value) {
   if (!value) return {};
   if (typeof value === "object") return value;
@@ -93,133 +156,111 @@ function normalizeProductId(value, fallback = "") {
     .replace(/^-+|-+$/g, "");
 }
 
-function parseStoreProductFromJsonLd(node, output) {
-  if (!node) return;
+const INTERNAL_STORE_PRODUCTS = [
+  {
+    id: "spid",
+    name: "Attivazione SPID",
+    amountCents: 2900,
+    currency: "eur",
+    assetPath: "/downloads/spid-guida.pdf",
+  },
+  {
+    id: "pec",
+    name: "Attivazione PEC",
+    amountCents: 1900,
+    currency: "eur",
+    assetPath: "/downloads/pec-guida.pdf",
+  },
+  {
+    id: "firma-digitale",
+    name: "Firma Digitale",
+    amountCents: 3900,
+    currency: "eur",
+    assetPath: "/downloads/firma-digitale-guida.pdf",
+  },
+  {
+    id: "telefonia",
+    name: "Consulenza Telefonia",
+    amountCents: 2500,
+    currency: "eur",
+    assetPath: "/downloads/telefonia-checklist.pdf",
+  },
+  {
+    id: "energia",
+    name: "Consulenza Energia",
+    amountCents: 2500,
+    currency: "eur",
+    assetPath: "/downloads/energia-checklist.pdf",
+  },
+  {
+    id: "pagamenti",
+    name: "Servizi di Pagamento",
+    amountCents: 1500,
+    currency: "eur",
+    assetPath: "/downloads/pagamenti-guida.pdf",
+  },
+];
 
-  if (Array.isArray(node)) {
-    node.forEach((item) => parseStoreProductFromJsonLd(item, output));
-    return;
-  }
+function getInternalStoreProducts() {
+  return INTERNAL_STORE_PRODUCTS;
+}
 
-  if (typeof node !== "object") return;
-  const source = node;
+function getInternalStoreProductById(productId) {
+  return INTERNAL_STORE_PRODUCTS.find((item) => item.id === productId) || null;
+}
 
-  if (source["@graph"]) parseStoreProductFromJsonLd(source["@graph"], output);
-  if (source.itemListElement) parseStoreProductFromJsonLd(source.itemListElement, output);
-  if (source.item) parseStoreProductFromJsonLd(source.item, output);
+function getPublicBaseUrl() {
+  return (deliveryBaseUrl || String(process.env.NEXT_PUBLIC_SITE_URL || "").trim()).replace(/\/$/, "");
+}
 
-  const type = String(source["@type"] || "").toLowerCase();
-  if (type !== "product") return;
+function buildDeliveryLink(token) {
+  const base = getPublicBaseUrl();
+  if (!base) return "";
+  return `${base}/api/digital/download/${encodeURIComponent(token)}`;
+}
 
-  const url = String(source.url || "").trim();
-  if (!url) return;
+function buildAssetSourceUrl(pathOrUrl) {
+  const raw = String(pathOrUrl || "").trim();
+  if (!raw) return "";
 
-  const name = String(source.name || "Prodotto").trim();
-  const offers = typeof source.offers === "object" && source.offers ? source.offers : {};
-  const rawAmount = Number(offers.price || 0);
-  const amountCents = Number.isFinite(rawAmount) && rawAmount > 0 ? Math.round(rawAmount * 100) : 0;
-  const currency = String(offers.priceCurrency || "eur").trim().toLowerCase();
-
-  let idFromUrl = "";
   try {
-    const parsed = new URL(url);
-    idFromUrl = parsed.pathname.split("/").filter(Boolean).at(-1) || "";
+    return new URL(raw).toString();
   } catch {
-    idFromUrl = "";
+    const base = getPublicBaseUrl();
+    if (!base) return "";
+    const sanitizedPath = raw.startsWith("/") ? raw : `/${raw}`;
+    return `${base}${sanitizedPath}`;
   }
-
-  const id = normalizeProductId(idFromUrl || name, `payhip-${output.length + 1}`);
-  output.push({ id, name, amountCents, currency });
 }
 
-function parsePayhipProductForPayment(product, index = 0) {
-  const id = normalizeProductId(
-    product?.id || product?.product_id || product?.slug || product?.title,
-    `payhip-${index + 1}`,
-  );
-  const name = String(product?.name || product?.title || `Prodotto ${index + 1}`).trim();
-  const rawAmount = Number(product?.price || product?.amount || 0);
-  const amountCents = Number.isFinite(rawAmount) && rawAmount > 0 ? Math.round(rawAmount * 100) : 0;
-  const currency = String(product?.currency || "eur").trim().toLowerCase();
+async function sendDigitalDeliveryEmail({ to, productName, deliveryUrl }) {
+  const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
+  const resendFrom = String(process.env.RESEND_FROM || "").trim();
+  if (!resendApiKey || !resendFrom || !to || !deliveryUrl) return;
 
-  return {
-    id,
-    name,
-    amountCents,
-    currency,
-  };
-}
+  const subject = `Consegna digitale: ${productName}`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6;">
+      <h2 style="margin-bottom: 12px;">Pagamento confermato</h2>
+      <p>Grazie per il tuo acquisto. Ecco il link per il download del prodotto <strong>${productName}</strong>.</p>
+      <p><a href="${deliveryUrl}" style="display:inline-block;padding:12px 18px;background:#0891b2;color:#fff;text-decoration:none;border-radius:999px;">Scarica il prodotto</a></p>
+      <p style="font-size: 13px; color: #475569;">Il link ha scadenza e un numero massimo di download.</p>
+    </div>
+  `;
 
-async function fetchPayhipProductsForPayment() {
-  const apiKey = String(process.env.PAYHIP_API_KEY || "").trim();
-  if (!apiKey) return [];
-
-  const apiUrl = String(process.env.PAYHIP_PRODUCTS_API_URL || "https://payhip.com/api/products").trim();
-  const requests = [
-    fetch(apiUrl, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
-      },
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: resendFrom,
+      to,
+      subject,
+      html,
     }),
-    fetch(`${apiUrl}${apiUrl.includes("?") ? "&" : "?"}api_key=${encodeURIComponent(apiKey)}`, {
-      headers: { Accept: "application/json" },
-    }),
-  ];
-
-  for (const request of requests) {
-    try {
-      const response = await request;
-      if (!response.ok) continue;
-      const payload = await response.json();
-      const source = Array.isArray(payload)
-        ? payload
-        : payload?.products || payload?.data || payload?.results || payload?.items || [];
-
-      if (!Array.isArray(source)) continue;
-
-      return source
-        .map((item, index) => parsePayhipProductForPayment(item, index))
-        .filter((item) => item.id && item.amountCents > 0);
-    } catch {
-      continue;
-    }
-  }
-
-  const storeUrl = String(process.env.NEXT_PUBLIC_PAYHIP_STORE_URL || "").trim();
-  if (storeUrl) {
-    try {
-      const response = await fetch(storeUrl);
-      if (response.ok) {
-        const html = await response.text();
-        const scriptRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-        const collected = [];
-        const seen = new Set();
-        let match;
-        while ((match = scriptRegex.exec(html)) !== null) {
-          const rawJson = (match[1] || "").trim();
-          if (!rawJson) continue;
-          try {
-            parseStoreProductFromJsonLd(JSON.parse(rawJson), collected);
-          } catch {
-            continue;
-          }
-        }
-
-        const normalized = collected.filter((item) => {
-          if (!item.id || seen.has(item.id) || item.amountCents <= 0) return false;
-          seen.add(item.id);
-          return true;
-        });
-
-        if (normalized.length > 0) return normalized;
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  return [];
+  });
 }
 
 let stripeClient = null;
@@ -411,6 +452,10 @@ app.get("/api/payhip/health", (_req, res) => {
   });
 });
 
+app.get("/api/store/products", (_req, res) => {
+  return res.json({ products: getInternalStoreProducts() });
+});
+
 app.post("/api/payments/create-intent", async (req, res) => {
   const stripe = getStripeClient();
   if (!stripe) {
@@ -418,25 +463,31 @@ app.post("/api/payments/create-intent", async (req, res) => {
   }
 
   const productId = normalizeProductId(req.body?.productId || "");
+  const customerEmail = String(req.body?.customerEmail || "").trim().toLowerCase();
   if (!productId) {
     return res.status(400).json({ message: "Prodotto non valido" });
   }
+  if (!customerEmail || !customerEmail.includes("@")) {
+    return res.status(400).json({ message: "Email cliente non valida" });
+  }
 
   try {
-    const products = await fetchPayhipProductsForPayment();
+    const products = getInternalStoreProducts();
     const product = products.find((item) => item.id === productId);
     if (!product) {
-      return res.status(404).json({ message: "Prodotto non trovato su Payhip" });
+      return res.status(404).json({ message: "Prodotto non trovato" });
     }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: product.amountCents,
       currency: product.currency || "eur",
       automatic_payment_methods: { enabled: true },
+      receipt_email: customerEmail,
       metadata: {
         source: "agenziaplinio_checkout",
         product_id: product.id,
         product_name: product.name,
+        customer_email: customerEmail,
       },
     });
 
@@ -448,6 +499,185 @@ app.post("/api/payments/create-intent", async (req, res) => {
     });
   } catch {
     return res.status(500).json({ message: "Errore creazione pagamento" });
+  }
+});
+
+app.post("/api/payments/webhook", async (req, res) => {
+  const stripe = getStripeClient();
+  if (!stripe || (!stripeWebhookSecret && !stripeWebhookSecretSecondary)) {
+    return res.status(503).json({ message: "Webhook Stripe non configurato" });
+  }
+
+  const signature = req.get("stripe-signature");
+  if (!signature || !req.rawBody) {
+    return res.status(400).json({ message: "Firma webhook mancante" });
+  }
+
+  let event;
+  const webhookSecrets = [stripeWebhookSecret, stripeWebhookSecretSecondary].filter(Boolean);
+  for (const secret of webhookSecrets) {
+    try {
+      event = stripe.webhooks.constructEvent(req.rawBody, signature, secret);
+      break;
+    } catch {
+      // prova il secret successivo
+    }
+  }
+
+  if (!event) {
+    return res.status(400).json({ message: "Firma webhook non valida" });
+  }
+
+  if (event.type !== "payment_intent.succeeded") {
+    return res.json({ ok: true, ignored: true });
+  }
+
+  if (!process.env.MYSQL_HOST) {
+    return res.status(503).json({ message: "Database non configurato" });
+  }
+
+  try {
+    await ensureDigitalCommerceTables();
+
+    const paymentIntent = event.data.object;
+    const productId = normalizeProductId(paymentIntent?.metadata?.product_id || "");
+    const customerEmail = String(
+      paymentIntent?.receipt_email || paymentIntent?.metadata?.customer_email || "",
+    )
+      .trim()
+      .toLowerCase();
+
+    if (!productId || !customerEmail) {
+      return res.status(400).json({ message: "Dati ordine incompleti" });
+    }
+
+    const product = getInternalStoreProductById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Prodotto non riconosciuto" });
+    }
+
+    const poolRef = getPool();
+    const [orderResult] = await poolRef.execute(
+      `INSERT INTO digital_orders
+        (stripe_payment_intent_id, product_id, product_name, customer_email, amount_cents, currency, status, metadata_json, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'paid', ?, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE
+        customer_email = VALUES(customer_email),
+        amount_cents = VALUES(amount_cents),
+        currency = VALUES(currency),
+        status = 'paid',
+        metadata_json = VALUES(metadata_json),
+        updated_at = NOW()`,
+      [
+        paymentIntent.id,
+        product.id,
+        product.name,
+        customerEmail,
+        Number(paymentIntent.amount || product.amountCents),
+        String(paymentIntent.currency || product.currency || "eur"),
+        JSON.stringify(paymentIntent.metadata || {}),
+      ],
+    );
+
+    let orderId = Number(orderResult?.insertId || 0);
+    if (!orderId) {
+      const [rows] = await poolRef.execute(
+        "SELECT id FROM digital_orders WHERE stripe_payment_intent_id = ? LIMIT 1",
+        [paymentIntent.id],
+      );
+      orderId = Number(rows?.[0]?.id || 0);
+    }
+
+    if (!orderId) {
+      return res.status(500).json({ message: "Impossibile registrare ordine" });
+    }
+
+    const token = generateDeliveryToken();
+    const tokenHash = hashToken(token);
+    const expiresAt = DateTime.now().plus({ days: 7 }).toFormat("yyyy-LL-dd HH:mm:ss");
+
+    await poolRef.execute(
+      `INSERT INTO digital_delivery_tokens
+        (token_hash, order_id, product_id, customer_email, asset_path, expires_at, max_downloads, download_count, revoked, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 3, 0, 0, NOW(), NOW())`,
+      [tokenHash, orderId, product.id, customerEmail, product.assetPath, expiresAt],
+    );
+
+    const deliveryLink = buildDeliveryLink(token);
+    await sendDigitalDeliveryEmail({
+      to: customerEmail,
+      productName: product.name,
+      deliveryUrl: deliveryLink,
+    });
+
+    return res.json({ ok: true, processed: true });
+  } catch {
+    return res.status(500).json({ message: "Errore elaborazione webhook Stripe" });
+  }
+});
+
+app.get("/api/digital/download/:token", async (req, res) => {
+  if (!process.env.MYSQL_HOST) {
+    return res.status(503).send("Database non configurato");
+  }
+
+  const token = String(req.params?.token || "").trim();
+  if (!token) return res.status(400).send("Token non valido");
+
+  try {
+    await ensureDigitalCommerceTables();
+    const tokenHash = hashToken(token);
+    const poolRef = getPool();
+
+    const [rows] = await poolRef.execute(
+      `SELECT id, product_id, asset_path, expires_at, max_downloads, download_count, revoked
+       FROM digital_delivery_tokens
+       WHERE token_hash = ?
+       LIMIT 1`,
+      [tokenHash],
+    );
+
+    const row = rows?.[0];
+    if (!row) return res.status(404).send("Link non valido");
+    if (Number(row.revoked) === 1) return res.status(403).send("Link revocato");
+
+    const expiresAt = DateTime.fromSQL(String(row.expires_at));
+    if (!expiresAt.isValid || expiresAt < DateTime.now()) {
+      return res.status(410).send("Link scaduto");
+    }
+
+    const downloadCount = Number(row.download_count || 0);
+    const maxDownloads = Number(row.max_downloads || 0);
+    if (maxDownloads > 0 && downloadCount >= maxDownloads) {
+      return res.status(410).send("Numero massimo download raggiunto");
+    }
+
+    const product = getInternalStoreProductById(String(row.product_id || ""));
+    const assetPath = String(row.asset_path || product?.assetPath || "").trim();
+    const assetSourceUrl = buildAssetSourceUrl(assetPath);
+    if (!assetSourceUrl) return res.status(500).send("Asset non disponibile");
+
+    const upstream = await fetch(assetSourceUrl);
+    if (!upstream.ok || !upstream.body) {
+      return res.status(502).send("Asset non raggiungibile");
+    }
+
+    await poolRef.execute(
+      `UPDATE digital_delivery_tokens
+       SET download_count = download_count + 1,
+           last_download_at = NOW(),
+           updated_at = NOW()
+       WHERE id = ?`,
+      [row.id],
+    );
+
+    const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+    const contentDisposition = upstream.headers.get("content-disposition") || "attachment";
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", contentDisposition);
+    return Readable.fromWeb(upstream.body).pipe(res);
+  } catch {
+    return res.status(500).send("Errore download digitale");
   }
 });
 

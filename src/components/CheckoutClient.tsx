@@ -14,15 +14,15 @@ const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : null;
 
 type CheckoutClientProps = {
   products: StoreProduct[];
-  fallbackCheckoutUrl: string;
 };
 
 type StripeCheckoutFormProps = {
   clientSecret: string;
   product: StoreProduct;
+  customerEmail: string;
 };
 
-function StripeCheckoutForm({ clientSecret, product }: StripeCheckoutFormProps) {
+function StripeCheckoutForm({ clientSecret, product, customerEmail }: StripeCheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
@@ -41,8 +41,12 @@ function StripeCheckoutForm({ clientSecret, product }: StripeCheckoutFormProps) 
     setSuccessMessage("");
 
     const result = await stripe.confirmCardPayment(clientSecret, {
+      receipt_email: customerEmail,
       payment_method: {
         card,
+        billing_details: {
+          email: customerEmail,
+        },
       },
     });
 
@@ -91,12 +95,13 @@ function StripeCheckoutForm({ clientSecret, product }: StripeCheckoutFormProps) 
   );
 }
 
-export default function CheckoutClient({ products, fallbackCheckoutUrl }: CheckoutClientProps) {
+export default function CheckoutClient({ products }: CheckoutClientProps) {
   const searchParams = useSearchParams();
   const productId = searchParams.get("product") ?? "";
   const [clientSecret, setClientSecret] = useState("");
   const [loadingIntent, setLoadingIntent] = useState(false);
   const [requestError, setRequestError] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === productId),
@@ -120,6 +125,12 @@ export default function CheckoutClient({ products, fallbackCheckoutUrl }: Checko
       return;
     }
 
+    const normalizedEmail = customerEmail.trim();
+    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+      setRequestError("Inserisci una email valida per la consegna digitale.");
+      return;
+    }
+
     setLoadingIntent(true);
     setRequestError("");
 
@@ -128,7 +139,7 @@ export default function CheckoutClient({ products, fallbackCheckoutUrl }: Checko
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: selectedProduct.id }),
+        body: JSON.stringify({ productId: selectedProduct.id, customerEmail: normalizedEmail }),
       });
 
       const payload = (await response.json()) as { clientSecret?: string; message?: string };
@@ -144,13 +155,11 @@ export default function CheckoutClient({ products, fallbackCheckoutUrl }: Checko
     }
   };
 
-  const checkoutUrl = selectedProduct?.payhipCheckoutUrl || fallbackCheckoutUrl;
-
-  if (!selectedProduct && !checkoutUrl) {
+  if (!selectedProduct) {
     return (
       <div className="lux-card rounded-2xl p-6">
         <p className="text-sm text-slate-600">
-          Nessun checkout disponibile. Verifica la configurazione prodotti Payhip.
+          Seleziona un prodotto dallo store per avviare il checkout interno.
         </p>
       </div>
     );
@@ -184,36 +193,44 @@ export default function CheckoutClient({ products, fallbackCheckoutUrl }: Checko
       ) : null}
 
       <div className="lux-card rounded-2xl p-6">
-        {!selectedProduct ? (
-          <p className="text-sm text-slate-600">
-            Seleziona un prodotto dallo store per procedere al pagamento interno.
-          </p>
+        <p className="text-sm text-slate-600">
+          Pagamento carta interno su agenziaplinio.it. Nessun embed e nessun redirect esterno nel checkout.
+        </p>
+
+        <label className="mt-4 block">
+          <span className="mb-2 block text-sm font-medium text-slate-700">Email per consegna digitale</span>
+          <input
+            type="email"
+            value={customerEmail}
+            onChange={(event) => setCustomerEmail(event.target.value)}
+            placeholder="nome@dominio.it"
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            autoComplete="email"
+          />
+        </label>
+
+        {!clientSecret ? (
+          <button
+            type="button"
+            onClick={startPayment}
+            disabled={loadingIntent}
+            className="mt-5 inline-flex items-center justify-center rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loadingIntent ? "Inizializzazione..." : "Procedi al pagamento"}
+          </button>
         ) : (
-          <>
-            <p className="text-sm text-slate-600">
-              Pagamento carta interno su agenziaplinio.it. Nessun embed e nessun redirect Payhip nel flusso checkout.
-            </p>
-
-            {!clientSecret ? (
-              <button
-                type="button"
-                onClick={startPayment}
-                disabled={loadingIntent}
-                className="mt-5 inline-flex items-center justify-center rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loadingIntent ? "Inizializzazione..." : "Procedi al pagamento"}
-              </button>
-            ) : (
-              <div className="mt-5">
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <StripeCheckoutForm clientSecret={clientSecret} product={selectedProduct} />
-                </Elements>
-              </div>
-            )}
-
-            {requestError ? <p className="mt-3 text-sm font-medium text-red-600">{requestError}</p> : null}
-          </>
+          <div className="mt-5">
+            <Elements stripe={stripePromise} options={{ clientSecret }}>
+              <StripeCheckoutForm
+                clientSecret={clientSecret}
+                product={selectedProduct}
+                customerEmail={customerEmail.trim()}
+              />
+            </Elements>
+          </div>
         )}
+
+        {requestError ? <p className="mt-3 text-sm font-medium text-red-600">{requestError}</p> : null}
       </div>
     </div>
   );

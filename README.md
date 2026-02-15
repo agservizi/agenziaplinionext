@@ -53,45 +53,37 @@ RESEND_TO=
 NEXT_PUBLIC_GA_ID=
 NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
-NEXT_PUBLIC_PAYHIP_STORE_URL=
-NEXT_PUBLIC_PAYHIP_CHECKOUT_URL=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
-PAYHIP_PRODUCTS_API_URL=
-PAYHIP_WEBHOOK_SECRET=
+STRIPE_WEBHOOK_SECRET=
+DIGITAL_DELIVERY_BASE_URL=
 ```
 
 > `NEXT_PUBLIC_GA_ID` è opzionale e serve solo se vuoi attivare Google Analytics dopo consenso.
 > `NEXT_PUBLIC_SITE_URL` è l’URL pubblico del sito (usato per canonical, sitemap e Open Graph).
 > `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` è opzionale per la verifica Search Console.
-> `NEXT_PUBLIC_PAYHIP_STORE_URL` è l’URL pubblico del tuo store Payhip (apertura in nuova scheda).
-> `NEXT_PUBLIC_PAYHIP_CHECKOUT_URL` è l’URL usato dalla pagina interna `/checkout` (raggiunta dall’icona carrello nella header).
 > `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` abilita il checkout carta nativo in pagina.
 > `STRIPE_SECRET_KEY` viene usata dal backend per creare i `PaymentIntent` Stripe.
-> `PAYHIP_PRODUCTS_API_URL` è opzionale (default `https://payhip.com/api/products`) e viene usato per sincronizzare il catalogo frontend dai prodotti Payhip.
-> `PAYHIP_WEBHOOK_SECRET` protegge l’endpoint backend `/api/payhip/webhook` (consigliato).
+> `STRIPE_WEBHOOK_SECRET` valida i webhook Stripe (`payment_intent.succeeded`).
+> `DIGITAL_DELIVERY_BASE_URL` è la base URL pubblica usata per i link download tokenizzati.
 
 ## Checkout nativo (senza embed)
 
 Il backend `booking-backend/server.js` espone:
 
+- `GET /api/store/products`
 - `POST /api/payments/create-intent`
+- `POST /api/payments/webhook`
+- `GET /api/digital/download/:token`
 
-La pagina `/checkout` usa Stripe Elements per il pagamento carta direttamente sul sito, mentre Payhip resta fonte catalogo prodotti.
+La pagina `/checkout` usa Stripe Elements per il pagamento carta direttamente sul sito. Il catalogo è interno al progetto (`src/lib/store-products.ts`) e validato lato backend.
 
-## Webhook Payhip (ordini)
+Per i prodotti digitali, il backend:
 
-Il backend in `booking-backend/server.js` espone:
-
-- `POST /api/payhip/webhook`
-- `GET /api/payhip/health`
-
-Configurazione consigliata su Payhip:
-
-1. URL webhook: `https://TUO_BACKEND/api/payhip/webhook?secret=PAYHIP_WEBHOOK_SECRET`
-2. Imposta lo stesso valore anche in `.env` alla voce `PAYHIP_WEBHOOK_SECRET`
-
-Il backend salva i webhook in MySQL nella tabella `payhip_orders` (creata automaticamente al primo evento), con idempotenza su `external_id`.
+1. registra l'ordine dopo `payment_intent.succeeded`
+2. genera un token download con scadenza e limite utilizzi
+3. invia email al cliente con link sicuro
+4. serve il file tramite endpoint tokenizzato
 
 ## Database (log consensi cookie)
 Per salvare i consensi cookie nel database MySQL, crea la tabella `consent_logs`:

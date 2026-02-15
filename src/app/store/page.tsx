@@ -1,21 +1,19 @@
 import Link from "next/link";
 import Container from "@/components/Container";
 import { buildMetadata } from "@/lib/seo";
-import { getStoreProducts } from "@/lib/store-products";
-
-const payhipCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL ?? "";
+import { getStoreProducts } from "../../lib/store-products";
 
 export function generateMetadata() {
   return buildMetadata({
     title: "Store digitale AG SERVIZI",
     description:
-      "Acquista servizi digitali e prodotti online di AG SERVIZI tramite checkout sicuro Payhip.",
+      "Acquista servizi digitali e prodotti online di AG SERVIZI con checkout interno sicuro.",
     path: "/store",
   });
 }
 
-export default async function StorePage() {
-  const storeProducts = await getStoreProducts();
+export default function StorePage() {
+  const storeProducts = getStoreProducts();
   const hasCustomCatalog = storeProducts.length > 0;
 
   return (
@@ -27,20 +25,12 @@ export default async function StorePage() {
               Store
             </p>
             <h1 className="text-4xl font-semibold text-white md:text-5xl">
-              Acquista online con checkout sicuro Payhip
+              Acquista online con checkout interno sicuro
             </h1>
             <p className="text-base text-slate-300 md:text-lg">
-              Qui trovi i prodotti e servizi disponibili all’acquisto online con
-              backend Payhip per pagamenti e gestione ordini.
+              Qui trovi i prodotti e servizi disponibili all’acquisto online,
+              con gestione ordini e pagamenti totalmente interna.
             </p>
-            {payhipCheckoutUrl ? (
-              <Link
-                href={payhipCheckoutUrl}
-                className="inline-flex rounded-full border border-cyan-400/60 px-6 py-3 text-sm font-semibold text-cyan-200 transition hover:border-cyan-300 hover:text-white"
-              >
-                Vai al checkout
-              </Link>
-            ) : null}
             {!hasCustomCatalog ? (
               <Link
                 href="/contatti"
@@ -93,9 +83,8 @@ export default async function StorePage() {
             ) : (
               <div className="lux-card rounded-2xl p-6">
                 <p className="text-sm text-slate-600">
-                  Nessun prodotto trovato. Verifica <strong>PAYHIP_API_KEY</strong>
-                  (e facoltativamente <strong>PAYHIP_PRODUCTS_API_URL</strong>)
-                  per sincronizzare automaticamente il catalogo da Payhip.
+                  Nessun prodotto disponibile. Configura il catalogo in
+                  <strong> src/lib/store-products.ts</strong>.
                 </p>
               </div>
             )}

@@ -4,8 +4,6 @@ import { getStoreProducts } from "@/lib/store-products";
 import { buildMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 
-const payhipCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL ?? "";
-
 export function generateMetadata() {
   return buildMetadata({
     title: "Checkout online",
@@ -45,7 +43,6 @@ export default async function CheckoutPage() {
             >
               <CheckoutClient
                 products={products}
-                fallbackCheckoutUrl={payhipCheckoutUrl}
               />
             </Suspense>
           </Container>
