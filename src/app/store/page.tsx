@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Container from "@/components/Container";
 import { buildMetadata } from "@/lib/seo";
-import { storeProducts } from "@/lib/store-products";
+import { getStoreProducts } from "@/lib/store-products";
 
 const payhipCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL ?? "";
 
@@ -14,7 +14,8 @@ export function generateMetadata() {
   });
 }
 
-export default function StorePage() {
+export default async function StorePage() {
+  const storeProducts = await getStoreProducts();
   const hasCustomCatalog = storeProducts.length > 0;
 
   return (
@@ -92,9 +93,9 @@ export default function StorePage() {
             ) : (
               <div className="lux-card rounded-2xl p-6">
                 <p className="text-sm text-slate-600">
-                  Configura i prodotti in <strong>src/lib/store-products.ts</strong>
-                  per mostrare il catalogo frontend e collegare ogni acquisto al
-                  checkout Payhip.
+                  Nessun prodotto trovato. Verifica <strong>PAYHIP_API_KEY</strong>
+                  (e facoltativamente <strong>PAYHIP_PRODUCTS_API_URL</strong>)
+                  per sincronizzare automaticamente il catalogo da Payhip.
                 </p>
               </div>
             )}

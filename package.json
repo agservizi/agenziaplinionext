@@ -10,6 +10,8 @@
     "export": "next build"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.9.1",
+    "@stripe/stripe-js": "^7.8.0",
     "mysql2": "^3.16.3",
     "next": "16.1.6",
     "react": "19.2.3",

@@ -5,11 +5,18 @@ import { useEffect, useState } from "react";
 import Container from "./Container";
 import { navigation } from "@/lib/site-data";
 
-const cartCheckoutUrl = "/checkout";
+const CART_PRODUCT_KEY = "ag:selectedCheckoutProduct";
+
+function getCheckoutUrlFromStorage(): string {
+  if (typeof window === "undefined") return "/checkout";
+  const productId = window.localStorage.getItem(CART_PRODUCT_KEY)?.trim();
+  return productId ? `/checkout?product=${encodeURIComponent(productId)}` : "/checkout";
+}
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartCheckoutUrl, setCartCheckoutUrl] = useState("/checkout");
 
   const trackContactClick = () => {
     if (typeof window === "undefined") return;
@@ -51,6 +58,17 @@ export default function Header() {
       body.style.touchAction = "";
     };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    const updateCartUrl = () => setCartCheckoutUrl(getCheckoutUrlFromStorage());
+    updateCartUrl();
+    window.addEventListener("storage", updateCartUrl);
+    window.addEventListener("ag-cart-product-updated", updateCartUrl);
+    return () => {
+      window.removeEventListener("storage", updateCartUrl);
+      window.removeEventListener("ag-cart-product-updated", updateCartUrl);
+    };
+  }, []);
 
   return (
     <header

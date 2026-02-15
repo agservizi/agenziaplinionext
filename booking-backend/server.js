@@ -4,6 +4,7 @@ import cors from "cors";
 import { google } from "googleapis";
 import mysql from "mysql2/promise";
 import { DateTime, Interval } from "luxon";
+import Stripe from "stripe";
 
 const app = express();
 app.use(
@@ -32,6 +33,7 @@ const config = {
 const OPEN_HOUR = 9;
 const CLOSE_HOUR = 18;
 const payhipWebhookSecret = String(process.env.PAYHIP_WEBHOOK_SECRET || "").trim();
+const stripeSecretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
 
 let pool = null;
 function getPool() {
@@ -81,6 +83,80 @@ function toObject(value) {
     }
   }
   return {};
+}
+
+function normalizeProductId(value, fallback = "") {
+  return String(value || fallback)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function parsePayhipProductForPayment(product, index = 0) {
+  const id = normalizeProductId(
+    product?.id || product?.product_id || product?.slug || product?.title,
+    `payhip-${index + 1}`,
+  );
+  const name = String(product?.name || product?.title || `Prodotto ${index + 1}`).trim();
+  const rawAmount = Number(product?.price || product?.amount || 0);
+  const amountCents = Number.isFinite(rawAmount) && rawAmount > 0 ? Math.round(rawAmount * 100) : 0;
+  const currency = String(product?.currency || "eur").trim().toLowerCase();
+
+  return {
+    id,
+    name,
+    amountCents,
+    currency,
+  };
+}
+
+async function fetchPayhipProductsForPayment() {
+  const apiKey = String(process.env.PAYHIP_API_KEY || "").trim();
+  if (!apiKey) return [];
+
+  const apiUrl = String(process.env.PAYHIP_PRODUCTS_API_URL || "https://payhip.com/api/products").trim();
+  const requests = [
+    fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
+      },
+    }),
+    fetch(`${apiUrl}${apiUrl.includes("?") ? "&" : "?"}api_key=${encodeURIComponent(apiKey)}`, {
+      headers: { Accept: "application/json" },
+    }),
+  ];
+
+  for (const request of requests) {
+    try {
+      const response = await request;
+      if (!response.ok) continue;
+      const payload = await response.json();
+      const source = Array.isArray(payload)
+        ? payload
+        : payload?.products || payload?.data || payload?.results || payload?.items || [];
+
+      if (!Array.isArray(source)) continue;
+
+      return source
+        .map((item, index) => parsePayhipProductForPayment(item, index))
+        .filter((item) => item.id && item.amountCents > 0);
+    } catch {
+      continue;
+    }
+  }
+
+  return [];
+}
+
+let stripeClient = null;
+function getStripeClient() {
+  if (!stripeSecretKey) return null;
+  if (!stripeClient) {
+    stripeClient = new Stripe(stripeSecretKey);
+  }
+  return stripeClient;
 }
 
 function normalizePayhipPayload(body) {
@@ -261,6 +337,46 @@ app.get("/api/payhip/health", (_req, res) => {
       database: Boolean(process.env.MYSQL_HOST),
     },
   });
+});
+
+app.post("/api/payments/create-intent", async (req, res) => {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return res.status(503).json({ message: "Stripe non configurato" });
+  }
+
+  const productId = normalizeProductId(req.body?.productId || "");
+  if (!productId) {
+    return res.status(400).json({ message: "Prodotto non valido" });
+  }
+
+  try {
+    const products = await fetchPayhipProductsForPayment();
+    const product = products.find((item) => item.id === productId);
+    if (!product) {
+      return res.status(404).json({ message: "Prodotto non trovato su Payhip" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: product.amountCents,
+      currency: product.currency || "eur",
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        source: "agenziaplinio_checkout",
+        product_id: product.id,
+        product_name: product.name,
+      },
+    });
+
+    return res.json({
+      clientSecret: paymentIntent.client_secret,
+      amountCents: product.amountCents,
+      currency: product.currency,
+      productName: product.name,
+    });
+  } catch {
+    return res.status(500).json({ message: "Errore creazione pagamento" });
+  }
 });
 
 app.get("/api/booking/availability", async (req, res) => {

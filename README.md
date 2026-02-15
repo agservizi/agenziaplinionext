@@ -55,6 +55,9 @@ NEXT_PUBLIC_SITE_URL=
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
 NEXT_PUBLIC_PAYHIP_STORE_URL=
 NEXT_PUBLIC_PAYHIP_CHECKOUT_URL=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+PAYHIP_PRODUCTS_API_URL=
 PAYHIP_WEBHOOK_SECRET=
 ```
 
@@ -63,7 +66,18 @@ PAYHIP_WEBHOOK_SECRET=
 > `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` è opzionale per la verifica Search Console.
 > `NEXT_PUBLIC_PAYHIP_STORE_URL` è l’URL pubblico del tuo store Payhip (apertura in nuova scheda).
 > `NEXT_PUBLIC_PAYHIP_CHECKOUT_URL` è l’URL usato dalla pagina interna `/checkout` (raggiunta dall’icona carrello nella header).
+> `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` abilita il checkout carta nativo in pagina.
+> `STRIPE_SECRET_KEY` viene usata dal backend per creare i `PaymentIntent` Stripe.
+> `PAYHIP_PRODUCTS_API_URL` è opzionale (default `https://payhip.com/api/products`) e viene usato per sincronizzare il catalogo frontend dai prodotti Payhip.
 > `PAYHIP_WEBHOOK_SECRET` protegge l’endpoint backend `/api/payhip/webhook` (consigliato).
+
+## Checkout nativo (senza embed)
+
+Il backend `booking-backend/server.js` espone:
+
+- `POST /api/payments/create-intent`
+
+La pagina `/checkout` usa Stripe Elements per il pagamento carta direttamente sul sito, mentre Payhip resta fonte catalogo prodotti.
 
 ## Webhook Payhip (ordini)
 

@@ -1,5 +1,8 @@
 import Container from "@/components/Container";
+import CheckoutClient from "@/components/CheckoutClient";
+import { getStoreProducts } from "@/lib/store-products";
 import { buildMetadata } from "@/lib/seo";
+import { Suspense } from "react";
 
 const payhipCheckoutUrl = process.env.NEXT_PUBLIC_PAYHIP_CHECKOUT_URL ?? "";
 
@@ -11,7 +14,9 @@ export function generateMetadata() {
   });
 }
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const products = await getStoreProducts();
+
   return (
     <div className="pb-24">
       <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
@@ -23,7 +28,7 @@ export default function CheckoutPage() {
             Completa il pagamento
           </h1>
           <p className="text-base text-slate-300 md:text-lg">
-            Finalizza il tuo ordine direttamente su agenziaplinio.it.
+            Seleziona il prodotto e prosegui al pagamento senza usare embed nella pagina checkout.
           </p>
         </Container>
       </section>
@@ -31,23 +36,18 @@ export default function CheckoutPage() {
       <div className="lux-surface pt-10 text-slate-900">
         <section className="py-10">
           <Container>
-            {payhipCheckoutUrl ? (
-              <div className="lux-card overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <iframe
-                  src={payhipCheckoutUrl}
-                  title="Checkout Payhip AG SERVIZI"
-                  loading="lazy"
-                  className="h-300 w-full"
-                />
-              </div>
-            ) : (
-              <div className="lux-card rounded-2xl p-6">
-                <p className="text-sm text-slate-600">
-                  Configura <strong>NEXT_PUBLIC_PAYHIP_CHECKOUT_URL</strong> per
-                  mostrare il checkout in questa pagina.
-                </p>
-              </div>
-            )}
+            <Suspense
+              fallback={
+                <div className="lux-card rounded-2xl p-6">
+                  <p className="text-sm text-slate-600">Caricamento checkout…</p>
+                </div>
+              }
+            >
+              <CheckoutClient
+                products={products}
+                fallbackCheckoutUrl={payhipCheckoutUrl}
+              />
+            </Suspense>
           </Container>
         </section>
       </div>
