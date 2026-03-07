@@ -87,8 +87,6 @@ export const serviceCategories: ServiceCategory[] = [
       { title: "A2A Energia", description: "Offerte sostenibili." },
       { title: "WindTre Luce e Gas", description: "Pacchetti integrati." },
       { title: "Fastweb Energia", description: "Gestione digitale." },
-      { title: "Egea", description: "Servizi energetici locali." },
-      { title: "Iren", description: "Supporto multicanale." },
     ],
   },
   {

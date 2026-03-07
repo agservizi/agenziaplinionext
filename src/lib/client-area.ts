@@ -58,11 +58,6 @@ export const clientAreas: ClientAreaConfig[] = [
         label: "Spedizione internazionale",
         description: "Gestione richieste con dati doganali e supporto documentale.",
       },
-      {
-        value: "preventivo-business",
-        label: "Preventivo business",
-        description: "Per aziende che spediscono con frequenza e vogliono condizioni dedicate.",
-      },
     ],
     fields: [
       { id: "pickup_address", label: "Indirizzo ritiro", placeholder: "Via, civico, CAP, citta", required: true },

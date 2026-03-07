@@ -158,6 +158,8 @@ function public_api_ensure_shipping_pricing_table(): void
         CREATE TABLE IF NOT EXISTS shipping_pricing_rules (
           id INT AUTO_INCREMENT PRIMARY KEY,
           label VARCHAR(191) NOT NULL,
+          service_scope VARCHAR(20) NOT NULL DEFAULT 'all',
+          country_code VARCHAR(8) NOT NULL DEFAULT '',
           min_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
           max_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
           min_volume_m3 DECIMAL(10,4) NOT NULL DEFAULT 0,
@@ -169,6 +171,10 @@ function public_api_ensure_shipping_pricing_table(): void
           updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
     ");
+
+    // Backward-compatible migration for existing installations.
+    @$db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN service_scope VARCHAR(20) NOT NULL DEFAULT 'all' AFTER label");
+    @$db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN country_code VARCHAR(8) NOT NULL DEFAULT '' AFTER service_scope");
 }
 
 function public_api_ensure_visure_pricing_table(): void

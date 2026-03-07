@@ -1,5 +1,9 @@
 User-Agent: *
 Allow: /
 Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+Disallow: /login
+Disallow: /admin-login
 
 Sitemap: https://agenziaplinio.it/sitemap.xml

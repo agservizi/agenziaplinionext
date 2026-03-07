@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ClientAreaConfig } from "@/lib/client-area";
 import { SHIPMENT_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/shipment-payment";
+import type { PublicShippingPricingRule } from "@/lib/shipping-pricing";
 
 export type BrtShipmentLiveSummary = {
   serviceLabel: string;
@@ -20,6 +21,7 @@ export type BrtShipmentLiveSummary = {
 
 type BrtShipmentFormProps = {
   area: ClientAreaConfig;
+  pricingRules?: PublicShippingPricingRule[];
   onSummaryChange?: (summary: BrtShipmentLiveSummary) => void;
   onShipmentCreated?: () => void;
 };
@@ -105,8 +107,19 @@ function buildInitialState(area: ClientAreaConfig): ShipmentFormState {
   };
 }
 
+function getServiceCountryValidationMessage(serviceCode: string, destinationCountry: string) {
+  if (serviceCode === "ritiro-nazionale" && destinationCountry !== "IT") {
+    return "Con 'Spedizione nazionale' puoi spedire solo in Italia (IT).";
+  }
+  if (serviceCode === "ritiro-internazionale" && destinationCountry === "IT") {
+    return "Con 'Spedizione internazionale' seleziona una nazione diversa da IT.";
+  }
+  return "";
+}
+
 export default function BrtShipmentForm({
   area,
+  pricingRules = [],
   onSummaryChange,
   onShipmentCreated,
 }: BrtShipmentFormProps) {
@@ -119,6 +132,8 @@ export default function BrtShipmentForm({
     "idle",
   );
   const [paymentMessage, setPaymentMessage] = useState("");
+  const [step, setStep] = useState(1);
+  const [stepError, setStepError] = useState("");
   const [routingInfo, setRoutingInfo] = useState<{
     arrivalTerminal: string;
     arrivalDepot: string;
@@ -158,6 +173,14 @@ export default function BrtShipmentForm({
   const [deleteMessage, setDeleteMessage] = useState("");
   const [manifestStatus, setManifestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [manifestMessage, setManifestMessage] = useState("");
+  const totalSteps = 5;
+  const stepLabels = [
+    "Anagrafica",
+    "Ritiro e Destinazione",
+    "Colli e Peso",
+    "Fatturazione",
+    "Riepilogo e Pagamento",
+  ];
 
   const labelHref = useMemo(() => {
     if (!labelPdfBase64) return "";
@@ -173,13 +196,104 @@ export default function BrtShipmentForm({
   const actualWeightKG = Number(form.weightKG) || 0;
   const taxableWeightKG = Math.max(actualWeightKG, volumetricWeightKG);
   const selectedService = area.serviceOptions.find((option) => option.value === form.serviceCode);
+  const estimatedCostLabel =
+    form.destinationCountry === "IT"
+      ? taxableWeightKG <= 3
+        ? "7,90 - 9,90 euro"
+        : taxableWeightKG <= 10
+          ? "9,90 - 14,90 euro"
+          : "14,90+ euro"
+      : "preventivo dinamico";
+  const serviceCountryError = getServiceCountryValidationMessage(
+    form.serviceCode,
+    form.destinationCountry,
+  );
+  const listinoStrictError = useMemo(() => {
+    if (serviceCountryError) return "";
+    if (taxableWeightKG <= 0) return "";
+
+    const destinationCountry = String(form.destinationCountry || "IT").trim().toUpperCase();
+    const serviceScope = destinationCountry === "IT" ? "national" : "international";
+    const candidates = pricingRules.filter((rule) => {
+      if (!rule.active) return false;
+      const ruleScope = String(rule.serviceScope || "all").trim().toLowerCase();
+      if (ruleScope !== serviceScope) return false;
+      if (serviceScope === "international") {
+        const ruleCountry = String(rule.countryCode || "").trim().toUpperCase();
+        return ruleCountry === destinationCountry || ruleCountry === "ALL" || ruleCountry === "";
+      }
+      return true;
+    });
+
+    const hasMatchingRule = candidates.some((rule) => {
+      const weightMatches =
+        taxableWeightKG >= rule.minWeightKG &&
+        (rule.maxWeightKG <= 0 || taxableWeightKG <= rule.maxWeightKG);
+      return weightMatches;
+    });
+
+    if (hasMatchingRule) return "";
+    return "Il servizio selezionato non consente spedizioni con peso superiore al listino disponibile. Per colli extra ti invitiamo a portare il pacco in agenzia.";
+  }, [form.destinationCountry, pricingRules, serviceCountryError, taxableWeightKG]);
   const selectedPudoPoint = useMemo(
     () => pudoPoints.find((point) => point.id === form.pudoId) || null,
     [form.pudoId, pudoPoints],
   );
 
   const updateField = <K extends keyof ShipmentFormState>(key: K, value: ShipmentFormState[K]) => {
+    setStepError("");
     setForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 1) {
+      if (!form.customerName.trim()) return "Inserisci nome e cognome.";
+      if (!form.email.trim().includes("@")) return "Inserisci una email valida.";
+      if (!form.phone.trim()) return "Inserisci il numero di telefono.";
+      if (!form.serviceCode.trim()) return "Seleziona un servizio.";
+      if (!form.destinationCountry.trim()) return "Inserisci la nazione di destinazione.";
+      if (serviceCountryError) return serviceCountryError;
+      return "";
+    }
+    if (currentStep === 2) {
+      if (!form.pickupAddress.trim()) return "Inserisci l'indirizzo di ritiro.";
+      if (!form.pickupZIPCode.trim()) return "Inserisci il CAP di ritiro.";
+      if (!form.pickupCity.trim()) return "Inserisci la citta di ritiro.";
+      if (!form.pickupProvince.trim()) return "Inserisci la provincia di ritiro.";
+      if (!form.destinationCompanyName.trim()) return "Inserisci il destinatario/azienda.";
+      if (!form.destinationAddress.trim()) return "Inserisci l'indirizzo di destinazione.";
+      if (!form.destinationZIPCode.trim()) return "Inserisci il CAP di destinazione.";
+      if (!form.destinationCity.trim()) return "Inserisci la citta di destinazione.";
+      if (!form.destinationProvince.trim()) return "Inserisci la provincia di destinazione.";
+      if (!form.destinationCountry.trim()) return "Inserisci la nazione di destinazione.";
+      if (serviceCountryError) return serviceCountryError;
+      return "";
+    }
+    if (currentStep === 3) {
+      if ((Number(form.parcelCount) || 0) <= 0) return "Inserisci un numero colli valido.";
+      if ((Number(form.parcelLengthCM) || 0) <= 0) return "Inserisci una lunghezza valida.";
+      if ((Number(form.parcelHeightCM) || 0) <= 0) return "Inserisci un'altezza valida.";
+      if ((Number(form.parcelDepthCM) || 0) <= 0) return "Inserisci una profondita valida.";
+      if ((Number(form.weightKG) || 0) <= 0) return "Inserisci un peso valido.";
+      if (listinoStrictError) return listinoStrictError;
+      return "";
+    }
+    return "";
+  };
+
+  const goNextStep = () => {
+    const error = validateStep(step);
+    if (error) {
+      setStepError(error);
+      return;
+    }
+    setStepError("");
+    setStep((current) => Math.min(totalSteps, current + 1));
+  };
+
+  const goPreviousStep = () => {
+    setStepError("");
+    setStep((current) => Math.max(1, current - 1));
   };
 
   const buildSubmissionPayload = (): ShipmentSubmissionPayload => ({
@@ -192,15 +306,6 @@ export default function BrtShipmentForm({
   });
 
   useEffect(() => {
-    const costLabel =
-      form.destinationCountry === "IT"
-        ? taxableWeightKG <= 3
-          ? "7,90 - 9,90 euro"
-          : taxableWeightKG <= 10
-            ? "9,90 - 14,90 euro"
-            : "14,90+ euro"
-        : "preventivo dinamico";
-
     onSummaryChange?.({
       serviceLabel: selectedService?.label || "Spedizione",
       destinationCountry: form.destinationCountry,
@@ -211,7 +316,7 @@ export default function BrtShipmentForm({
       volumeM3,
       dimensionsLabel: `${parcelLengthCM || 0} x ${parcelHeightCM || 0} x ${parcelDepthCM || 0} cm`,
       pudoSelected: Boolean(form.pudoId),
-      estimatedCostLabel: costLabel,
+      estimatedCostLabel,
     });
   }, [
     actualWeightKG,
@@ -228,6 +333,7 @@ export default function BrtShipmentForm({
     taxableWeightKG,
     volumetricWeightKG,
     volumeM3,
+    estimatedCostLabel,
   ]);
 
   useEffect(() => {
@@ -453,10 +559,25 @@ export default function BrtShipmentForm({
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (step < totalSteps) {
+      goNextStep();
+      return;
+    }
     setPaymentStatus("loading");
     setPaymentMessage("");
 
     try {
+      if (serviceCountryError) {
+        setPaymentStatus("error");
+        setPaymentMessage(serviceCountryError);
+        return;
+      }
+      if (listinoStrictError) {
+        setPaymentStatus("error");
+        setPaymentMessage(listinoStrictError);
+        return;
+      }
+
       const shipmentPayload = buildSubmissionPayload();
 
       if (typeof window !== "undefined") {
@@ -472,13 +593,26 @@ export default function BrtShipmentForm({
         body: JSON.stringify(shipmentPayload),
       });
 
-      const payload = (await response.json()) as {
+      const rawPayload = await response.text();
+      let payload: {
         message?: string;
         url?: string;
-      };
+        errorCode?: string;
+      } = {};
+      try {
+        payload = rawPayload ? (JSON.parse(rawPayload) as typeof payload) : {};
+      } catch {
+        payload = { message: rawPayload || undefined };
+      }
 
       if (!response.ok || !payload.url) {
-        throw new Error(payload.message || "Avvio pagamento Stripe non riuscito.");
+        const apiError = new Error(payload.message || "Avvio pagamento Stripe non riuscito.") as Error & {
+          status?: number;
+          errorCode?: string;
+        };
+        apiError.status = response.status;
+        apiError.errorCode = payload.errorCode;
+        throw apiError;
       }
 
       setPaymentStatus("redirecting");
@@ -488,8 +622,21 @@ export default function BrtShipmentForm({
         window.location.assign(payload.url);
       }
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Errore avvio pagamento.";
+      const errorCode =
+        typeof error === "object" && error && "errorCode" in error
+          ? String((error as { errorCode?: unknown }).errorCode || "")
+          : "";
       setPaymentStatus("error");
-      setPaymentMessage(error instanceof Error ? error.message : "Errore avvio pagamento.");
+      setPaymentMessage(errorMessage);
+      if (
+        errorCode === "SHIPPING_LIMIT_EXCEEDED" ||
+        errorMessage.includes("non consente spedizioni con peso/volume") ||
+        errorMessage.includes("non consente spedizioni con peso superiore")
+      ) {
+        setPaymentMessage(errorMessage);
+      }
     }
   };
 
@@ -506,6 +653,23 @@ export default function BrtShipmentForm({
         </p>
       </div>
 
+      <div className="mt-5">
+        <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          <span>
+            Step {step} / {totalSteps}
+          </span>
+          <span>{stepLabels[step - 1]}</span>
+        </div>
+        <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full rounded-full bg-cyan-600 transition-all"
+            style={{ width: `${(step / totalSteps) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      <div key={`wizard-step-${step}`} className="transition-all duration-200">
+      {step === 1 ? (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
           <span className="block text-sm font-medium text-slate-700">Nome e cognome</span>
@@ -539,7 +703,23 @@ export default function BrtShipmentForm({
           <span className="block text-sm font-medium text-slate-700">Servizio</span>
           <select
             value={form.serviceCode}
-            onChange={(event) => updateField("serviceCode", event.target.value)}
+            onChange={(event) => {
+              setStepError("");
+              const nextServiceCode = event.target.value;
+              setForm((current) => {
+                const nextCountry =
+                  nextServiceCode === "ritiro-nazionale"
+                    ? "IT"
+                    : nextServiceCode === "ritiro-internazionale" && current.destinationCountry === "IT"
+                      ? ""
+                      : current.destinationCountry;
+                return {
+                  ...current,
+                  serviceCode: nextServiceCode,
+                  destinationCountry: nextCountry,
+                };
+              });
+            }}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
           >
             {area.serviceOptions.map((option) => (
@@ -550,7 +730,9 @@ export default function BrtShipmentForm({
           </select>
         </label>
       </div>
+      ) : null}
 
+      {step === 4 ? (
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <button
           type="button"
@@ -670,7 +852,9 @@ export default function BrtShipmentForm({
           </div>
         ) : null}
       </div>
+      ) : null}
 
+      {step === 2 ? (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
           <span className="block text-sm font-medium text-slate-700">Indirizzo ritiro</span>
@@ -711,7 +895,9 @@ export default function BrtShipmentForm({
           />
         </label>
       </div>
+      ) : null}
 
+      {step === 2 ? (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
           <span className="block text-sm font-medium text-slate-700">Destinatario / Azienda</span>
@@ -767,12 +953,19 @@ export default function BrtShipmentForm({
             value={form.destinationCountry}
             onChange={(event) => updateField("destinationCountry", event.target.value.toUpperCase())}
             maxLength={2}
+            readOnly={form.serviceCode === "ritiro-nazionale"}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
             required
           />
         </label>
       </div>
+      ) : null}
 
+      {step === 2 && serviceCountryError ? (
+        <p className="mt-3 text-sm font-medium text-red-600">{serviceCountryError}</p>
+      ) : null}
+
+      {step === 2 ? (
       <div className="mt-4">
         <button
           type="button"
@@ -816,7 +1009,9 @@ export default function BrtShipmentForm({
           </div>
         ) : null}
       </div>
+      ) : null}
 
+      {step === 3 ? (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
           <span className="block text-sm font-medium text-slate-700">Numero colli</span>
@@ -875,7 +1070,9 @@ export default function BrtShipmentForm({
           />
         </label>
       </div>
+      ) : null}
 
+      {step === 3 ? (
       <div className="mt-4 rounded-2xl border border-cyan-100 bg-cyan-50 p-4 text-sm text-cyan-950">
         <p className="font-semibold">Calcolo BRT ufficiale</p>
         <p className="mt-1">
@@ -888,7 +1085,9 @@ export default function BrtShipmentForm({
           Volume totale: <strong>{volumeM3 || 0} m3</strong>
         </p>
       </div>
+      ) : null}
 
+      {step === 5 ? (
       <label className="mt-4 block space-y-2">
         <span className="block text-sm font-medium text-slate-700">Note operative</span>
         <textarea
@@ -899,6 +1098,76 @@ export default function BrtShipmentForm({
           placeholder="Citofono, fascia oraria o istruzioni utili"
         />
       </label>
+      ) : null}
+
+      {step === 5 ? (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-800">
+          <p className="font-semibold text-slate-900">Riepilogo spedizione</p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <p>
+              <strong>Servizio:</strong> {selectedService?.label || form.serviceCode}
+            </p>
+            <p>
+              <strong>Destinazione:</strong> {form.destinationCity} ({form.destinationCountry})
+            </p>
+            <p>
+              <strong>Colli:</strong> {parcelCount} - <strong>Peso tassabile:</strong>{" "}
+              {taxableWeightKG || 0} kg
+            </p>
+            <p>
+              <strong>Stima costo:</strong> {estimatedCostLabel}
+            </p>
+            <p className="md:col-span-2">
+              <strong>PUDO:</strong>{" "}
+              {form.pudoId
+                ? selectedPudoPoint?.name || form.pudoId
+                : "Nessun punto selezionato (consegna standard)"}
+            </p>
+          </div>
+        </div>
+      ) : null}
+      </div>
+
+      {stepError ? (
+        <p className="mt-4 text-sm font-medium text-red-600">{stepError}</p>
+      ) : null}
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        {step > 1 ? (
+          <button
+            type="button"
+            onClick={goPreviousStep}
+            className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-800 transition hover:border-slate-400"
+          >
+            Indietro
+          </button>
+        ) : null}
+        {step < totalSteps ? (
+          <button
+            type="button"
+            onClick={goNextStep}
+            className="inline-flex rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/15 transition hover:bg-cyan-500"
+          >
+            Avanti
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={
+              status === "submitting" || paymentStatus === "loading" || paymentStatus === "redirecting"
+            }
+            className="inline-flex rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/15 transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {paymentStatus === "loading"
+              ? "Preparo il pagamento..."
+              : paymentStatus === "redirecting"
+                ? "Reindirizzamento a Stripe..."
+                : status === "submitting"
+                  ? "Pagamento confermato, creo la spedizione..."
+                  : "Paga con Stripe e crea spedizione BRT"}
+          </button>
+        )}
+      </div>
 
       {message ? (
         <p
@@ -1061,25 +1330,12 @@ export default function BrtShipmentForm({
         </div>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={
-          status === "submitting" || paymentStatus === "loading" || paymentStatus === "redirecting"
-        }
-        className="mt-6 inline-flex rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/15 transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {paymentStatus === "loading"
-          ? "Preparo il pagamento..."
-          : paymentStatus === "redirecting"
-            ? "Reindirizzamento a Stripe..."
-            : status === "submitting"
-              ? "Pagamento confermato, creo la spedizione..."
-              : "Paga con Stripe e crea spedizione BRT"}
-      </button>
-      <p className="mt-3 text-sm text-slate-600">
-        Il pagamento viene completato prima: solo dopo la conferma Stripe il sistema crea la
-        spedizione BRT.
-      </p>
+      {step === totalSteps ? (
+        <p className="mt-3 text-sm text-slate-600">
+          Il pagamento viene completato prima: solo dopo la conferma Stripe il sistema crea la
+          spedizione BRT.
+        </p>
+      ) : null}
 
       {pudoModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
@@ -1138,6 +1394,7 @@ export default function BrtShipmentForm({
           </div>
         </div>
       ) : null}
+
     </form>
   );
 }

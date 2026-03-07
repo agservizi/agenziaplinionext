@@ -15,6 +15,8 @@ export async function ensureShippingPricingTable() {
     CREATE TABLE IF NOT EXISTS shipping_pricing_rules (
       id INT AUTO_INCREMENT PRIMARY KEY,
       label VARCHAR(191) NOT NULL,
+      service_scope VARCHAR(20) NOT NULL DEFAULT 'all',
+      country_code VARCHAR(8) NOT NULL DEFAULT '',
       min_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
       max_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
       min_volume_m3 DECIMAL(10,4) NOT NULL DEFAULT 0,
@@ -26,15 +28,30 @@ export async function ensureShippingPricingTable() {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Backward-compatible migration for existing installations.
+  try {
+    await pool.execute(
+      "ALTER TABLE shipping_pricing_rules ADD COLUMN service_scope VARCHAR(20) NOT NULL DEFAULT 'all' AFTER label",
+    );
+  } catch {}
+  try {
+    await pool.execute(
+      "ALTER TABLE shipping_pricing_rules ADD COLUMN country_code VARCHAR(8) NOT NULL DEFAULT '' AFTER service_scope",
+    );
+  } catch {}
 }
 
 export async function resolveShippingPrice(
   taxableWeightKG: number,
   volumeM3: number,
   destinationCountry: string,
+  options?: { strict?: boolean },
 ) {
   let label = "Tariffa base";
   let amountEUR = 0;
+  const country = String(destinationCountry || "IT").toUpperCase();
+  const serviceScope = country === "IT" ? "national" : "international";
 
   if (hasDatabaseConfig()) {
     await ensureShippingPricingTable();
@@ -42,6 +59,8 @@ export async function resolveShippingPrice(
     const [rows] = await pool.query(
       `SELECT
          label,
+         service_scope,
+         country_code,
          min_weight_kg,
          max_weight_kg,
          min_volume_m3,
@@ -53,20 +72,36 @@ export async function resolveShippingPrice(
        ORDER BY sort_order ASC, min_weight_kg ASC`,
     );
 
-    const matchedRule = Array.isArray(rows)
-      ? (rows as any[]).find((row) => {
-          const minWeight = Number(row.min_weight_kg || 0);
-          const maxWeight = Number(row.max_weight_kg || 0);
-          const minVolume = Number(row.min_volume_m3 || 0);
-          const maxVolume = Number(row.max_volume_m3 || 0);
-          const weightMatches =
-            taxableWeightKG >= minWeight && (maxWeight <= 0 || taxableWeightKG <= maxWeight);
-          const volumeMatches =
-            volumeM3 >= minVolume && (maxVolume <= 0 || volumeM3 <= maxVolume);
+    const normalizedRows = Array.isArray(rows) ? (rows as any[]) : [];
+    const includeLegacyAll = !options?.strict;
+    const scopedRows = normalizedRows.filter((row) => {
+      const rowScope = String(row.service_scope || "all").trim().toLowerCase();
+      return rowScope === serviceScope || (includeLegacyAll && rowScope === "all");
+    });
+    const countryRows =
+      serviceScope === "international"
+        ? scopedRows.filter((row) => {
+            const rowCountry = String(row.country_code || "").trim().toUpperCase();
+            return rowCountry === country;
+          })
+        : scopedRows;
+    const wildcardRows =
+      serviceScope === "international"
+        ? scopedRows.filter((row) => {
+            const rowCountry = String(row.country_code || "").trim().toUpperCase();
+            return rowCountry === "" || rowCountry === "ALL";
+          })
+        : [];
+    const candidateRows =
+      serviceScope === "international" ? [...countryRows, ...wildcardRows] : scopedRows;
 
-          return weightMatches && volumeMatches;
-        })
-      : null;
+    const matchedRule = candidateRows.find((row) => {
+      const minWeight = Number(row.min_weight_kg || 0);
+      const maxWeight = Number(row.max_weight_kg || 0);
+      const weightMatches =
+        taxableWeightKG >= minWeight && (maxWeight <= 0 || taxableWeightKG <= maxWeight);
+      return weightMatches;
+    });
 
     if (matchedRule) {
       label = String(matchedRule.label || "Listino admin");
@@ -75,9 +110,14 @@ export async function resolveShippingPrice(
   }
 
   if (amountEUR <= 0) {
+    if (options?.strict) {
+      throw new Error(
+        "Il servizio selezionato non consente spedizioni con peso superiore al listino disponibile. Per colli extra ti invitiamo a portare il pacco in agenzia.",
+      );
+    }
     label = "Tariffa stimata";
     amountEUR =
-      destinationCountry === "IT"
+      country === "IT"
         ? taxableWeightKG <= 3
           ? 8.9
           : taxableWeightKG <= 10

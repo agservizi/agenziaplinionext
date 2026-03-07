@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getMissingBrtConfig, routeBrtShipment } from "@/lib/brt-shipment";
+import { resolveShippingPrice } from "@/lib/shipping-pricing-engine";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,16 @@ function requireString(value: unknown) {
 function requirePositiveNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function getServiceCountryValidationMessage(serviceCode: string, destinationCountry: string) {
+  if (serviceCode === "ritiro-nazionale" && destinationCountry !== "IT") {
+    return "Per 'Spedizione nazionale' la destinazione deve essere IT.";
+  }
+  if (serviceCode === "ritiro-internazionale" && destinationCountry === "IT") {
+    return "Per 'Spedizione internazionale' la destinazione deve essere diversa da IT.";
+  }
+  return "";
 }
 
 export async function POST(request: Request) {
@@ -40,6 +51,8 @@ export async function POST(request: Request) {
   const volumeCM3 =
     payload.parcelLengthCM * payload.parcelHeightCM * payload.parcelDepthCM * payload.parcelCount;
   const volumeM3 = Number((volumeCM3 / 1_000_000).toFixed(4));
+  const volumetricWeightKG = Number((volumeCM3 / 4000).toFixed(2));
+  const taxableWeightKG = Math.max(payload.weightKG, volumetricWeightKG);
 
   if (
     !payload.destinationCompanyName ||
@@ -59,7 +72,18 @@ export async function POST(request: Request) {
     );
   }
 
+  const serviceCountryError = getServiceCountryValidationMessage(
+    payload.serviceCode,
+    payload.destinationCountry,
+  );
+  if (serviceCountryError) {
+    return NextResponse.json({ message: serviceCountryError }, { status: 400 });
+  }
+
   try {
+    await resolveShippingPrice(taxableWeightKG, volumeM3, payload.destinationCountry, {
+      strict: true,
+    });
     const result = await routeBrtShipment({
       ...payload,
       volumeM3,
@@ -74,12 +98,17 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Errore durante il routing della spedizione.";
+    const isShippingLimitExceeded =
+      message.includes("non consente spedizioni con peso/volume") ||
+      message.includes("non consente spedizioni con peso superiore");
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Errore durante il routing della spedizione.",
+        message,
+        errorCode: isShippingLimitExceeded ? "SHIPPING_LIMIT_EXCEEDED" : undefined,
       },
-      { status: 502 },
+      { status: isShippingLimitExceeded ? 409 : 502 },
     );
   }
 }

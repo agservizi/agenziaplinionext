@@ -5,12 +5,12 @@ import AppShell from "@/components/AppShell";
 import PageTransitionOverlay from "@/components/PageTransitionOverlay";
 import { ConsentProvider } from "@/components/cookies/ConsentProvider";
 import LocalBusinessJsonLd from "@/components/seo/LocalBusinessJsonLd";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: {
     default: "AG SERVIZI | Consulenze Telefonia, Energia e Servizi Digitali",
-    template: "%s | AG SERVIZI",
+    template: `%s | ${SITE_NAME}`,
   },
   description:
     "AG SERVIZI è un’agenzia di servizi moderna e dinamica specializzata in consulenze per telefonia, energia elettrica e gas, con soluzioni digitali su misura.",
@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     "Castellammare di Stabia",
   ],
   metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: "/",
+  },
   robots: {
     index: true,
     follow: true,
@@ -33,7 +36,7 @@ export const metadata: Metadata = {
     description:
       "AG SERVIZI è un’agenzia di servizi moderna e dinamica specializzata in consulenze per telefonia, energia elettrica e gas, con soluzioni digitali su misura.",
     url: SITE_URL,
-    siteName: "AG SERVIZI",
+    siteName: SITE_NAME,
     locale: "it_IT",
     type: "website",
     images: [
@@ -41,7 +44,7 @@ export const metadata: Metadata = {
         url: "/og-default.svg",
         width: 1200,
         height: 630,
-        alt: "AG SERVIZI · Castellammare di Stabia",
+        alt: SITE_NAME,
       },
     ],
   },
@@ -60,6 +63,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/manifest.webmanifest",
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },

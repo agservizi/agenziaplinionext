@@ -3,6 +3,8 @@
 export type PublicShippingPricingRule = {
   id: number;
   label: string;
+  serviceScope: "national" | "international" | "all";
+  countryCode: string;
   minWeightKG: number;
   maxWeightKG: number;
   minVolumeM3: number;

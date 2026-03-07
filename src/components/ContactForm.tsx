@@ -106,7 +106,7 @@ export default function ContactForm({
           <option>A2A Energia</option>
           <option>WindTre Luce e Gas</option>
           <option>Fastweb Energia</option>
-          <option>Egea | Iren</option>
+          <option>Altri operatori energia</option>
           <option>Spedizioni nazionali</option>
           <option>Spedizioni internazionali</option>
           <option>SPID</option>

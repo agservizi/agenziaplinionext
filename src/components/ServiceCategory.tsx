@@ -8,6 +8,10 @@ import { ServiceCategory as ServiceCategoryType } from "@/lib/site-data";
 import { cx } from "@/lib/utils";
 import { getPaymentServiceSlugByCatalogTitle } from "@/lib/payment-services";
 import { getPhoneServiceSlugByCatalogTitle } from "@/lib/phone-services";
+import { getEnergyServiceSlugByCatalogTitle } from "@/lib/energy-services";
+import { getLogisticsServiceSlugByCatalogTitle } from "@/lib/logistics-services";
+import { getDigitalServiceSlugByCatalogTitle } from "@/lib/digital-services";
+import { getWebAgencyServiceSlugByCatalogTitle } from "@/lib/web-agency-services";
 import {
   DigitalIcon,
   EnergyIcon,
@@ -71,10 +75,34 @@ export default function ServiceCategory({
       category.id === "telefonia"
         ? getPhoneServiceSlugByCatalogTitle(item.title)
         : "";
+    const energySlug =
+      category.id === "energia"
+        ? getEnergyServiceSlugByCatalogTitle(item.title)
+        : "";
+    const logisticsSlug =
+      category.id === "logistica"
+        ? getLogisticsServiceSlugByCatalogTitle(item.title)
+        : "";
+    const digitalSlug =
+      category.id === "digitali"
+        ? getDigitalServiceSlugByCatalogTitle(item.title)
+        : "";
+    const webAgencySlug =
+      category.id === "web-agency"
+        ? getWebAgencyServiceSlugByCatalogTitle(item.title)
+        : "";
     const targetHref = paymentSlug
       ? `/servizi/pagamenti/${paymentSlug}`
       : phoneSlug
         ? `/servizi/telefonia/${phoneSlug}`
+        : energySlug
+          ? `/servizi/energia/${energySlug}`
+          : logisticsSlug
+            ? `/servizi/logistica/${logisticsSlug}`
+            : digitalSlug
+              ? `/servizi/digitali/${digitalSlug}`
+              : webAgencySlug
+                ? `/servizi/web-agency/${webAgencySlug}`
         : "";
 
     const cardClassName = cx(

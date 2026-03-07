@@ -49,12 +49,17 @@ if (
     client_area_json(['message' => 'Compila i campi richiesti prima di procedere al pagamento.'], 400);
 }
 
+$countryValidationError = client_area_validate_shipping_service_country($payload['serviceCode'], $payload['destinationCountry']);
+if ($countryValidationError !== null) {
+    client_area_json(['message' => $countryValidationError], 400);
+}
+
 try {
     $volumeCM3 = $payload['parcelCount'] * $payload['parcelLengthCM'] * $payload['parcelHeightCM'] * $payload['parcelDepthCM'];
     $volumeM3 = round($volumeCM3 / 1000000, 4);
     $volumetricWeightKG = round($volumeCM3 / 4000, 2);
     $taxableWeightKG = max($payload['weightKG'], $volumetricWeightKG);
-    $price = client_area_resolve_shipping_price($taxableWeightKG, $volumeM3, $payload['destinationCountry']);
+    $price = client_area_resolve_shipping_price($taxableWeightKG, $volumeM3, $payload['destinationCountry'], true);
 
     $origin = client_area_site_origin();
     $checkout = client_area_create_stripe_checkout_session([
@@ -85,7 +90,12 @@ try {
         'message' => 'Reindirizzamento a Stripe per completare il pagamento.',
     ], 200);
 } catch (Throwable $error) {
+    $message = trim($error->getMessage()) !== '' ? $error->getMessage() : 'Creazione checkout Stripe non riuscita.';
+    $isShippingLimitExceeded =
+        str_contains($message, 'non consente spedizioni con peso/volume') ||
+        str_contains($message, 'non consente spedizioni con peso superiore');
     client_area_json([
-        'message' => trim($error->getMessage()) !== '' ? $error->getMessage() : 'Creazione checkout Stripe non riuscita.',
-    ], 502);
+        'message' => $message,
+        'errorCode' => $isShippingLimitExceeded ? 'SHIPPING_LIMIT_EXCEEDED' : null,
+    ], $isShippingLimitExceeded ? 409 : 502);
 }

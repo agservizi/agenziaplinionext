@@ -36,7 +36,7 @@ export default function AreaClientiSpedizioniPage() {
             </div>
           </div>
           <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">Workflow</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">Procedura</p>
             <ol className="mt-4 space-y-3 text-sm text-slate-200">
               <li>1. Compila i dati completi di mittente, destinatario, colli e ritiro/consegna.</li>
               <li>2. Conferma la spedizione e completa il checkout Stripe per autorizzare il pagamento.</li>

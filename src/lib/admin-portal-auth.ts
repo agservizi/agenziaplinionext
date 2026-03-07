@@ -3,6 +3,8 @@ export const ADMIN_PORTAL_TOKEN_KEY = "ag:admin-portal-token";
 export type ShippingPricingRule = {
   id: number;
   label: string;
+  serviceScope: "national" | "international" | "all";
+  countryCode: string;
   minWeightKG: number;
   maxWeightKG: number;
   minVolumeM3: number;
@@ -332,12 +334,22 @@ export async function upsertAdminShippingPricing(
     body: JSON.stringify(rule),
   });
 
-  const payload = (await response.json()) as { message?: string };
+  const payload = (await response.json()) as {
+    message?: string;
+    savedRule?: { serviceScope?: string; countryCode?: string };
+  };
   if (!response.ok) {
     throw new Error(payload.message || "Salvataggio listino non riuscito");
   }
 
-  return payload.message || "Regola salvata";
+  const savedScope = String(payload.savedRule?.serviceScope || "").trim();
+  const savedCountry = String(payload.savedRule?.countryCode || "").trim();
+  const scopeSuffix =
+    savedScope !== ""
+      ? ` (salvata in ${savedScope}${savedCountry ? `/${savedCountry}` : ""})`
+      : "";
+
+  return `${payload.message || "Regola salvata"}${scopeSuffix}`;
 }
 
 export async function deleteAdminShippingPricing(token: string, id: number) {

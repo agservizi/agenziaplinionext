@@ -173,7 +173,7 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
         </div>
       </div>
 
-      <BrtShipmentForm area={area} onSummaryChange={setSummary} />
+      <BrtShipmentForm area={area} pricingRules={pricingRules} onSummaryChange={setSummary} />
     </div>
   );
 }

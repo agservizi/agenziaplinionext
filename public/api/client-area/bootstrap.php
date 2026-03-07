@@ -1220,41 +1220,88 @@ function client_area_brt_next_orm_collection_date(): string
     return $date->format('Y-m-d');
 }
 
-function client_area_resolve_shipping_price(float $taxableWeightKG, float $volumeM3, string $destinationCountry): array
+function client_area_validate_shipping_service_country(string $serviceCode, string $destinationCountry): ?string
+{
+    $normalizedServiceCode = trim($serviceCode);
+    $country = strtoupper(trim($destinationCountry));
+
+    if ($normalizedServiceCode === 'ritiro-nazionale' && $country !== 'IT') {
+        return "Per 'Spedizione nazionale' la destinazione deve essere IT.";
+    }
+
+    if ($normalizedServiceCode === 'ritiro-internazionale' && $country === 'IT') {
+        return "Per 'Spedizione internazionale' la destinazione deve essere diversa da IT.";
+    }
+
+    return null;
+}
+
+function client_area_resolve_shipping_price(float $taxableWeightKG, float $volumeM3, string $destinationCountry, bool $strict = false): array
 {
     $label = 'Tariffa base';
     $amountEUR = 0.0;
+    $country = strtoupper(trim($destinationCountry));
+    $serviceScope = $country === 'IT' ? 'national' : 'international';
 
     if (client_area_has_database_config()) {
         public_api_ensure_shipping_pricing_table();
         $db = client_area_db();
         if ($db) {
-            $result = $db->query("SELECT label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order
+            $result = $db->query("SELECT label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order
                                   FROM shipping_pricing_rules
                                   WHERE active = 1
                                   ORDER BY sort_order ASC, min_weight_kg ASC");
             if ($result) {
+                $exactCountryRules = [];
+                $wildcardRules = [];
+                $scopedRules = [];
+
                 while ($row = $result->fetch_assoc()) {
+                    $rowScope = strtolower(trim((string) ($row['service_scope'] ?? 'all')));
+                    $includeLegacyAll = !$strict;
+                    if ($rowScope !== $serviceScope && !($includeLegacyAll && $rowScope === 'all')) {
+                        continue;
+                    }
+
+                    $rowCountry = strtoupper(trim((string) ($row['country_code'] ?? '')));
+                    if ($serviceScope === 'international') {
+                        if ($rowCountry === $country) {
+                            $exactCountryRules[] = $row;
+                        } elseif ($rowCountry === '' || $rowCountry === 'ALL') {
+                            $wildcardRules[] = $row;
+                        }
+                        continue;
+                    }
+
+                    $scopedRules[] = $row;
+                }
+
+                $candidates = $serviceScope === 'international'
+                    ? array_merge($exactCountryRules, $wildcardRules)
+                    : $scopedRules;
+
+                foreach ($candidates as $row) {
                     $minWeight = (float) ($row['min_weight_kg'] ?? 0);
                     $maxWeight = (float) ($row['max_weight_kg'] ?? 0);
-                    $minVolume = (float) ($row['min_volume_m3'] ?? 0);
-                    $maxVolume = (float) ($row['max_volume_m3'] ?? 0);
                     $weightMatches = $taxableWeightKG >= $minWeight && ($maxWeight <= 0 || $taxableWeightKG <= $maxWeight);
-                    $volumeMatches = $volumeM3 >= $minVolume && ($maxVolume <= 0 || $volumeM3 <= $maxVolume);
-                    if ($weightMatches && $volumeMatches) {
+                    if ($weightMatches) {
                         $label = (string) ($row['label'] ?? 'Listino admin');
                         $amountEUR = (float) ($row['price_eur'] ?? 0);
                         break;
                     }
                 }
+
                 $result->free();
             }
         }
     }
 
     if ($amountEUR <= 0) {
+        if ($strict) {
+            throw new RuntimeException("Il servizio selezionato non consente spedizioni con peso superiore al listino disponibile. Per colli extra ti invitiamo a portare il pacco in agenzia.");
+        }
         $label = 'Tariffa stimata';
-        if (strtoupper(trim($destinationCountry)) === 'IT') {
+        if ($country === 'IT') {
             $amountEUR = $taxableWeightKG <= 3 ? 8.9 : ($taxableWeightKG <= 10 ? 12.9 : 16.9);
         } else {
             $amountEUR = 24.9;

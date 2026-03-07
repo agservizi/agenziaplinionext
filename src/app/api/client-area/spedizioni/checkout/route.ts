@@ -13,6 +13,16 @@ function requirePositiveNumber(value: unknown) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
+function getServiceCountryValidationMessage(serviceCode: string, destinationCountry: string) {
+  if (serviceCode === "ritiro-nazionale" && destinationCountry !== "IT") {
+    return "Per 'Spedizione nazionale' la destinazione deve essere IT.";
+  }
+  if (serviceCode === "ritiro-internazionale" && destinationCountry === "IT") {
+    return "Per 'Spedizione internazionale' la destinazione deve essere diversa da IT.";
+  }
+  return "";
+}
+
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
     return NextResponse.json({ message: "Stripe non configurato." }, { status: 503 });
@@ -58,6 +68,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const serviceCountryError = getServiceCountryValidationMessage(
+    payload.serviceCode,
+    payload.destinationCountry,
+  );
+  if (serviceCountryError) {
+    return NextResponse.json({ message: serviceCountryError }, { status: 400 });
+  }
+
   try {
     const volumeCM3 =
       payload.parcelCount *
@@ -71,6 +89,7 @@ export async function POST(request: Request) {
       taxableWeightKG,
       volumeM3,
       payload.destinationCountry,
+      { strict: true },
     );
     const origin = new URL(request.url).origin;
     const checkout = await createStripeCheckoutSession({
@@ -104,12 +123,17 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Creazione checkout Stripe non riuscita.";
+    const isShippingLimitExceeded =
+      message.includes("non consente spedizioni con peso/volume") ||
+      message.includes("non consente spedizioni con peso superiore");
     return NextResponse.json(
       {
-        message:
-          error instanceof Error ? error.message : "Creazione checkout Stripe non riuscita.",
+        message,
+        errorCode: isShippingLimitExceeded ? "SHIPPING_LIMIT_EXCEEDED" : undefined,
       },
-      { status: 502 },
+      { status: isShippingLimitExceeded ? 409 : 502 },
     );
   }
 }

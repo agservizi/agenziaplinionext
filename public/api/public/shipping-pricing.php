@@ -17,14 +17,28 @@ try {
     public_api_ensure_shipping_pricing_table();
 
     $result = $db->query("
-        SELECT id, label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
+        SELECT id, label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
         FROM shipping_pricing_rules
         WHERE active = 1
-        ORDER BY sort_order ASC, id ASC
+        ORDER BY service_scope ASC, country_code ASC, sort_order ASC, id ASC
     ");
 
     if (!$result) {
-        public_api_json(['message' => 'Errore caricamento prezzi spedizioni'], 500);
+        // Legacy fallback: installations where new columns are missing.
+        $result = $db->query("
+            SELECT id, label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
+            FROM shipping_pricing_rules
+            WHERE active = 1
+            ORDER BY sort_order ASC, id ASC
+        ");
+    }
+
+    if (!$result) {
+        public_api_json([
+            'ok' => true,
+            'rules' => [],
+            'warning' => 'Listino spedizioni non disponibile al momento',
+        ]);
     }
 
     $rules = [];
@@ -32,6 +46,8 @@ try {
         $rules[] = [
             'id' => (int) ($row['id'] ?? 0),
             'label' => (string) ($row['label'] ?? ''),
+            'serviceScope' => (string) ($row['service_scope'] ?? 'all'),
+            'countryCode' => strtoupper((string) ($row['country_code'] ?? '')),
             'minWeightKG' => (float) ($row['min_weight_kg'] ?? 0),
             'maxWeightKG' => (float) ($row['max_weight_kg'] ?? 0),
             'minVolumeM3' => (float) ($row['min_volume_m3'] ?? 0),
@@ -49,6 +65,8 @@ try {
     ]);
 } catch (Throwable $error) {
     public_api_json([
-        'message' => 'Errore caricamento prezzi spedizioni',
-    ], 500);
+        'ok' => true,
+        'rules' => [],
+        'warning' => 'Listino spedizioni non disponibile al momento',
+    ]);
 }

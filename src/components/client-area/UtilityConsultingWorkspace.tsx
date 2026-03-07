@@ -167,7 +167,7 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
           title: "Dettagli fornitura luce",
           description: "Raccogliamo i dati energetici minimi per una simulazione utile e veloce.",
           providerLabel: "Fornitore luce attuale",
-          providerPlaceholder: "Es. Enel Energia, A2A, Iren",
+          providerPlaceholder: "Es. Enel Energia, A2A, Fastweb Energia",
           monthlySpendLabel: "Spesa media bolletta luce (€)",
           cityLabel: "Comune di fornitura",
           cityPlaceholder: "Comune dove è attiva l'utenza luce",

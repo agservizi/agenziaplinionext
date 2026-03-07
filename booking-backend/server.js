@@ -129,6 +129,8 @@ async function ensureShippingPricingTable() {
     CREATE TABLE IF NOT EXISTS shipping_pricing_rules (
       id INT AUTO_INCREMENT PRIMARY KEY,
       label VARCHAR(191) NOT NULL,
+      service_scope VARCHAR(20) NOT NULL DEFAULT 'all',
+      country_code VARCHAR(8) NOT NULL DEFAULT '',
       min_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
       max_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
       min_volume_m3 DECIMAL(10,4) NOT NULL DEFAULT 0,
@@ -142,6 +144,18 @@ async function ensureShippingPricingTable() {
       KEY idx_shipping_pricing_active (active)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Backward-compatible migration on existing tables.
+  try {
+    await pool.execute(
+      "ALTER TABLE shipping_pricing_rules ADD COLUMN service_scope VARCHAR(20) NOT NULL DEFAULT 'all' AFTER label",
+    );
+  } catch (_error) {}
+  try {
+    await pool.execute(
+      "ALTER TABLE shipping_pricing_rules ADD COLUMN country_code VARCHAR(8) NOT NULL DEFAULT '' AFTER service_scope",
+    );
+  } catch (_error) {}
 }
 
 async function ensureVisurePricingTable() {
@@ -1143,16 +1157,18 @@ app.get("/api/public/shipping-pricing", async (_req, res) => {
     await ensureShippingPricingTable();
     const pool = getPool();
     const [rows] = await pool.query(
-      `SELECT id, label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
+      `SELECT id, label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
        FROM shipping_pricing_rules
        WHERE active = 1
-       ORDER BY sort_order ASC, id ASC`,
+       ORDER BY service_scope ASC, country_code ASC, sort_order ASC, id ASC`,
     );
 
     const rules = Array.isArray(rows)
       ? rows.map((row) => ({
           id: row.id,
           label: row.label,
+          serviceScope: String(row.service_scope || "all"),
+          countryCode: String(row.country_code || "").toUpperCase(),
           minWeightKG: Number(row.min_weight_kg || 0),
           maxWeightKG: Number(row.max_weight_kg || 0),
           minVolumeM3: Number(row.min_volume_m3 || 0),
@@ -1220,15 +1236,17 @@ app.get("/api/admin/shipping-pricing", async (req, res) => {
     await ensureShippingPricingTable();
     const pool = getPool();
     const [rows] = await pool.query(
-      `SELECT id, label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
+      `SELECT id, label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
        FROM shipping_pricing_rules
-       ORDER BY sort_order ASC, id ASC`,
+       ORDER BY service_scope ASC, country_code ASC, sort_order ASC, id ASC`,
     );
 
     const rules = Array.isArray(rows)
       ? rows.map((row) => ({
           id: row.id,
           label: row.label,
+          serviceScope: String(row.service_scope || "all"),
+          countryCode: String(row.country_code || "").toUpperCase(),
           minWeightKG: Number(row.min_weight_kg || 0),
           maxWeightKG: Number(row.max_weight_kg || 0),
           minVolumeM3: Number(row.min_volume_m3 || 0),
@@ -1299,6 +1317,8 @@ app.post("/api/admin/shipping-pricing/upsert", async (req, res) => {
 
   const id = Number(req.body?.id || 0);
   const label = String(req.body?.label || "").trim();
+  const serviceScope = String(req.body?.serviceScope || "all").trim().toLowerCase();
+  let countryCode = String(req.body?.countryCode || "").trim().toUpperCase();
   const minWeightKG = Number(req.body?.minWeightKG || 0);
   const maxWeightKG = Number(req.body?.maxWeightKG || 0);
   const minVolumeM3 = Number(req.body?.minVolumeM3 || 0);
@@ -1309,6 +1329,19 @@ app.post("/api/admin/shipping-pricing/upsert", async (req, res) => {
 
   if (!label) {
     return res.status(400).json({ message: "Etichetta regola obbligatoria" });
+  }
+
+  if (!["all", "national", "international"].includes(serviceScope)) {
+    return res.status(400).json({ message: "Ambito regola non valido" });
+  }
+  if (serviceScope === "national") {
+    countryCode = "IT";
+  }
+  if (serviceScope === "international" && !countryCode) {
+    countryCode = "ALL";
+  }
+  if (countryCode && countryCode !== "ALL" && !/^[A-Z]{2}$/.test(countryCode)) {
+    return res.status(400).json({ message: "Codice nazione non valido (usa IT, FR, DE... o ALL)" });
   }
 
   if (
@@ -1325,24 +1358,64 @@ app.post("/api/admin/shipping-pricing/upsert", async (req, res) => {
   try {
     await ensureShippingPricingTable();
     const pool = getPool();
+    let savedId = id;
 
     if (id > 0) {
       await pool.execute(
         `UPDATE shipping_pricing_rules
-         SET label = ?, min_weight_kg = ?, max_weight_kg = ?, min_volume_m3 = ?, max_volume_m3 = ?, price_eur = ?, sort_order = ?, active = ?, updated_at = CURRENT_TIMESTAMP
+         SET label = ?, service_scope = ?, country_code = ?, min_weight_kg = ?, max_weight_kg = ?, min_volume_m3 = ?, max_volume_m3 = ?, price_eur = ?, sort_order = ?, active = ?, updated_at = CURRENT_TIMESTAMP
          WHERE id = ?`,
-        [label, minWeightKG, maxWeightKG, minVolumeM3, maxVolumeM3, priceEUR, sortOrder, active ? 1 : 0, id],
+        [
+          label,
+          serviceScope,
+          countryCode,
+          minWeightKG,
+          maxWeightKG,
+          minVolumeM3,
+          maxVolumeM3,
+          priceEUR,
+          sortOrder,
+          active ? 1 : 0,
+          id,
+        ],
       );
     } else {
-      await pool.execute(
+      const [insertResult] = await pool.execute(
         `INSERT INTO shipping_pricing_rules
-          (label, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [label, minWeightKG, maxWeightKG, minVolumeM3, maxVolumeM3, priceEUR, sortOrder, active ? 1 : 0],
+          (label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          label,
+          serviceScope,
+          countryCode,
+          minWeightKG,
+          maxWeightKG,
+          minVolumeM3,
+          maxVolumeM3,
+          priceEUR,
+          sortOrder,
+          active ? 1 : 0,
+        ],
       );
+      savedId = Number(insertResult?.insertId || 0);
+    }
+    let savedRule = { id: savedId, serviceScope, countryCode };
+    if (savedId > 0) {
+      const [verifyRows] = await pool.query(
+        "SELECT id, service_scope, country_code FROM shipping_pricing_rules WHERE id = ? LIMIT 1",
+        [savedId],
+      );
+      const row = Array.isArray(verifyRows) && verifyRows[0] ? verifyRows[0] : null;
+      if (row) {
+        savedRule = {
+          id: Number(row.id || savedId),
+          serviceScope: String(row.service_scope || serviceScope),
+          countryCode: String(row.country_code || countryCode).toUpperCase(),
+        };
+      }
     }
 
-    return res.json({ ok: true, message: "Regola prezzo salvata" });
+    return res.json({ ok: true, message: "Regola prezzo salvata", savedRule });
   } catch (error) {
     return res.status(500).json({
       message: error instanceof Error ? error.message : "Errore salvataggio regola",

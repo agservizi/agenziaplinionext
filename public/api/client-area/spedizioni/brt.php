@@ -85,6 +85,11 @@ if (
     client_area_json(['message' => 'Pagamento o dati spedizione mancanti. Completa prima il checkout Stripe.'], 400);
 }
 
+$countryValidationError = client_area_validate_shipping_service_country($payload['serviceCode'], $payload['destinationCountry']);
+if ($countryValidationError !== null) {
+    client_area_json(['message' => $countryValidationError], 400);
+}
+
 try {
     client_area_ensure_client_area_requests_table();
     client_area_ensure_client_area_shipments_table();
@@ -93,7 +98,7 @@ try {
 
     $db = client_area_require_db();
     $taxableWeightKG = max($payload['weightKG'], $volumetricWeightKG);
-    $expectedPrice = client_area_resolve_shipping_price($taxableWeightKG, $volumeM3, $payload['destinationCountry']);
+    $expectedPrice = client_area_resolve_shipping_price($taxableWeightKG, $volumeM3, $payload['destinationCountry'], true);
     $stripeSession = client_area_get_stripe_checkout_session($stripeSessionId);
     $paymentCompleted = (($stripeSession['status'] ?? '') === 'complete') && (($stripeSession['paymentStatus'] ?? '') === 'paid');
     if (!$paymentCompleted) {
@@ -416,7 +421,12 @@ try {
         'confirmMessage' => (string) ($shipment['confirmMessage'] ?? ''),
     ], 200);
 } catch (Throwable $error) {
+    $message = trim($error->getMessage()) !== '' ? $error->getMessage() : 'Errore durante la creazione della spedizione BRT.';
+    $isShippingLimitExceeded =
+        str_contains($message, 'non consente spedizioni con peso/volume') ||
+        str_contains($message, 'non consente spedizioni con peso superiore');
     client_area_json([
-        'message' => trim($error->getMessage()) !== '' ? $error->getMessage() : 'Errore durante la creazione della spedizione BRT.',
-    ], 502);
+        'message' => $message,
+        'errorCode' => $isShippingLimitExceeded ? 'SHIPPING_LIMIT_EXCEEDED' : null,
+    ], $isShippingLimitExceeded ? 409 : 502);
 }

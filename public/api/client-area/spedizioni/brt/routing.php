@@ -32,6 +32,8 @@ $payload = [
 
 $volumeCM3 = $payload['parcelLengthCM'] * $payload['parcelHeightCM'] * $payload['parcelDepthCM'] * $payload['parcelCount'];
 $volumeM3 = round($volumeCM3 / 1000000, 4);
+$volumetricWeightKG = round($volumeCM3 / 4000, 2);
+$taxableWeightKG = max($payload['weightKG'], $volumetricWeightKG);
 
 if (
     $payload['destinationCompanyName'] === '' ||
@@ -48,7 +50,14 @@ if (
     client_area_json(['message' => 'Compila i dati minimi per il routing BRT.'], 400);
 }
 
+$countryValidationError = client_area_validate_shipping_service_country($payload['serviceCode'], $payload['destinationCountry']);
+if ($countryValidationError !== null) {
+    client_area_json(['message' => $countryValidationError], 400);
+}
+
 try {
+    client_area_resolve_shipping_price($taxableWeightKG, $volumeM3, $payload['destinationCountry'], true);
+
     $result = client_area_brt_route_shipment([
         ...$payload,
         'volumeM3' => $volumeM3,
@@ -61,7 +70,12 @@ try {
         'deliveryZone' => (string) ($result['deliveryZone'] ?? ''),
     ], 200);
 } catch (Throwable $error) {
+    $message = trim($error->getMessage()) !== '' ? $error->getMessage() : 'Errore durante il routing della spedizione.';
+    $isShippingLimitExceeded =
+        str_contains($message, 'non consente spedizioni con peso/volume') ||
+        str_contains($message, 'non consente spedizioni con peso superiore');
     client_area_json([
-        'message' => trim($error->getMessage()) !== '' ? $error->getMessage() : 'Errore durante il routing della spedizione.',
-    ], 502);
+        'message' => $message,
+        'errorCode' => $isShippingLimitExceeded ? 'SHIPPING_LIMIT_EXCEEDED' : null,
+    ], $isShippingLimitExceeded ? 409 : 502);
 }
