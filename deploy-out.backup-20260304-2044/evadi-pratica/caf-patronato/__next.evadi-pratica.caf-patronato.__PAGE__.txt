@@ -1,6 +1,0 @@
-1:"$Sreact.fragment"
-2:"$Sreact.suspense"
-3:I[8366,["8121","static/chunks/app/evadi-pratica/caf-patronato/page-96f7e00cbf025812.js"],"default"]
-4:I[484,[],"OutletBoundary"]
-0:{"buildId":"E9gyxS1a-wVKceXHHUka_","rsc":["$","$1","c",{"children":[["$","$2",null,{"fallback":["$","div",null,{"className":"mx-auto max-w-4xl px-6 py-10","children":["$","div",null,{"className":"rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-slate-200","children":"Sto aprendo la pratica..."}]}],"children":["$","$L3",null,{}]}],null,["$","$L4",null,{"children":["$","$2",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
-5:null

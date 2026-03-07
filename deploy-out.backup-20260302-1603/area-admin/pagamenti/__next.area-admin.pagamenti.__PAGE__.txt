@@ -1,6 +1,0 @@
-1:"$Sreact.fragment"
-2:I[1390,["2053","static/chunks/app/area-admin/pagamenti/page-68bbc63a95767c30.js"],"default"]
-3:I[484,[],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"buildId":"gD1qg3m3E7DKnrWq2A-9Q","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-6 pb-16 text-slate-950","children":[["$","section",null,{"className":"rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.06)] md:p-8","children":[["$","p",null,{"className":"text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700","children":"Sezione Pagamenti"}],["$","h1",null,{"className":"mt-3 text-3xl font-semibold text-slate-950 md:text-4xl","children":"Qui controllo incassi e fatturazione collegati alle spedizioni."}],["$","p",null,{"className":"mt-3 max-w-3xl text-sm text-slate-600 md:text-base","children":"In questa schermata tengo insieme il lato economico: pagamenti Stripe, importi incassati, stato della richiesta e avanzamento della fattura."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
-5:null

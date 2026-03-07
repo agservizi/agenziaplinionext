@@ -1,6 +1,0 @@
-1:"$Sreact.fragment"
-2:I[4987,["6261","static/chunks/app/area-admin/richieste/page-42365e3fe6e61b3b.js"],"default"]
-3:I[484,[],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"buildId":"1qphKvpcBGRN7zn1QUlCh","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-6 pb-16 text-white","children":[["$","section",null,{"className":"glass-card rounded-4xl p-6 md:p-8","children":[["$","p",null,{"className":"text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400","children":"Sezione Richieste"}],["$","h1",null,{"className":"mt-3 text-3xl font-semibold text-white md:text-4xl","children":"Qui seguo il flusso operativo delle pratiche."}],["$","p",null,{"className":"mt-3 max-w-3xl text-sm text-slate-300 md:text-base","children":"In questa schermata mi concentro solo sulle richieste: filtro, controllo i dettagli e aggiorno gli stati senza mescolare altre configurazioni."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
-5:null

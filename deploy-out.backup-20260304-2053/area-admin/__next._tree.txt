@@ -1,2 +1,0 @@
-:HL["/_next/static/css/c558cb161b732785.css","style"]
-0:{"buildId":"4sbT6Tar50I-GTL8BBPfk","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"area-admin","paramType":null,"paramKey":"area-admin","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}

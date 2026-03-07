@@ -1,2 +1,0 @@
-:HL["/_next/static/css/16ce05122c90bcff.css","style"]
-0:{"buildId":"neW2i9pUUVngCViH9TJwR","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"web-agency","paramType":null,"paramKey":"web-agency","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
