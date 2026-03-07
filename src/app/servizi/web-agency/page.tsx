@@ -33,7 +33,7 @@ export default function WebAgencyPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/contatti"
+                href="/consulenza?service=web-agency"
                 className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
               >
                 Richiedi una consulenza

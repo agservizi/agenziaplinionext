@@ -1,28 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import type { MouseEvent } from "react";
+import { startTransition, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Container from "./Container";
+import PublicBookingDrawer from "./PublicBookingDrawer";
 import { navigation } from "@/lib/site-data";
-
-const CART_PRODUCT_KEY = "ag:selectedCheckoutProduct";
-
-function getCheckoutUrlFromStorage(): string {
-  if (typeof window === "undefined") return "/checkout";
-  const productId = window.localStorage.getItem(CART_PRODUCT_KEY)?.trim();
-  return productId ? `/checkout?product=${encodeURIComponent(productId)}` : "/checkout";
-}
+import {
+  fetchClientPortalProfile,
+  getClientPortalToken,
+} from "@/lib/client-portal-auth";
 
 export default function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [cartCheckoutUrl, setCartCheckoutUrl] = useState("/checkout");
-
-  const trackContactClick = () => {
-    if (typeof window === "undefined") return;
-    const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
-    gtag?.("event", "click_contatti", { event_category: "contatti" });
-  };
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [clientSessionValid, setClientSessionValid] = useState(false);
+  const [clientFullName, setClientFullName] = useState("");
+  const primaryNavigation = navigation.filter((item) => item.href !== "/area-clienti");
+  const clientAreaCta = clientSessionValid
+    ? {
+        href: "/area-clienti",
+        label: clientFullName || "Area clienti",
+      }
+    : { href: "/login", label: "Accedi all'area clienti" };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -32,18 +36,51 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen && !bookingOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false);
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        setBookingOpen(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [mobileOpen]);
+  }, [bookingOpen, mobileOpen]);
+
+  useEffect(() => {
+    let active = true;
+
+    const run = async () => {
+      const token = getClientPortalToken();
+      if (!token) {
+        if (!active) return;
+        setClientSessionValid(false);
+        setClientFullName("");
+        return;
+      }
+
+      try {
+        const payload = await fetchClientPortalProfile(token);
+        if (!active) return;
+        setClientSessionValid(true);
+        setClientFullName((payload.profile.fullName || "").trim());
+      } catch {
+        if (!active) return;
+        setClientSessionValid(false);
+        setClientFullName("");
+      }
+    };
+
+    run();
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
-    if (mobileOpen) {
+    if (mobileOpen || bookingOpen) {
       root.style.overflow = "hidden";
       body.style.overflow = "hidden";
       body.style.touchAction = "none";
@@ -57,18 +94,35 @@ export default function Header() {
       body.style.overflow = "";
       body.style.touchAction = "";
     };
-  }, [mobileOpen]);
+  }, [bookingOpen, mobileOpen]);
 
-  useEffect(() => {
-    const updateCartUrl = () => setCartCheckoutUrl(getCheckoutUrlFromStorage());
-    updateCartUrl();
-    window.addEventListener("storage", updateCartUrl);
-    window.addEventListener("ag-cart-product-updated", updateCartUrl);
-    return () => {
-      window.removeEventListener("storage", updateCartUrl);
-      window.removeEventListener("ag-cart-product-updated", updateCartUrl);
-    };
-  }, []);
+  const navigateWithTransition = (
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string,
+    onBeforeNavigate?: () => void,
+  ) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      pathname === href
+    ) {
+      onBeforeNavigate?.();
+      return;
+    }
+
+    event.preventDefault();
+    onBeforeNavigate?.();
+    window.dispatchEvent(new Event("ag-page-transition-start"));
+    window.setTimeout(() => {
+      startTransition(() => {
+        router.push(href);
+      });
+    }, 220);
+  };
 
   return (
     <header
@@ -90,10 +144,11 @@ export default function Header() {
           <span className="sr-only">AG SERVIZI</span>
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
-          {navigation.map((item) => (
+          {primaryNavigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              onClick={(event) => navigateWithTransition(event, item.href)}
               className={
                 scrolled
                   ? "relative text-sm font-medium text-slate-600 transition hover:text-slate-900 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-cyan-600 after:transition-transform after:duration-300 hover:after:scale-x-100"
@@ -105,38 +160,23 @@ export default function Header() {
           ))}
         </nav>
         <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href={cartCheckoutUrl}
-            aria-label="Vai al checkout"
+          <button
+            type="button"
+            onClick={() => setBookingOpen(true)}
             className={
               scrolled
-                ? "inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-900 transition hover:border-slate-400"
-                : "inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 text-white transition hover:border-white/70 hover:bg-white/20"
+                ? "rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-slate-950"
+                : "rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/15"
             }
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="h-5 w-5"
-              aria-hidden="true"
-            >
-              <circle cx="9" cy="20" r="1.5" />
-              <circle cx="18" cy="20" r="1.5" />
-              <path d="M2 3h2.2a1 1 0 0 1 .97.76L6.2 8.2a1 1 0 0 0 .97.76h12.1a1 1 0 0 1 .98 1.2l-1.1 5.2a1 1 0 0 1-.98.8H8.4" />
-            </svg>
-          </Link>
+            Prenota un appuntamento
+          </button>
           <Link
-            href="/contatti"
-            className={
-              scrolled
-                ? "rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-400"
-                : "rounded-full border border-white/40 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/70 hover:bg-white/20"
-            }
-            onClick={trackContactClick}
+            href={clientAreaCta.href}
+            onClick={(event) => navigateWithTransition(event, clientAreaCta.href)}
+            className="inline-flex items-center justify-center rounded-full !bg-cyan-500 px-5 py-2 text-sm font-semibold !text-slate-950 transition hover:!bg-cyan-400"
           >
-            Contattaci
+            {clientAreaCta.label}
           </Link>
         </div>
         <button
@@ -204,11 +244,13 @@ export default function Header() {
           </button>
         </div>
         <nav className="mt-8 flex flex-col gap-4">
-          {navigation.map((item) => (
+          {primaryNavigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={(event) =>
+                navigateWithTransition(event, item.href, () => setMobileOpen(false))
+              }
               className="text-base font-semibold text-slate-900"
             >
               {item.label}
@@ -216,37 +258,28 @@ export default function Header() {
           ))}
         </nav>
         <div className="mt-8 flex items-center gap-3">
-          <Link
-            href={cartCheckoutUrl}
-            onClick={() => setMobileOpen(false)}
-            aria-label="Vai al checkout"
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              className="h-5 w-5"
-              aria-hidden="true"
-            >
-              <circle cx="9" cy="20" r="1.5" />
-              <circle cx="18" cy="20" r="1.5" />
-              <path d="M2 3h2.2a1 1 0 0 1 .97.76L6.2 8.2a1 1 0 0 0 .97.76h12.1a1 1 0 0 1 .98 1.2l-1.1 5.2a1 1 0 0 1-.98.8H8.4" />
-            </svg>
-          </Link>
-          <Link
-            href="/contatti"
+          <button
+            type="button"
             onClick={() => {
               setMobileOpen(false);
-              trackContactClick();
+              setBookingOpen(true);
             }}
-            className="inline-flex w-full items-center justify-center rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white"
+            className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900"
           >
-            Contattaci
+            Prenota un appuntamento
+          </button>
+          <Link
+            href={clientAreaCta.href}
+            onClick={(event) =>
+              navigateWithTransition(event, clientAreaCta.href, () => setMobileOpen(false))
+            }
+            className="inline-flex w-full items-center justify-center rounded-full !bg-cyan-500 px-5 py-3 text-sm font-semibold !text-slate-950"
+          >
+            {clientAreaCta.label}
           </Link>
         </div>
       </aside>
+      <PublicBookingDrawer open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </header>
   );
 }

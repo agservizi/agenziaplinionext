@@ -1,5 +1,13 @@
+"use client";
+
+import Link from "next/link";
+import type { MouseEvent } from "react";
+import { startTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { ServiceCategory as ServiceCategoryType } from "@/lib/site-data";
 import { cx } from "@/lib/utils";
+import { getPaymentServiceSlugByCatalogTitle } from "@/lib/payment-services";
+import { getPhoneServiceSlugByCatalogTitle } from "@/lib/phone-services";
 import {
   DigitalIcon,
   EnergyIcon,
@@ -27,8 +35,103 @@ export default function ServiceCategory({
   compact?: boolean;
   tone?: "light" | "dark";
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const Icon = iconMap[category.icon];
   const isDark = tone === "dark";
+
+  const navigateWithTransition = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      pathname === href
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    window.dispatchEvent(new Event("ag-page-transition-start"));
+    window.setTimeout(() => {
+      startTransition(() => {
+        router.push(href);
+      });
+    }, 220);
+  };
+
+  const renderItemCard = (item: ServiceCategoryType["items"][number]) => {
+    const paymentSlug =
+      category.id === "pagamenti"
+        ? getPaymentServiceSlugByCatalogTitle(item.title)
+        : "";
+    const phoneSlug =
+      category.id === "telefonia"
+        ? getPhoneServiceSlugByCatalogTitle(item.title)
+        : "";
+    const targetHref = paymentSlug
+      ? `/servizi/pagamenti/${paymentSlug}`
+      : phoneSlug
+        ? `/servizi/telefonia/${phoneSlug}`
+        : "";
+
+    const cardClassName = cx(
+      "rounded-2xl p-4 transition hover:-translate-y-1",
+      isDark
+        ? "border border-white/10 bg-slate-950/60 hover:border-cyan-400/40 hover:shadow-[0_18px_45px_rgba(8,47,73,0.45)]"
+        : "border border-slate-200/60 bg-white/95 hover:border-cyan-500/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.15)]",
+    );
+
+    const content = (
+      <>
+        <div className="flex items-start justify-between gap-3">
+          <h4
+            className={cx(
+              "text-base font-semibold",
+              isDark ? "text-white" : "text-slate-900",
+            )}
+          >
+            {item.title}
+          </h4>
+          <span
+            className={cx(
+              "hidden rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] md:inline",
+              isDark
+                ? "border-white/10 text-cyan-300"
+                : "border-slate-200 text-cyan-600",
+            )}
+          >
+            {targetHref ? "Apri" : "Servizio"}
+          </span>
+        </div>
+        <p className={cx("mt-2 text-sm", isDark ? "text-slate-300" : "text-slate-600")}>
+          {item.description}
+        </p>
+      </>
+    );
+
+    if (!targetHref) {
+      return (
+        <div key={item.title} className={cardClassName}>
+          {content}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.title}
+        href={targetHref}
+        onClick={(event) => navigateWithTransition(event, targetHref)}
+        className={cx(cardClassName, "block")}
+      >
+        {content}
+      </Link>
+    );
+  };
+
   return (
     <section
       className={cx(
@@ -75,41 +178,7 @@ export default function ServiceCategory({
           compact ? "md:grid-cols-2" : "md:grid-cols-3",
         )}
       >
-        {category.items.map((item) => (
-          <div
-            key={item.title}
-            className={cx(
-              "rounded-2xl p-4 transition hover:-translate-y-1",
-              isDark
-                ? "border border-white/10 bg-slate-950/60 hover:border-cyan-400/40 hover:shadow-[0_18px_45px_rgba(8,47,73,0.45)]"
-                : "border border-slate-200/60 bg-white/95 hover:border-cyan-500/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.15)]",
-            )}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <h4
-                className={cx(
-                  "text-base font-semibold",
-                  isDark ? "text-white" : "text-slate-900",
-                )}
-              >
-                {item.title}
-              </h4>
-              <span
-                className={cx(
-                  "hidden rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] md:inline",
-                  isDark
-                    ? "border-white/10 text-cyan-300"
-                    : "border-slate-200 text-cyan-600",
-                )}
-              >
-                Servizio
-              </span>
-            </div>
-            <p className={cx("mt-2 text-sm", isDark ? "text-slate-300" : "text-slate-600")}>
-              {item.description}
-            </p>
-          </div>
-        ))}
+        {category.items.map((item) => renderItemCard(item))}
       </div>
     </section>
   );

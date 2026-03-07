@@ -4,7 +4,19 @@ import { useState } from "react";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
-export default function ContactForm({ tone = "dark" }: { tone?: "light" | "dark" }) {
+type ContactFormProps = {
+  tone?: "light" | "dark";
+  initialService?: string;
+  initialMessage?: string;
+  submitLabel?: string;
+};
+
+export default function ContactForm({
+  tone = "dark",
+  initialService = "",
+  initialMessage = "",
+  submitLabel = "Invia richiesta",
+}: ContactFormProps) {
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
   const isDark = tone === "dark";
@@ -77,7 +89,7 @@ export default function ContactForm({ tone = "dark" }: { tone?: "light" | "dark"
       </div>
       <label className={isDark ? "space-y-2 text-sm text-slate-200" : "space-y-2 text-sm text-slate-700"}>
         Servizio di interesse
-        <select name="service" className={inputClass}>
+        <select name="service" className={inputClass} defaultValue={initialService}>
           <option value="">Seleziona un servizio</option>
           <option>Bollettini (123 – 451 – 674 – 896)</option>
           <option>Bonifici bancari</option>
@@ -113,6 +125,7 @@ export default function ContactForm({ tone = "dark" }: { tone?: "light" | "dark"
           name="message"
           required
           rows={5}
+          defaultValue={initialMessage}
           className={inputClass}
         />
       </label>
@@ -125,12 +138,18 @@ export default function ContactForm({ tone = "dark" }: { tone?: "light" | "dark"
             : "w-full rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-cyan-600/70"
         }
       >
-        {state === "loading" ? "Invio in corso..." : "Invia richiesta"}
+        {state === "loading" ? "Invio in corso..." : submitLabel}
       </button>
       {message ? (
         <p
           className={
-            state === "success" ? "text-sm text-emerald-300" : "text-sm text-rose-300"
+            state === "success"
+              ? isDark
+                ? "text-sm text-emerald-300"
+                : "text-sm text-emerald-700"
+              : isDark
+                ? "text-sm text-rose-300"
+                : "text-sm text-rose-700"
           }
         >
           {message}

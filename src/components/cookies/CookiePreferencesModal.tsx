@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cookieCategories } from "@/lib/cookies";
 import { ConsentState, defaultConsent } from "@/lib/consent";
 import { useConsent } from "@/components/cookies/ConsentProvider";
@@ -18,6 +18,15 @@ export default function CookiePreferencesModal() {
   const [draft, setDraft] = useState<ConsentState | null>(null);
 
   const current = useMemo(() => consent ?? defaultConsent, [consent]);
+
+  useEffect(() => {
+    if (preferencesOpen) {
+      setDraft(current);
+      return;
+    }
+
+    setDraft(null);
+  }, [current, preferencesOpen]);
 
   if (!preferencesOpen) return null;
 
@@ -83,21 +92,30 @@ export default function CookiePreferencesModal() {
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => saveConsent(working)}
+            onClick={async () => {
+              await saveConsent(working);
+              closePreferences();
+            }}
             className="rounded-full bg-cyan-600 px-5 py-2 text-sm font-semibold text-white"
           >
             Salva preferenze
           </button>
           <button
             type="button"
-            onClick={acceptAll}
+            onClick={async () => {
+              await acceptAll();
+              closePreferences();
+            }}
             className="rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700"
           >
             Accetta tutti
           </button>
           <button
             type="button"
-            onClick={rejectAll}
+            onClick={async () => {
+              await rejectAll();
+              closePreferences();
+            }}
             className="rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700"
           >
             Rifiuta tutti

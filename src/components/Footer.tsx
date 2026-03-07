@@ -71,6 +71,21 @@ export default function Footer() {
             >
               Gestisci cookie
             </button>
+            <a
+              href="https://www.hostinger.com/it?REFERRALCODE=URBAGSERV8DA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center pt-1 transition hover:opacity-90"
+              aria-label="Hostinger referral"
+            >
+              <img
+                src="/hostinger_logo_white_fixed.png"
+                alt="Hostinger"
+                width={88}
+                height={20}
+                className="h-5 w-auto"
+              />
+            </a>
           </div>
         </div>
       </Container>

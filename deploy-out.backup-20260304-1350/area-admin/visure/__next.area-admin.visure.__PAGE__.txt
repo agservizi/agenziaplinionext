@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[7501,["8281","static/chunks/app/area-admin/visure/page-4b68c1f650931d35.js"],"default"]
+3:I[484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"LjsZKHb3zoN6J-MCPf38f","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-6 pb-16","children":[["$","div",null,{"className":"rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_14px_34px_rgba(15,23,42,0.06)]","children":[["$","p",null,{"className":"text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700","children":"Focus Visure"}],["$","h1",null,{"className":"mt-3 text-2xl font-semibold text-slate-950","children":"Monitoraggio pratiche OpenAPI"}],["$","p",null,{"className":"mt-3 text-sm leading-7 text-slate-600","children":"Qui tengo sott'occhio lo stato del provider, il riferimento OpenAPI e l'eventuale documento già pronto per il cliente."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

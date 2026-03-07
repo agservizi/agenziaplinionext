@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "dev:backend": "node booking-backend/server.js",
+    "dev:full": "node scripts/dev-full.mjs",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "export": "next build"
+    "export": "NEXT_STATIC_EXPORT=true next build --webpack"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.9.1",

@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:"$Sreact.suspense"
+3:I[907,["8964","static/chunks/app/evadi-pratica/visure/page-914524844a42bfdc.js"],"default"]
+4:I[484,[],"OutletBoundary"]
+0:{"buildId":"A4phudQ9pTYxjalAieNfb","rsc":["$","$1","c",{"children":[["$","$2",null,{"fallback":["$","div",null,{"className":"mx-auto max-w-5xl px-6 py-10","children":["$","div",null,{"className":"rounded-[28px] border border-white/10 bg-white/5 p-6 text-sm text-slate-200","children":"Sto aprendo la pratica visura..."}]}],"children":["$","$L3",null,{}]}],null,["$","$L4",null,{"children":["$","$2",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

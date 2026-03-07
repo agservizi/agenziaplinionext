@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/Container";
-import ContactForm from "@/components/ContactForm";
+import ContactInteractiveSection from "@/components/ContactInteractiveSection";
 import SectionHeading from "@/components/SectionHeading";
 import { company } from "@/lib/site-data";
 import { buildMetadata } from "@/lib/seo";
@@ -24,7 +24,7 @@ export default function ContattiPage() {
               Contatti
             </p>
             <h1 className="text-4xl font-semibold text-white md:text-5xl">
-              Parla con i consulenti AG SERVIZI.
+              Contattaci per una consulenza dedicata.
             </h1>
             <p className="text-base text-slate-300 md:text-lg">
               Inviaci una richiesta per una consulenza personalizzata. Ti rispondiamo
@@ -93,39 +93,8 @@ export default function ContattiPage() {
         </section>
 
         <section className="py-6">
-          <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr]">
-            <div className="lux-panel rounded-3xl p-6">
-              <ContactForm tone="light" />
-            </div>
-            <div className="space-y-6">
-              <div className="lux-panel rounded-3xl p-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
-                  Sede operativa
-                </p>
-                <p className="mt-3 text-base font-semibold text-slate-900">
-                  {company.legalName}
-                </p>
-                <p className="mt-2 text-sm text-slate-600">{company.address}</p>
-                <div className="mt-4 text-sm text-slate-600">
-                  <p>P. IVA: {company.vat}</p>
-                  <p>Codice SDI: {company.sdi}</p>
-                </div>
-              </div>
-              <div className="lux-panel rounded-3xl p-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
-                  Mappa
-                </p>
-                <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                  <iframe
-                    title="Mappa AG SERVIZI"
-                    src="https://www.google.com/maps?q=Via%20Plinio%20il%20Vecchio%2072%2C%2080053%20Castellammare%20di%20Stabia%20(NA)&output=embed"
-                    className="h-64 w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              </div>
-            </div>
+          <Container>
+            <ContactInteractiveSection />
           </Container>
         </section>
       </div>

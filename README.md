@@ -29,14 +29,15 @@ npm run export
 ```
 
 ## Export statico (Hostinger)
-Il progetto è configurato con `output: "export"`, quindi la build genera la cartella `out`.
+Di default il progetto gira in modalità server (API Next.js attive).
+Per generare un export statico usa la variabile `NEXT_STATIC_EXPORT=true`.
 
 Per il deploy su hosting statico:
 1. Esegui `npm install`
-2. Esegui `npm run export`
+2. Esegui `NEXT_STATIC_EXPORT=true npm run export`
 3. Carica il contenuto della cartella `out` in `public_html`
 
-Nota: le API server-side non sono disponibili in hosting statico. Il form contatti richiede un backend serverless o un endpoint esterno.
+Nota: in hosting statico le API server-side (`/api/*`) non sono disponibili. Endpoint come `/api/client-area/visure/openapi` richiedono deploy server (Node/Next runtime).
 
 ## Variabili d’ambiente
 Crea un file `.env` con:
@@ -66,17 +67,51 @@ DIGITAL_DELIVERY_BASE_URL=
 > `STRIPE_SECRET_KEY` viene usata dal backend per creare i `PaymentIntent` Stripe.
 > `STRIPE_WEBHOOK_SECRET` valida i webhook Stripe (`payment_intent.succeeded`).
 > `DIGITAL_DELIVERY_BASE_URL` è la base URL pubblica usata per i link download tokenizzati.
+> `STORE_ADMIN_USER` e `STORE_ADMIN_PASSWORD` proteggono gli endpoint admin catalogo (Basic Auth).
 
 ## Checkout nativo (senza embed)
 
 Il backend `booking-backend/server.js` espone:
 
 - `GET /api/store/products`
+- `GET /api/store/products/admin` (protetto Basic Auth)
+- `POST /api/store/products/admin` (protetto Basic Auth)
+- `POST /api/store/products/admin/delete` (protetto Basic Auth)
 - `POST /api/payments/create-intent`
 - `POST /api/payments/webhook`
 - `GET /api/digital/download/:token`
 
-La pagina `/checkout` usa Stripe Elements per il pagamento carta direttamente sul sito. Il catalogo è interno al progetto (`src/lib/store-products.ts`) e validato lato backend.
+Le pagine `/store` e `/checkout` caricano il catalogo runtime dal backend (`/api/store/products`).
+I prodotti sono persistiti in MySQL (`store_products`) e validati lato backend prima della creazione del pagamento Stripe.
+
+Esempio salvataggio prodotto (admin):
+
+```bash
+curl -u "$STORE_ADMIN_USER:$STORE_ADMIN_PASSWORD" \
+	-X POST "https://agenziaplinio.it/api/store/products/admin" \
+	-H "Content-Type: application/json" \
+	-d '{
+		"id":"spid",
+		"name":"Attivazione SPID",
+		"description":"Attivazione guidata SPID.",
+		"priceLabel":"€29",
+		"amountCents":2900,
+		"currency":"eur",
+		"checkoutUrl":"/checkout/?product=spid",
+		"assetPath":"/downloads/spid-guida.pdf",
+		"isActive":true,
+		"sortOrder":10
+	}'
+```
+
+Esempio eliminazione prodotto (admin):
+
+```bash
+curl -u "$STORE_ADMIN_USER:$STORE_ADMIN_PASSWORD" \
+	-X POST "https://agenziaplinio.it/api/store/products/admin/delete" \
+	-H "Content-Type: application/json" \
+	-d '{"productId":"spid"}'
+```
 
 Per i prodotti digitali, il backend:
 

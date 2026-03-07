@@ -1,0 +1,60 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Keep booking endpoints local and route clean URLs to PHP handlers
+RewriteRule ^api/booking/?$ /api/booking/create.php [L,QSA]
+RewriteCond %{REQUEST_URI} ^/api/booking/([A-Za-z0-9_-]+)/?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/api/booking/%1.php -f
+RewriteRule ^api/booking/([A-Za-z0-9_-]+)/?$ /api/booking/$1.php [L,QSA]
+
+# Keep client auth endpoints local and route clean URLs to PHP handlers
+RewriteCond %{REQUEST_URI} ^/api/client-auth/([A-Za-z0-9_-]+)/?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/api/client-auth/%1.php -f
+RewriteRule ^api/client-auth/([A-Za-z0-9_-]+)/?$ /api/client-auth/$1.php [L,QSA]
+
+# Keep admin auth endpoints local and route clean URLs to PHP handlers
+RewriteCond %{REQUEST_URI} ^/api/admin-auth/([A-Za-z0-9_-]+)/?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/api/admin-auth/%1.php -f
+RewriteRule ^api/admin-auth/([A-Za-z0-9_-]+)/?$ /api/admin-auth/$1.php [L,QSA]
+
+# Keep admin data endpoints local and route clean URLs to PHP handlers
+RewriteCond %{REQUEST_URI} ^/api/admin/(.+?)/?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/api/admin/%1.php -f
+RewriteRule ^api/admin/(.+?)/?$ /api/admin/$1.php [L,QSA]
+
+# Keep public pricing endpoints local and route clean URLs to PHP handlers
+RewriteCond %{REQUEST_URI} ^/api/public/([A-Za-z0-9_-]+)/?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/api/public/%1.php -f
+RewriteRule ^api/public/([A-Za-z0-9_-]+)/?$ /api/public/$1.php [L,QSA]
+
+# Proxy API traffic from main domain to Node backend
+RewriteCond %{REQUEST_URI} !^/api/booking(?:/|$) [NC]
+RewriteCond %{REQUEST_URI} !^/api/client-auth(?:/|$) [NC]
+RewriteCond %{REQUEST_URI} !^/api/admin-auth(?:/|$) [NC]
+RewriteCond %{REQUEST_URI} !^/api/admin(?:/|$) [NC]
+RewriteCond %{REQUEST_URI} !^/api/public(?:/|$) [NC]
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^api/(.*)$ https://cyan-gnu-934636.hostingersite.com/api/$1 [P,L,QSA]
+
+# Canonical URL: remove trailing slash on exported pages (e.g. /store/ -> /store)
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
+RewriteCond %{REQUEST_URI} !^/$
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# Serve static-export pages with clean URLs (e.g. /store -> /store.html)
+RewriteCond %{REQUEST_URI} !^/api/ [NC]
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]
+
+# Skip rewrite for existing files and folders
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Preserve Host header for upstream services if needed
+<IfModule mod_headers.c>
+RequestHeader set X-Forwarded-Host "%{HTTP_HOST}s"
+RequestHeader set X-Forwarded-Proto "https"
+</IfModule>
+</IfModule>

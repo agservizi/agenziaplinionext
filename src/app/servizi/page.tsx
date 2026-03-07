@@ -32,7 +32,7 @@ export default function ServiziPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/contatti"
+                href="/consulenza"
                 className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
               >
                 Richiedi info
@@ -91,120 +91,105 @@ export default function ServiziPage() {
         </Container>
       </section>
 
-      <div className="lux-surface pt-10 text-slate-900">
+      <div className="lux-surface text-slate-900">
+        {/* ── Indice rapido ─────────────────────────────────────── */}
         <section className="py-10">
           <Container>
             <SectionHeading
               eyebrow="Aree di servizio"
-              title="Categorie organizzate per esigenza"
-              description="Ogni area è seguita da consulenti specializzati e processi chiari."
+              title="Esplora tutte le categorie"
+              description="Clicca su una categoria per visualizzare i servizi disponibili."
               tone="dark"
+              align="center"
             />
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {serviceCategories.map((cat) => (
+                <a
+                  key={cat.id}
+                  href={`#${cat.id}`}
+                  className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-cyan-400 hover:text-cyan-700"
+                >
+                  {cat.title}
+                </a>
+              ))}
+            </div>
           </Container>
         </section>
 
-        <section className="py-6">
-          <Container className="space-y-10">
+        {/* ── Categorie servizi ─────────────────────────────────── */}
+        <section className="space-y-8 py-10">
+          <Container className="space-y-8">
             {serviceCategories.map((category) => (
-              <ServiceCategory key={category.id} category={category} tone="light" />
-            ))}
-          </Container>
-        </section>
-
-        <section className="py-6">
-          <Container className="grid gap-4 md:grid-cols-2">
-            <Link
-              href="/servizi/pagamenti"
-              className="lux-card rounded-2xl p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Pagamenti
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                Bollettini, F24 e PagoPA
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Supporto locale per operazioni di pagamento rapide e assistite.
-              </p>
-            </Link>
-            <Link
-              href="/servizi/telefonia"
-              className="lux-card rounded-2xl p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Telefonia
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                Iliad, WindTre e Fastweb
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Attivazioni e consulenza in sede a Castellammare di Stabia.
-              </p>
-            </Link>
-            <Link
-              href="/servizi/energia"
-              className="lux-card rounded-2xl p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Energia
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                Luce e gas con offerte ottimizzate
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Confronto tariffe e pratiche gestite localmente.
-              </p>
-            </Link>
-            <Link
-              href="/servizi/spid-pec-firma-digitale"
-              className="lux-card rounded-2xl p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Servizi digitali
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                SPID, PEC e firma digitale
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Attivazioni rapide con supporto Namirial.
-              </p>
-            </Link>
-            <Link
-              href="/servizi/web-agency"
-              className="lux-card rounded-2xl p-6 transition hover:-translate-y-1"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Web Agency
-              </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900">
-                Siti web e gestionali su misura
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Progetti digitali pensati per aziende locali.
-              </p>
-            </Link>
-          </Container>
-        </section>
-
-        <section className="py-16">
-          <Container className="grid gap-6 md:grid-cols-3">
-            {[
-              { label: "Attivazioni rapide", value: "Processi ottimizzati" },
-              { label: "Consulenza su misura", value: "Soluzioni personalizzate" },
-              { label: "Supporto continuo", value: "Sempre disponibile" },
-            ].map((item) => (
-              <div key={item.label} className="lux-card rounded-2xl p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
-                  {item.value}
-                </p>
+              <div key={category.id} id={category.id} className="scroll-mt-24">
+                <ServiceCategory category={category} tone="light" />
               </div>
             ))}
           </Container>
         </section>
+
+        {/* ── Punti di forza ────────────────────────────────────── */}
+        <section className="py-16 md:py-20">
+          <Container className="space-y-8">
+            <SectionHeading
+              eyebrow="Perché AG SERVIZI"
+              title="Un partner operativo e affidabile"
+              description="Competenza locale, processi chiari e supporto continuo per ogni servizio attivato."
+              tone="dark"
+              align="center"
+            />
+            <div className="grid gap-4 md:grid-cols-4">
+              {[
+                { label: "Attivi dal", value: "2016" },
+                { label: "Servizi gestiti", value: "30+" },
+                { label: "Supporto", value: "Locale" },
+                { label: "Clienti attivi", value: "500+" },
+              ].map((stat) => (
+                <div key={stat.label} className="lux-card rounded-2xl p-5 text-center">
+                  <p className="text-3xl font-bold text-cyan-600">{stat.value}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        {/* ── CTA finale ────────────────────────────────────────── */}
+        <section className="py-16 md:py-20">
+          <Container>
+            <div className="lux-panel rounded-3xl p-10 md:p-14">
+              <div className="mx-auto max-w-2xl space-y-5 text-center">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+                  Hai trovato il servizio che cerchi?
+                </p>
+                <h2 className="text-3xl font-semibold text-slate-900 md:text-4xl">
+                  Parliamone insieme
+                </h2>
+                <p className="text-base text-slate-600">
+                  Contattaci per una consulenza gratuita oppure accedi direttamente
+                  alla tua area riservata per gestire pratiche e richieste online.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                  <Link
+                    href="/consulenza"
+                    className="rounded-full bg-cyan-600 px-7 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
+                  >
+                    Richiedi consulenza
+                  </Link>
+                  <Link
+                    href="/area-clienti"
+                    className="rounded-full border border-slate-200 px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700"
+                  >
+                    {"Accedi all'Area Clienti"}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Container>
+        </section>
       </div>
+
     </div>
   );
 }

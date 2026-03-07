@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-static";
 
-export async function GET() {
+export async function POST() {
   return NextResponse.json(
-    { message: "API spostate su backend esterno" },
+    { message: "API booking gestite dal backend PHP in produzione/export." },
     { status: 410 },
   );
 }

@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[9916,["5003","static/chunks/app/area-admin/listino-caf-patronato/page-548a6bc6162a9976.js"],"default"]
+3:I[484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"4sbT6Tar50I-GTL8BBPfk","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-5","children":[["$","section",null,{"className":"rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.06)]","children":[["$","p",null,{"className":"text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700","children":"Prezzi CAF e Patronato"}],["$","h1",null,{"className":"mt-3 text-3xl font-semibold text-slate-950","children":"Qui tengo allineato il prezzo pubblico di ogni pratica."}],["$","p",null,{"className":"mt-3 max-w-3xl text-sm leading-7 text-slate-600","children":"Questo listino alimenta checkout Stripe, storico cliente e mail finale, così l’importo resta coerente in ogni punto del flusso."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

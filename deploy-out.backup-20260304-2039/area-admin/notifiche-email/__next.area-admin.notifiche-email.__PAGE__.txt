@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[9745,["2543","static/chunks/app/area-admin/notifiche-email/page-92c710411e965703.js"],"default"]
+3:I[484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"C3Tc6eo0d2hxuEdYCOpQs","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-6 pb-16 text-white","children":[["$","section",null,{"className":"glass-card rounded-4xl p-6 md:p-8","children":[["$","p",null,{"className":"text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400","children":"Sezione Notifiche"}],["$","h1",null,{"className":"mt-3 text-3xl font-semibold text-white md:text-4xl","children":"Qui monitoro gli invii email dell'area clienti."}],["$","p",null,{"className":"mt-3 max-w-3xl text-sm text-slate-300 md:text-base","children":"In questa pagina verifico esito invio, ragione di eventuali errori e dettaglio evento per ogni notifica generata dai flussi operativi."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

@@ -5,9 +5,9 @@ import { CONSENT_POLICY_VERSION } from "@/lib/consent";
 import { useConsent } from "@/components/cookies/ConsentProvider";
 
 export default function CookieBanner() {
-  const { consent, acceptAll, rejectAll, openPreferences } = useConsent();
+  const { consent, consentReady, acceptAll, rejectAll, openPreferences } = useConsent();
 
-  if (consent) return null;
+  if (!consentReady || consent) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[60] px-4 pb-6">
@@ -29,7 +29,7 @@ export default function CookieBanner() {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="flex flex-nowrap gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={acceptAll}

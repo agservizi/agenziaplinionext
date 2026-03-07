@@ -20,6 +20,7 @@ const ConsentContext = createContext<{
   acceptAll: () => Promise<void>;
   rejectAll: () => Promise<void>;
   preferencesOpen: boolean;
+  consentReady: boolean;
 } | null>(null);
 
 function parseConsentCookie(): ConsentState | null {
@@ -60,6 +61,7 @@ function updateConsentMode(consent: ConsentState) {
 export function ConsentProvider({ children }: { children: React.ReactNode }) {
   const [consent, setConsent] = useState<ConsentState | null>(null);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [consentReady, setConsentReady] = useState(false);
 
   useEffect(() => {
     const existing = parseConsentCookie();
@@ -69,6 +71,7 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
     } else {
       setConsent(null);
     }
+    setConsentReady(true);
   }, []);
 
   const saveConsent = async (next: ConsentState) => {
@@ -113,8 +116,9 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
       acceptAll,
       rejectAll,
       preferencesOpen,
+      consentReady,
     }),
-    [consent, preferencesOpen],
+    [consent, preferencesOpen, consentReady],
   );
 
   return (

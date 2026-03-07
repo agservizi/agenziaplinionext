@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[2690,["6106","static/chunks/app/area-admin/listino-spedizioni/page-6f2f3dc3f1033947.js"],"default"]
+3:I[484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"A4phudQ9pTYxjalAieNfb","rsc":["$","$1","c",{"children":[["$","div",null,{"className":"space-y-6 pb-16 text-white","children":[["$","section",null,{"className":"glass-card rounded-4xl p-6 md:p-8","children":[["$","p",null,{"className":"text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400","children":"Sezione Listino"}],["$","h1",null,{"className":"mt-3 text-3xl font-semibold text-white md:text-4xl","children":"Qui imposto il prezzo reale delle spedizioni."}],["$","p",null,{"className":"mt-3 max-w-3xl text-sm text-slate-300 md:text-base","children":"In questa pagina definisco gli scaglioni di peso e volume. Appena salvo una regola, il costo live lato cliente usa questo listino invece della sola stima generica."}]]}],["$","$L2",null,{}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null
