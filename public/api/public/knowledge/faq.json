@@ -1,0 +1,44 @@
+{
+  "faq": [
+    {
+      "scope": "spid",
+      "question": "Come faccio lo SPID?",
+      "answer": "Possiamo aiutarti ad attivare lo SPID direttamente in agenzia. In genere servono documento di identita valido, tessera sanitaria, numero di cellulare personale ed email. Prezzo: 22 EUR."
+    },
+    {
+      "scope": "pec",
+      "question": "Che documenti servono per la PEC?",
+      "answer": "Per la PEC in genere servono documento di identita, codice fiscale ed email personale. Per PEC aziendale possono servire anche partita IVA e dati aziendali. Prezzo: 15 EUR annuale oppure 30 EUR triennale."
+    },
+    {
+      "scope": "firma-digitale",
+      "question": "Quanto costa la firma digitale?",
+      "answer": "Il prezzo della firma digitale e 55 EUR."
+    },
+    {
+      "scope": "energia",
+      "question": "Fate attivazioni luce e gas?",
+      "answer": "Si, forniamo supporto su attivazioni luce/gas e cambio fornitore. In genere servono documento, codice fiscale, POD/PDR e ultima bolletta."
+    },
+    {
+      "scope": "contatti",
+      "question": "Dove vi trovate?",
+      "answer": "Ci trovi in Via Plinio il Vecchio 72, Castellammare di Stabia (NA)."
+    },
+    {
+      "scope": "contatti",
+      "question": "Quali sono gli orari?",
+      "answer": "Orari indicativi: lunedi-venerdi 09:00-19:00, sabato 09:00-13:00. Per conferma aggiornata consigliamo il contatto diretto."
+    },
+    {
+      "scope": "contatti",
+      "question": "Posso parlare con un operatore?",
+      "answer": "Si, puoi contattare l'agenzia allo 081 0584542 oppure via email a info@agenziaplinio.it."
+    },
+    {
+      "scope": "pagamenti",
+      "question": "Fate pagamenti pagoPA, F24 o bollettini?",
+      "answer": "Si, l'agenzia supporta pagamenti pagoPA, F24, bollettini, MAV e RAV."
+    }
+  ]
+}

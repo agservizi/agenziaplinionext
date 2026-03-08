@@ -1,0 +1,58 @@
+{
+  "documents": {
+    "spid": [
+      "documento di identita valido e non scaduto",
+      "tessera sanitaria o codice fiscale",
+      "numero di cellulare personale",
+      "email personale attiva"
+    ],
+    "pec": [
+      "documento di identita valido",
+      "codice fiscale",
+      "email e numero di cellulare attivi",
+      "se azienda: partita IVA, dati aziendali e dati del legale rappresentante"
+    ],
+    "firma-digitale": [
+      "documento di identita valido e non scaduto",
+      "tessera sanitaria o codice fiscale",
+      "email attiva",
+      "numero di cellulare personale",
+      "smartphone per codici OTP e riconoscimento"
+    ],
+    "telefonia": [
+      "documento di identita",
+      "codice fiscale",
+      "numero da migrare",
+      "ICCID SIM",
+      "indirizzo di attivazione",
+      "eventuale IBAN"
+    ],
+    "energia": [
+      "documento di identita",
+      "codice fiscale",
+      "POD luce",
+      "PDR gas",
+      "ultima bolletta",
+      "eventuale IBAN"
+    ],
+    "pagamenti": [
+      "avviso o modello da pagare (es. pagoPA, F24, bollettino, MAV, RAV)",
+      "dati anagrafici corretti"
+    ],
+    "spedizioni": [
+      "dati mittente e destinatario",
+      "peso del collo",
+      "contenuto dichiarato"
+    ],
+    "digitali": [
+      "documento di identita",
+      "codice fiscale",
+      "eventuali credenziali gia disponibili"
+    ],
+    "contatti": [
+      "nome",
+      "telefono o email",
+      "servizio richiesto"
+    ]
+  }
+}

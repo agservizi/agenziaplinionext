@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PlatformFooter from "@/components/PlatformFooter";
+import PlinioAssistantChat from "@/components/PlinioAssistantChat";
 import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
 import { clearAdminPortalToken } from "@/lib/admin-portal-auth";
 
@@ -60,6 +61,7 @@ export default function AppShell({
   const isAdminRoute = pathname === "/admin-login" || pathname.startsWith("/area-admin");
   const isOperatorRoute = pathname.startsWith("/evadi-pratica");
   const isPlatformRoute = isClientRoute || isAdminRoute || isOperatorRoute;
+  const showPlinioAssistant = !isAdminRoute && !isOperatorRoute;
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [clientUserLabel, setClientUserLabel] = useState("");
   const [isWhatsappOnline, setIsWhatsappOnline] = useState(false);
@@ -227,6 +229,7 @@ export default function AppShell({
           </div>
         </div>
         {whatsappNotch}
+        {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
         {scrollTopButton}
       </>
     );
@@ -238,6 +241,7 @@ export default function AppShell({
       <main className="min-h-screen bg-slate-950">{children}</main>
       <Footer />
       {whatsappNotch}
+      {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
       {scrollTopButton}
     </>
   );

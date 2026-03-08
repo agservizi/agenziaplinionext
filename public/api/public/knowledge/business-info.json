@@ -1,0 +1,27 @@
+{
+  "name": "AG Servizi Via Plinio 72",
+  "website": "https://agenziaplinio.it",
+  "type": "Agenzia multiservizi per cittadini e aziende",
+  "category": "Agenzia multiservizi per privati e aziende",
+  "positioning": "Supporto rapido e professionale per pratiche amministrative, servizi digitali, pagamenti, telefonia, energia e servizi accessori.",
+  "address": "Via Plinio il Vecchio 72, Castellammare di Stabia (NA)",
+  "target_clients": [
+    "cittadini",
+    "lavoratori autonomi",
+    "piccoli imprenditori",
+    "pensionati",
+    "persone con difficolta con servizi digitali",
+    "clienti che preferiscono assistenza fisica"
+  ],
+  "value_props": [
+    "assistenza umana",
+    "velocita",
+    "semplicita",
+    "supporto burocratico",
+    "centralizzazione servizi"
+  ],
+  "contacts": {
+    "email": "info@agenziaplinio.it",
+    "phone": "081 0584542"
+  }
+}

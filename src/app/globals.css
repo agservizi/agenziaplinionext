@@ -44,7 +44,153 @@ button:disabled {
 }
 
 .hero-gradient {
-  background: radial-gradient(circle at top, rgba(14, 165, 233, 0.2), transparent 55%);
+  background:
+    radial-gradient(1200px 520px at 50% -120px, rgba(14, 165, 233, 0.22), rgba(14, 165, 233, 0.06) 48%, transparent 78%),
+    linear-gradient(180deg, #04132c 0%, #031129 58%, #020a1c 100%);
+}
+
+.hero-reveal {
+  animation: heroReveal 0.8s ease-out both;
+}
+
+.hero-reveal-delayed {
+  animation: heroReveal 0.95s ease-out 0.18s both;
+}
+
+.client-hero-card {
+  animation: clientCardIn 0.45s ease-out both;
+  transform-style: preserve-3d;
+}
+
+.client-hero-card-active {
+  animation: clientCardGlow 1.8s ease-in-out infinite;
+}
+
+.client-hero-panel-enter {
+  animation: clientPanelEnter 0.34s ease-out both;
+}
+
+.client-hero-card:hover {
+  transform: translateY(-2px) rotateX(1.5deg) rotateY(-1.5deg);
+}
+
+.client-hero-cta-pulse {
+  animation: clientCtaPulse 0.9s ease-out 2;
+}
+
+.cta-shine-once {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-shine-once::after {
+  content: "";
+  position: absolute;
+  top: -120%;
+  left: -32%;
+  width: 26%;
+  height: 340%;
+  transform: rotate(18deg);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.48) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: ctaShineOnce 1.2s ease-out 0.35s 1;
+}
+
+.client-hero-parallax {
+  position: absolute;
+  inset: -6% -4%;
+  pointer-events: none;
+  background:
+    radial-gradient(560px 280px at 20% 18%, rgba(6, 182, 212, 0.14), transparent 72%),
+    radial-gradient(480px 260px at 78% 20%, rgba(14, 165, 233, 0.14), transparent 72%);
+  transition: transform 0.14s ease-out;
+}
+
+@keyframes clientCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes clientPanelEnter {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes clientCtaPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.35);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 8px rgba(6, 182, 212, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+  }
+}
+
+@keyframes ctaShineOnce {
+  0% {
+    left: -36%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    left: 124%;
+    opacity: 0;
+  }
+}
+
+@keyframes clientCardGlow {
+  0%, 100% {
+    box-shadow: 0 22px 50px rgba(6, 182, 212, 0.18);
+  }
+  50% {
+    box-shadow: 0 30px 70px rgba(6, 182, 212, 0.3);
+  }
+}
+
+.hero-grid-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 82%);
+  opacity: 0.18;
+}
+
+@keyframes heroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .glass-card {
@@ -116,8 +262,8 @@ button:disabled {
 
 .lux-surface {
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(14, 165, 233, 0.18), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(1000px 520px at 50% -18%, rgba(148, 163, 184, 0.12), transparent 62%),
+    radial-gradient(900px 420px at 50% 108%, rgba(148, 163, 184, 0.08), transparent 64%),
     linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 

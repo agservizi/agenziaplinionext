@@ -9,7 +9,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "export": "NEXT_STATIC_EXPORT=true next build --webpack"
+    "export": "NEXT_STATIC_EXPORT=true next build --webpack",
+    "test:chat-coherence": "node scripts/test-plinio-chat-coherence.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.9.1",

@@ -1,18 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Container from "./Container";
 import { company, navigation } from "@/lib/site-data";
 import { useConsent } from "@/components/cookies/ConsentProvider";
 
 export default function Footer() {
   const { openPreferences } = useConsent();
+  const pathname = usePathname();
+  const isLegalPage = pathname === "/privacy-policy" || pathname === "/cookie-policy";
+  const footerContentOffsetClass = isLegalPage ? "-translate-y-2" : "-translate-y-8";
 
   return (
     <footer className="bg-slate-950 py-12">
-      <Container className="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
+      <Container className={`relative ${footerContentOffsetClass} grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]`}>
         <div className="space-y-4">
-          <p className="text-lg font-semibold text-white">{company.name}</p>
+          <Link href="/" className="inline-flex items-center">
+            <img src="/logo.png" alt="AG SERVIZI" className="h-10 w-auto" />
+            <span className="sr-only">{company.name}</span>
+          </Link>
           <p className="text-sm text-slate-300">{company.legalName}</p>
           <p className="text-sm text-slate-300">{company.address}</p>
           <div className="text-sm text-slate-400">
@@ -36,12 +43,12 @@ export default function Footer() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
             Orari e supporto
           </p>
-          <p className="text-sm text-slate-300">
-            Consulenze su appuntamento per privati e aziende.
-          </p>
-          <p className="text-sm text-slate-300">
-            Integrazione area riservata e servizi digitali in evoluzione.
-          </p>
+          <div className="space-y-1 text-sm text-slate-300">
+            <p>Lunedi - Venerdi: 08:45 - 13:20 / 16:20 - 19:00</p>
+            <p>Sabato: 09:20 - 12:30</p>
+            <p>Domenica: Chiuso</p>
+          </div>
+          <p className="text-sm text-slate-300">Supporto anche su appuntamento.</p>
         </div>
         <div className="space-y-3">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">

@@ -8,7 +8,10 @@ export default function PlatformFooter() {
     <footer className="border-t border-white/10 bg-slate-950">
       <div className="mx-auto flex w-full max-w-none flex-col gap-4 px-6 py-5 text-sm text-slate-300 md:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-14">
         <div className="space-y-1">
-          <p className="font-semibold text-white">{company.name}</p>
+          <Link href="/" className="inline-flex items-center">
+            <img src="/logo.png" alt="AG SERVIZI" className="h-9 w-auto" />
+            <span className="sr-only">{company.name}</span>
+          </Link>
           <p className="text-xs text-slate-400">
             Area riservata per clienti, gestione pratiche e operatività interna.
           </p>

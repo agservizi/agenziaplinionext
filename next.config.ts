@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: "/api/public/plinio-assistant",
+        destination: `${localPhpApiOrigin}/api/public/plinio-assistant.php`,
+      },
+      {
         source: "/api/client-area/requests",
         destination: `${localPhpApiOrigin}/api/client-area/requests.php`,
       },

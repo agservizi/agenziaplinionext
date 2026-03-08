@@ -1,0 +1,184 @@
+{
+  "services": [
+    {
+      "slug": "pagamenti",
+      "scope": "pagamenti",
+      "name": "Pagamenti",
+      "description": "Supporto operativo su bollettini, pagoPA, F24, MAV, RAV, bollo auto e bonifici.",
+      "keywords": [
+        "pagamenti",
+        "bollettino",
+        "bollettini",
+        "pagopa",
+        "f24",
+        "mav",
+        "rav",
+        "bollo auto",
+        "bonifico"
+      ],
+      "intents": [
+        "pagamento_bollettino",
+        "pagamento_f24",
+        "pagamento_pagopa",
+        "pagamento_mav",
+        "pagamento_rav",
+        "pagamento_bollo_auto"
+      ],
+      "documents_ref": "pagamenti"
+    },
+    {
+      "slug": "spid",
+      "scope": "spid",
+      "name": "SPID",
+      "description": "Assistenza per attivazione SPID e identita digitale.",
+      "keywords": [
+        "spid",
+        "identita digitale",
+        "identita"
+      ],
+      "intents": [
+        "spid"
+      ],
+      "documents_ref": "spid"
+    },
+    {
+      "slug": "pec",
+      "scope": "pec",
+      "name": "PEC",
+      "description": "Attivazione PEC personale o aziendale e supporto configurazione.",
+      "keywords": [
+        "pec",
+        "posta certificata",
+        "email certificata"
+      ],
+      "intents": [
+        "pec"
+      ],
+      "documents_ref": "pec"
+    },
+    {
+      "slug": "firma-digitale",
+      "scope": "firma-digitale",
+      "name": "Firma Digitale",
+      "description": "Supporto per richiesta e attivazione firma digitale.",
+      "keywords": [
+        "firma digitale",
+        "firma elettronica",
+        "token firma"
+      ],
+      "intents": [
+        "firma_digitale"
+      ],
+      "documents_ref": "firma-digitale"
+    },
+    {
+      "slug": "servizi-pa",
+      "scope": "digitali",
+      "name": "Servizi PA",
+      "description": "Supporto ai servizi online della Pubblica Amministrazione.",
+      "keywords": [
+        "servizi digitali",
+        "pubblica amministrazione",
+        "servizi pa",
+        "supporto online"
+      ],
+      "intents": [
+        "servizi_pa"
+      ],
+      "documents_ref": "digitali"
+    },
+    {
+      "slug": "telefonia",
+      "scope": "telefonia",
+      "name": "Telefonia",
+      "description": "Attivazione nuove linee, cambio operatore, portabilita numero e consulenza offerte.",
+      "operators": [
+        "WindTre",
+        "Fastweb",
+        "Iliad"
+      ],
+      "keywords": [
+        "telefonia",
+        "sim",
+        "fibra",
+        "linea mobile",
+        "linea casa",
+        "cambio operatore",
+        "portabilita"
+      ],
+      "intents": [
+        "attivazione_linea",
+        "cambio_operatore",
+        "portabilita",
+        "verifica_offerta"
+      ],
+      "documents_ref": "telefonia"
+    },
+    {
+      "slug": "energia",
+      "scope": "energia",
+      "name": "Luce e Gas",
+      "description": "Supporto su attivazione luce, attivazione gas, cambio fornitore e consulenza offerte.",
+      "keywords": [
+        "luce",
+        "gas",
+        "energia",
+        "fornitore",
+        "bolletta",
+        "pod",
+        "pdr"
+      ],
+      "intents": [
+        "attivazione_luce",
+        "attivazione_gas",
+        "cambio_fornitore",
+        "verifica_tariffa"
+      ],
+      "documents_ref": "energia"
+    },
+    {
+      "slug": "spedizioni",
+      "scope": "spedizioni",
+      "name": "Spedizioni",
+      "description": "Spedizioni nazionali e internazionali, tracking e supporto logistico.",
+      "keywords": [
+        "spedizione",
+        "spedizioni",
+        "tracking",
+        "traccia",
+        "corriere",
+        "pacco",
+        "nazionale",
+        "internazionale",
+        "brt",
+        "poste",
+        "sda",
+        "fedex",
+        "tnt"
+      ],
+      "intents": [
+        "spedizione_pacco",
+        "spedizione_estero",
+        "tracking_spedizione"
+      ],
+      "documents_ref": "spedizioni"
+    },
+    {
+      "slug": "contatti",
+      "scope": "contatti",
+      "name": "Sede e Contatti",
+      "description": "Informazioni su sede, orari e contatti dell'agenzia.",
+      "keywords": [
+        "dove",
+        "sede",
+        "indirizzo",
+        "orari",
+        "contatti",
+        "telefono",
+        "email",
+        "operatore"
+      ],
+      "documents_ref": "contatti"
+    }
+  ]
+}

@@ -14,7 +14,7 @@ export function generateMetadata() {
 
 export default function CookiePolicyPage() {
   return (
-    <div className="lux-surface pb-24 pt-10 text-slate-900">
+    <div className="lux-surface pb-20 pt-20 text-slate-900">
       <Container className="space-y-10">
         <div className="lux-panel rounded-3xl p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-600">

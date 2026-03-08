@@ -71,6 +71,42 @@ type ShipmentSubmissionPayload = Omit<
   weightKG: number;
 };
 
+const DESTINATION_COUNTRY_OPTIONS: Array<{ code: string; label: string }> = [
+  { code: "IT", label: "Italia" },
+  { code: "AT", label: "Austria" },
+  { code: "BE", label: "Belgio" },
+  { code: "BG", label: "Bulgaria" },
+  { code: "HR", label: "Croazia" },
+  { code: "CZ", label: "Repubblica Ceca" },
+  { code: "DK", label: "Danimarca" },
+  { code: "EE", label: "Estonia" },
+  { code: "FI", label: "Finlandia" },
+  { code: "FR", label: "Francia" },
+  { code: "DE", label: "Germania" },
+  { code: "GR", label: "Grecia" },
+  { code: "HU", label: "Ungheria" },
+  { code: "IE", label: "Irlanda" },
+  { code: "LV", label: "Lettonia" },
+  { code: "LT", label: "Lituania" },
+  { code: "LU", label: "Lussemburgo" },
+  { code: "NL", label: "Paesi Bassi" },
+  { code: "NO", label: "Norvegia" },
+  { code: "PL", label: "Polonia" },
+  { code: "PT", label: "Portogallo" },
+  { code: "RO", label: "Romania" },
+  { code: "SK", label: "Slovacchia" },
+  { code: "SI", label: "Slovenia" },
+  { code: "ES", label: "Spagna" },
+  { code: "SE", label: "Svezia" },
+  { code: "CH", label: "Svizzera" },
+  { code: "GB", label: "Regno Unito" },
+];
+
+function getCountryLabelByCode(code: string) {
+  const normalized = String(code || "").trim().toUpperCase();
+  return DESTINATION_COUNTRY_OPTIONS.find((country) => country.code === normalized)?.label || normalized;
+}
+
 function buildInitialState(area: ClientAreaConfig): ShipmentFormState {
   return {
     customerName: "",
@@ -711,7 +747,7 @@ export default function BrtShipmentForm({
                   nextServiceCode === "ritiro-nazionale"
                     ? "IT"
                     : nextServiceCode === "ritiro-internazionale" && current.destinationCountry === "IT"
-                      ? ""
+                      ? "FR"
                       : current.destinationCountry;
                 return {
                   ...current,
@@ -949,14 +985,20 @@ export default function BrtShipmentForm({
         </label>
         <label className="space-y-2">
           <span className="block text-sm font-medium text-slate-700">Nazione destinazione</span>
-          <input
+          <select
             value={form.destinationCountry}
-            onChange={(event) => updateField("destinationCountry", event.target.value.toUpperCase())}
-            maxLength={2}
-            readOnly={form.serviceCode === "ritiro-nazionale"}
+            onChange={(event) => updateField("destinationCountry", event.target.value)}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
             required
-          />
+          >
+            {DESTINATION_COUNTRY_OPTIONS.filter((country) =>
+              form.serviceCode === "ritiro-nazionale" ? country.code === "IT" : country.code !== "IT",
+            ).map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.label}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
       ) : null}
@@ -1108,7 +1150,8 @@ export default function BrtShipmentForm({
               <strong>Servizio:</strong> {selectedService?.label || form.serviceCode}
             </p>
             <p>
-              <strong>Destinazione:</strong> {form.destinationCity} ({form.destinationCountry})
+              <strong>Destinazione:</strong> {form.destinationCity} (
+              {getCountryLabelByCode(form.destinationCountry)})
             </p>
             <p>
               <strong>Colli:</strong> {parcelCount} - <strong>Peso tassabile:</strong>{" "}

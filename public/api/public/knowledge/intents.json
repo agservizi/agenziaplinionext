@@ -1,0 +1,109 @@
+{
+  "intents": [
+    {
+      "intent": "pagamento_bollettino",
+      "scope": "pagamenti",
+      "triggers": ["bollettino", "bollettini"]
+    },
+    {
+      "intent": "pagamento_f24",
+      "scope": "pagamenti",
+      "triggers": ["f24", "modello f24"]
+    },
+    {
+      "intent": "pagamento_pagopa",
+      "scope": "pagamenti",
+      "triggers": ["pagopa", "pago pa"]
+    },
+    {
+      "intent": "pagamento_mav",
+      "scope": "pagamenti",
+      "triggers": ["mav"]
+    },
+    {
+      "intent": "pagamento_rav",
+      "scope": "pagamenti",
+      "triggers": ["rav"]
+    },
+    {
+      "intent": "pagamento_bollo_auto",
+      "scope": "pagamenti",
+      "triggers": ["bollo auto"]
+    },
+    {
+      "intent": "spid",
+      "scope": "spid",
+      "triggers": ["spid", "identita digitale"]
+    },
+    {
+      "intent": "pec",
+      "scope": "pec",
+      "triggers": ["pec", "posta certificata"]
+    },
+    {
+      "intent": "firma_digitale",
+      "scope": "firma-digitale",
+      "triggers": ["firma digitale", "firma elettronica"]
+    },
+    {
+      "intent": "servizi_pa",
+      "scope": "digitali",
+      "triggers": ["servizi pa", "pubblica amministrazione"]
+    },
+    {
+      "intent": "attivazione_linea",
+      "scope": "telefonia",
+      "triggers": ["nuova linea", "attivazione linea", "attivare sim"]
+    },
+    {
+      "intent": "cambio_operatore",
+      "scope": "telefonia",
+      "triggers": ["cambio operatore", "passare a", "migrazione"]
+    },
+    {
+      "intent": "portabilita",
+      "scope": "telefonia",
+      "triggers": ["portabilita", "mantenere numero", "numero da migrare"]
+    },
+    {
+      "intent": "verifica_offerta",
+      "scope": "telefonia",
+      "triggers": ["offerta", "confronto operatori", "quale conviene"]
+    },
+    {
+      "intent": "attivazione_luce",
+      "scope": "energia",
+      "triggers": ["attivazione luce", "nuova luce"]
+    },
+    {
+      "intent": "attivazione_gas",
+      "scope": "energia",
+      "triggers": ["attivazione gas", "nuovo gas"]
+    },
+    {
+      "intent": "cambio_fornitore",
+      "scope": "energia",
+      "triggers": ["cambio fornitore", "cambiare gestore"]
+    },
+    {
+      "intent": "verifica_tariffa",
+      "scope": "energia",
+      "triggers": ["tariffa", "offerta luce gas", "quanto costa luce gas"]
+    },
+    {
+      "intent": "spedizione_pacco",
+      "scope": "spedizioni",
+      "triggers": ["spedire pacco", "spedizione nazionale"]
+    },
+    {
+      "intent": "spedizione_estero",
+      "scope": "spedizioni",
+      "triggers": ["spedizione estero", "spedizione internazionale"]
+    },
+    {
+      "intent": "tracking_spedizione",
+      "scope": "spedizioni",
+      "triggers": ["tracking", "traccia", "stato spedizione"]
+    }
+  ]
+}

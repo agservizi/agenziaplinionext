@@ -1,0 +1,40 @@
+{
+  "flows": [
+    {
+      "id": "cliente_generico",
+      "name": "cliente_generico",
+      "goal": "capire il bisogno iniziale",
+      "bot_reply": "Ciao! Come posso aiutarti? Possiamo assisterti su pagamenti, SPID, PEC, telefonia, luce e gas o spedizioni."
+    },
+    {
+      "id": "cliente_indeciso",
+      "name": "cliente_indeciso",
+      "goal": "indirizzare il servizio corretto",
+      "bot_reply": "Ti aiuto volentieri. Dimmi quale area ti interessa: pagamenti, servizi digitali, telefonia, energia o spedizioni."
+    },
+    {
+      "id": "qualificazione_spid",
+      "name": "qualificazione_spid",
+      "goal": "raccolta bisogno SPID",
+      "bot_reply": "Vuoi attivare lo SPID per uso personale o per lavoro?"
+    },
+    {
+      "id": "qualificazione_telefonia",
+      "name": "qualificazione_telefonia",
+      "goal": "raccolta bisogno telefonia",
+      "bot_reply": "Vuoi attivare una nuova linea oppure cambiare operatore mantenendo il numero?"
+    },
+    {
+      "id": "qualificazione_energia",
+      "name": "qualificazione_energia",
+      "goal": "raccolta bisogno energia",
+      "bot_reply": "Si tratta di una nuova attivazione oppure di un cambio fornitore?"
+    },
+    {
+      "id": "escalation_operatore",
+      "name": "escalation_operatore",
+      "goal": "passaggio a supporto umano",
+      "bot_reply": "Per questa richiesta e meglio il supporto diretto di un operatore. Puoi contattare l'agenzia allo 081 0584542 o via email a info@agenziaplinio.it."
+    }
+  ]
+}

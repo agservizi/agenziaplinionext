@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Container from "@/components/Container";
 import SectionHeading from "@/components/SectionHeading";
+import HomeHeroCopyRotator from "@/components/HomeHeroCopyRotator";
+import ClientAreaInteractiveHero from "@/components/ClientAreaInteractiveHero";
 import { serviceCategories, values } from "@/lib/site-data";
-import { clientAreas } from "@/lib/client-area";
 import { buildMetadata } from "@/lib/seo";
 import {
   PaymentsIcon,
@@ -15,36 +16,30 @@ import {
 
 export default function Home() {
   return (
-    <div className="space-y-24 pb-24">
-      <section className="hero-gradient min-h-screen py-16">
+    <div className="pb-24">
+      <section className="hero-gradient relative isolate min-h-screen overflow-hidden py-16">
+        <div className="hero-grid-glow" aria-hidden="true" />
         <Container className="grid min-h-[calc(100vh-64px)] gap-12 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+          <div className="hero-reveal space-y-6">
+            <p className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
               Agenzia di servizi dal 2016
             </p>
-            <h1 className="text-4xl font-semibold text-white md:text-5xl">
-              Consulenze affidabili per telefonia, energia e servizi digitali.
-            </h1>
-            <p className="text-base text-slate-300 md:text-lg">
-              AG SERVIZI supporta privati e aziende con soluzioni personalizzate,
-              rapide e trasparenti, combinando competenza locale e innovazione
-              digitale.
-            </p>
+            <HomeHeroCopyRotator />
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/contatti"
-                className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                className="rounded-full bg-cyan-500 px-7 py-3 text-sm font-semibold text-slate-950 shadow-[0_14px_32px_rgba(6,182,212,0.35)] transition hover:-translate-y-0.5 hover:bg-cyan-400"
               >
                 Contattaci
               </Link>
               <Link
                 href="/servizi"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200"
+                className="rounded-full border border-white/20 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-cyan-400 hover:text-cyan-200"
               >
                 Scopri i servizi
               </Link>
             </div>
-            <div className="grid gap-4 pt-6 md:grid-cols-3">
+            <div className="grid gap-4 pt-8 md:grid-cols-3">
               {values.map((value) => (
                 <div
                   key={value.title}
@@ -58,10 +53,10 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="glass-card rounded-4xl p-8">
-            <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-                Focus strategico
+          <div className="hero-reveal-delayed glass-card rounded-4xl p-8">
+            <div className="space-y-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+                Quadro progetto
               </p>
               <h2 className="text-2xl font-semibold text-white">
                 Un unico partner per servizi essenziali e digitalizzazione.
@@ -76,6 +71,20 @@ export default function Home() {
                 <li>• Presenza locale con supporto continuativo.</li>
                 <li>• Servizi digitali per aziende e privati.</li>
               </ul>
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
+                  <p className="text-lg font-semibold text-cyan-300">2016</p>
+                  <p className="text-[11px] text-slate-400">Attivi dal</p>
+                </div>
+                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
+                  <p className="text-lg font-semibold text-cyan-300">6+</p>
+                  <p className="text-[11px] text-slate-400">Aree servizio</p>
+                </div>
+                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
+                  <p className="text-lg font-semibold text-cyan-300">Dedicato</p>
+                  <p className="text-[11px] text-slate-400">Supporto personalizzato</p>
+                </div>
+              </div>
             </div>
           </div>
         </Container>
@@ -187,62 +196,7 @@ export default function Home() {
         </section>
       </div>
 
-      {/* ── Sezione 3: Area Clienti (sfondo scuro per risalto) ── */}
-      <section className="hero-gradient bg-slate-950 py-20 md:py-28">
-        <Container className="space-y-10">
-          <div className="mx-auto max-w-2xl space-y-4 text-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-              Area Clienti
-            </p>
-            <h2 className="text-3xl font-semibold text-white md:text-4xl">
-              Gestisci tutto online, senza passare in sede
-            </h2>
-            <p className="text-base text-slate-300 md:text-lg">
-              Un portale dedicato dove puoi inviare richieste, seguire le pratiche e
-              ricevere aggiornamenti in tempo reale su spedizioni, visure e servizi
-              CAF/patronato.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {clientAreas.map((area) => (
-              <div
-                key={area.key}
-                className="premium-panel group rounded-3xl p-7 transition hover:-translate-y-1"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
-                  {area.eyebrow}
-                </p>
-                <h3 className="mt-3 text-xl font-semibold text-white">{area.title}</h3>
-                <p className="mt-2 text-sm text-slate-300">{area.subtitle}</p>
-                <ul className="mt-4 space-y-2 text-sm text-slate-400">
-                  {area.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2">
-                      <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href={area.path}
-                  className="mt-6 inline-flex rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
-                >
-                  {area.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/area-clienti"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200"
-            >
-              {"Scopri l'Area Clienti →"}
-            </Link>
-          </div>
-        </Container>
-      </section>
+      <ClientAreaInteractiveHero />
 
       {/* ── Sezione 4: Perché sceglierci ────────────────────────── */}
       <div className="lux-surface text-slate-900">
