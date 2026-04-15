@@ -69,6 +69,17 @@ run("cambio argomento esplicito resetta il focus", () => {
   assert.match(reply.toLowerCase(), /(cambiamo argomento|quale servizio ti interessa)/);
 });
 
+run("switch esplicito da spid a spedizioni vinted non resta bloccato su spid", () => {
+  const history = [
+    { role: "assistant", content: "Ciao, sono Plinio Assistant." },
+    { role: "user", content: "posso fare spid?" },
+    { role: "assistant", content: "Per SPID in genere servono documento di identita valido e non scaduto, tessera sanitaria o codice fiscale, numero di cellulare personale, email personale attiva." },
+  ];
+  const reply = clientFallbackReply("posso spedire vinted inpost", history);
+  assert.match(reply.toLowerCase(), /(spedizion|vinted|inpost|locker|corriere)/);
+  assert.doesNotMatch(reply.toLowerCase(), /(spid|identita digitale|tessera sanitaria)/);
+});
+
 run("richiesta breve ambigua chiede chiarimento servizio", () => {
   const reply = clientFallbackReply("ok", []);
   assert.match(reply.toLowerCase(), /(indica|ambito|servizio|pagamenti|telefonia|spedizioni)/);

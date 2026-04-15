@@ -13,8 +13,10 @@ import {
 } from "@/lib/shipping-pricing";
 
 type ChatMessage = {
+  id: string;
   role: "assistant" | "user";
   content: string;
+  createdAt: number;
 };
 
 type PlinioAssistantChatProps = {
@@ -94,9 +96,19 @@ const ATTENTION_TOOLTIPS = [
 const CHAT_IDLE_AUTO_CLOSE_MS = 90_000;
 const CHAT_IDLE_NUDGE_MS = 30_000;
 const CHAT_IDLE_NUDGE_MESSAGES = ["Ci sei ancora?", "Sei ancora qui?"];
-const BOT_MICRO_CTA_REAPPEAR_IDLE_MS = 10_000;
+const CHAT_MESSAGE_AUTO_HIDE_MS = 20_000;
+const BOT_MICRO_CTA_REAPPEAR_IDLE_MS = 300_000; // 5 minuti
 const BOT_MICRO_CTA_STATE_STORAGE_KEY = "plinio:micro-cta:dismissed";
 const BOT_MICRO_CTA_EVENT = "plinio:micro-cta:state";
+
+function makeChatMessage(role: ChatMessage["role"], content: string): ChatMessage {
+  return {
+    id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    role,
+    content,
+    createdAt: Date.now(),
+  };
+}
 
 function rotateQuickPrompts(pool: string[], offset: number, size: number) {
   if (pool.length === 0 || size <= 0) return [];
@@ -158,8 +170,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
   const [serverPrompts, setServerPrompts] = useState<string[]>([]);
   const [tooltipIndex, setTooltipIndex] = useState(0);
   const [microCtaDismissed, setMicroCtaDismissed] = useState(false);
+  const [microCtaReady, setMicroCtaReady] = useState(false);
   const [lastActivityAt, setLastActivityAt] = useState(() => Date.now());
   const [lastUserActionAt, setLastUserActionAt] = useState(() => Date.now());
+  const [messageVisibilityTick, setMessageVisibilityTick] = useState(() => Date.now());
   const [idleNudgeSent, setIdleNudgeSent] = useState(false);
   const [idleNudgeIndex, setIdleNudgeIndex] = useState(0);
   const [unreadBadgeCount, setUnreadBadgeCount] = useState(0);
@@ -167,15 +181,20 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inactivityTimerRef = useRef<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content:
-        "Ciao, sono Plinio Assistant. Posso aiutarti su pagamenti, SPID/PEC, telefonia, spedizioni e altri servizi AG Servizi.",
-    },
+    makeChatMessage(
+      "assistant",
+      "Ciao, sono Plinio Assistant. Posso aiutarti su pagamenti, SPID/PEC, telefonia, spedizioni e altri servizi AG Servizi.",
+    ),
   ]);
   const endpoint = useMemo(buildAssistantEndpoint, []);
 
-  const visibleMessages = useMemo(() => messages.slice(-12), [messages]);
+  const visibleMessages = useMemo(
+    () =>
+      messages
+        .filter((message) => messageVisibilityTick - message.createdAt < CHAT_MESSAGE_AUTO_HIDE_MS)
+        .slice(-12),
+    [messageVisibilityTick, messages],
+  );
   const quickPrompts = useMemo(
     () => rotateQuickPrompts(QUICK_PROMPT_POOL, quickPromptOffset, QUICK_PROMPTS_VISIBLE),
     [quickPromptOffset],
@@ -209,9 +228,32 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     return () => window.clearInterval(interval);
   }, [open]);
 
+  // Mostra la nuvoletta solo dopo 8s dal caricamento
+  useEffect(() => {
+    const t = window.setTimeout(() => setMicroCtaReady(true), 8_000);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+
+    const nextExpiry = messages
+      .map((message) => message.createdAt + CHAT_MESSAGE_AUTO_HIDE_MS - Date.now())
+      .filter((remaining) => remaining > 0)
+      .sort((a, b) => a - b)[0];
+
+    if (typeof nextExpiry !== "number") return;
+
+    const timer = window.setTimeout(() => {
+      setMessageVisibilityTick(Date.now());
+    }, nextExpiry + 50);
+
+    return () => window.clearTimeout(timer);
+  }, [messages, messageVisibilityTick]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const storedDismissed = window.localStorage.getItem(BOT_MICRO_CTA_STATE_STORAGE_KEY) === "1";
+    const storedDismissed = window.sessionStorage.getItem(BOT_MICRO_CTA_STATE_STORAGE_KEY) === "1";
     if (storedDismissed) {
       setMicroCtaDismissed(true);
     }
@@ -240,7 +282,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (inactivityMs >= BOT_MICRO_CTA_REAPPEAR_IDLE_MS) {
       setMicroCtaDismissed(false);
       if (typeof window !== "undefined") {
-        window.localStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
+        window.sessionStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
         window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: false } }));
       }
       return;
@@ -249,7 +291,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
       () => {
         setMicroCtaDismissed(false);
         if (typeof window !== "undefined") {
-          window.localStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
+          window.sessionStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
           window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: false } }));
         }
       },
@@ -302,10 +344,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     const timer = window.setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: CHAT_IDLE_NUDGE_MESSAGES[idleNudgeIndex % CHAT_IDLE_NUDGE_MESSAGES.length],
-        },
+        makeChatMessage(
+          "assistant",
+          CHAT_IDLE_NUDGE_MESSAGES[idleNudgeIndex % CHAT_IDLE_NUDGE_MESSAGES.length],
+        ),
       ]);
       setUnreadBadgeCount((prev) => prev + 1);
       setIdleNudgeIndex((prev) => (prev + 1) % CHAT_IDLE_NUDGE_MESSAGES.length);
@@ -443,7 +485,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     const trimmed = message.trim();
     if (!trimmed || loading) return;
 
-    const nextMessages = [...messages, { role: "user" as const, content: trimmed }];
+    const nextMessages = [...messages, makeChatMessage("user", trimmed)];
     const currentScope = detectConversationScope(nextMessages, trimmed);
     const isShortConfirmation = includesAny(trimmed, [
       "si",
@@ -477,11 +519,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (isReplyToIdleNudge) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content:
-            "Perfetto, eccomi. Dimmi pure quale servizio ti serve e ti guido subito (es. telefonia, SPID, PEC, pagamenti, spedizioni).",
-        },
+        makeChatMessage(
+          "assistant",
+          "Perfetto, eccomi. Dimmi pure quale servizio ti serve e ti guido subito (es. telefonia, SPID, PEC, pagamenti, spedizioni).",
+        ),
       ]);
       return;
     }
@@ -530,14 +571,11 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
         setShowContactForm(true);
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      setMessages((prev) => [...prev, makeChatMessage("assistant", reply)]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: clientFallbackReply(trimmed, nextMessages),
-        },
+        makeChatMessage("assistant", clientFallbackReply(trimmed, nextMessages)),
       ]);
       maybeOpenTrackingFormFromText(trimmed);
       maybeOpenShippingQuoteFormFromText(trimmed);
@@ -572,10 +610,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (!Number.isFinite(weight) || weight <= 0) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Per il preventivo indicativo inserisci un peso valido in KG.",
-        },
+        makeChatMessage("assistant", "Per il preventivo indicativo inserisci un peso valido in KG."),
       ]);
       return;
     }
@@ -583,10 +618,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (![length, width, height].every((n) => Number.isFinite(n) && n > 0)) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Per il preventivo indicativo inserisci tutte le misure in cm (lunghezza, larghezza, altezza).",
-        },
+        makeChatMessage(
+          "assistant",
+          "Per il preventivo indicativo inserisci tutte le misure in cm (lunghezza, larghezza, altezza).",
+        ),
       ]);
       return;
     }
@@ -646,11 +681,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (!matchedRule) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content:
-            "In base ai dati inseriti non trovo una fascia attiva nel listino. Per peso/volume extra ti invitiamo a portare il pacco in agenzia per un preventivo personalizzato.",
-        },
+        makeChatMessage(
+          "assistant",
+          "In base ai dati inseriti non trovo una fascia attiva nel listino. Per peso/volume extra ti invitiamo a portare il pacco in agenzia per un preventivo personalizzato.",
+        ),
       ]);
       return;
     }
@@ -662,10 +696,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
       : "";
     setMessages((prev) => [
       ...prev,
-      {
-        role: "assistant",
-        content: `Preventivo indicativo spedizione ${scopeLabel}: € ${estimate} (${matchedRule.label || "fascia listino"}).${fallbackNote} Stima non vincolante, conferma finale in fase operativa.`,
-      },
+      makeChatMessage(
+        "assistant",
+        `Preventivo indicativo spedizione ${scopeLabel}: € ${estimate} (${matchedRule.label || "fascia listino"}).${fallbackNote} Stima non vincolante, conferma finale in fase operativa.`,
+      ),
     ]);
   }
 
@@ -684,10 +718,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (!Number.isFinite(monthlySpend) || monthlySpend <= 0) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Per la stima bolletta inserisci una spesa mensile valida in euro.",
-        },
+        makeChatMessage("assistant", "Per la stima bolletta inserisci una spesa mensile valida in euro."),
       ]);
       return;
     }
@@ -708,10 +739,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
       consumptionHint.length > 0 ? ` Ho considerato ${consumptionHint.join(" e ")}.` : "";
     setMessages((prev) => [
       ...prev,
-      {
-        role: "assistant",
-        content: `Stima indicativa ${serviceLabel} (${utilityContractType}): spesa annua circa € ${format(annualSpend)}.${consumptionText} Potenziale ottimizzazione: circa € ${format(lowSaving)} - € ${format(highSaving)} annui. Stima non vincolante: per conferma finale serve analisi completa della bolletta.`,
-      },
+      makeChatMessage(
+        "assistant",
+        `Stima indicativa ${serviceLabel} (${utilityContractType}): spesa annua circa € ${format(annualSpend)}.${consumptionText} Potenziale ottimizzazione: circa € ${format(lowSaving)} - € ${format(highSaving)} annui. Stima non vincolante: per conferma finale serve analisi completa della bolletta.`,
+      ),
     ]);
   }
 
@@ -733,15 +764,14 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (!Number.isFinite(monthlySpend) || monthlySpend <= 0) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content:
-            telephonyLineType === "mobile"
-              ? "Per il controllo mobile inserisci una spesa mensile valida."
-              : telephonyLineType === "casa"
-                ? "Per il controllo internet casa inserisci una spesa mensile valida."
-                : "Per il controllo mobile + casa inserisci una spesa valida per almeno una delle due linee.",
-        },
+        makeChatMessage(
+          "assistant",
+          telephonyLineType === "mobile"
+            ? "Per il controllo mobile inserisci una spesa mensile valida."
+            : telephonyLineType === "casa"
+              ? "Per il controllo internet casa inserisci una spesa mensile valida."
+              : "Per il controllo mobile + casa inserisci una spesa valida per almeno una delle due linee.",
+        ),
       ]);
       return;
     }
@@ -789,10 +819,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
         : "";
     setMessages((prev) => [
       ...prev,
-      {
-        role: "assistant",
-        content: `Controllo offerta telefonia (${lineLabel}): ${profile}${minutesText}. Budget target indicativo: € ${format(recommendedBudgetMin)} - € ${format(recommendedBudgetMax)}/mese rispetto all'attuale. Possiamo confrontare le opzioni WindTre, Fastweb e Iliad in base a copertura e utilizzo reale.${portabilityText} Stima indicativa, conferma finale con verifica commerciale.`,
-      },
+      makeChatMessage(
+        "assistant",
+        `Controllo offerta telefonia (${lineLabel}): ${profile}${minutesText}. Budget target indicativo: € ${format(recommendedBudgetMin)} - € ${format(recommendedBudgetMax)}/mese rispetto all'attuale. Possiamo confrontare le opzioni WindTre, Fastweb e Iliad in base a copertura e utilizzo reale.${portabilityText} Stima indicativa, conferma finale con verifica commerciale.`,
+      ),
     ]);
   }
 
@@ -800,7 +830,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     setOpen(true);
     setMicroCtaDismissed(true);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
+      window.sessionStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
       window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: true } }));
     }
     void sendMessage(prompt);
@@ -817,10 +847,10 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     if (name === "" || (phone === "" && email === "")) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Per inviare la richiesta contatto inserisci almeno nome e telefono oppure email.",
-        },
+        makeChatMessage(
+          "assistant",
+          "Per inviare la richiesta contatto inserisci almeno nome e telefono oppure email.",
+        ),
       ]);
       return;
     }
@@ -833,7 +863,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
   function onDismissMicroCta() {
     setMicroCtaDismissed(true);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
+      window.sessionStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
       window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: true } }));
     }
   }
@@ -878,9 +908,9 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
           </div>
 
           <div ref={messagesViewportRef} className="flex-1 min-h-0 space-y-3 overflow-y-auto px-4 py-4">
-            {visibleMessages.map((message, index) => (
+            {visibleMessages.map((message) => (
               <div
-                key={`${message.role}-${index}`}
+                key={message.id}
                 className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm leading-6 ${
                   message.role === "assistant"
                     ? "bg-slate-800 text-slate-100"
@@ -1320,7 +1350,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
         </div>
       ) : null}
 
-      {!open && !microCtaDismissed ? (
+      {!open && !microCtaDismissed && microCtaReady ? (
         <div className="fixed right-4 bottom-42 z-[60] flex w-[min(90vw,320px)] flex-col items-end gap-2 sm:right-6">
           <div className="rounded-xl border border-cyan-300/35 bg-slate-900/95 px-3 py-2 text-xs font-medium text-cyan-100 shadow-[0_12px_30px_rgba(8,47,73,0.4)] backdrop-blur animate-[fadeIn_0.35s_ease-out]">
             <div className="flex items-start justify-between gap-3">

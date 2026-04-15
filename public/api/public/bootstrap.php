@@ -147,6 +147,35 @@ function public_api_db_error_message(): string
     return $messages[$status] ?? 'Connessione MySQL non riuscita';
 }
 
+function public_api_table_column_exists(mysqli $db, string $table, string $column): bool
+{
+    $database = public_api_env('MYSQL_DATABASE', '');
+    if ($database === '') {
+        return false;
+    }
+
+    $stmt = $db->prepare(
+        "SELECT 1
+         FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = ?
+           AND TABLE_NAME = ?
+           AND COLUMN_NAME = ?
+         LIMIT 1"
+    );
+
+    if (!$stmt) {
+        return false;
+    }
+
+    $stmt->bind_param('sss', $database, $table, $column);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $exists = (bool) ($result && $result->fetch_row());
+    $stmt->close();
+
+    return $exists;
+}
+
 function public_api_ensure_shipping_pricing_table(): void
 {
     $db = public_api_db();
@@ -158,6 +187,8 @@ function public_api_ensure_shipping_pricing_table(): void
         CREATE TABLE IF NOT EXISTS shipping_pricing_rules (
           id INT AUTO_INCREMENT PRIMARY KEY,
           label VARCHAR(191) NOT NULL,
+          carrier_provider VARCHAR(20) NOT NULL DEFAULT 'brt',
+          package_size VARCHAR(20) NOT NULL DEFAULT '',
           service_scope VARCHAR(20) NOT NULL DEFAULT 'all',
           country_code VARCHAR(8) NOT NULL DEFAULT '',
           min_weight_kg DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -173,8 +204,37 @@ function public_api_ensure_shipping_pricing_table(): void
     ");
 
     // Backward-compatible migration for existing installations.
-    @$db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN service_scope VARCHAR(20) NOT NULL DEFAULT 'all' AFTER label");
-    @$db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN country_code VARCHAR(8) NOT NULL DEFAULT '' AFTER service_scope");
+    if (!public_api_table_column_exists($db, 'shipping_pricing_rules', 'carrier_provider')) {
+        try {
+            $db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN carrier_provider VARCHAR(20) NOT NULL DEFAULT 'brt' AFTER label");
+        } catch (Throwable $error) {
+            // Ignore migration race conditions and keep API available.
+        }
+    }
+
+    if (!public_api_table_column_exists($db, 'shipping_pricing_rules', 'package_size')) {
+        try {
+            $db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN package_size VARCHAR(20) NOT NULL DEFAULT '' AFTER carrier_provider");
+        } catch (Throwable $error) {
+            // Ignore migration race conditions and keep API available.
+        }
+    }
+
+    if (!public_api_table_column_exists($db, 'shipping_pricing_rules', 'service_scope')) {
+        try {
+            $db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN service_scope VARCHAR(20) NOT NULL DEFAULT 'all' AFTER package_size");
+        } catch (Throwable $error) {
+            // Ignore migration race conditions and keep API available.
+        }
+    }
+
+    if (!public_api_table_column_exists($db, 'shipping_pricing_rules', 'country_code')) {
+        try {
+            $db->query("ALTER TABLE shipping_pricing_rules ADD COLUMN country_code VARCHAR(8) NOT NULL DEFAULT '' AFTER service_scope");
+        } catch (Throwable $error) {
+            // Ignore migration race conditions and keep API available.
+        }
+    }
 }
 
 function public_api_ensure_visure_pricing_table(): void

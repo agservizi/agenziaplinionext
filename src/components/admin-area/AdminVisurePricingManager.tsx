@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AdminEmptyState, AdminMetricCard, AdminStatusBadge } from "@/components/admin-area/AdminUi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   deleteAdminVisurePricing,
   fetchAdminVisurePricing,
@@ -145,41 +149,51 @@ export default function AdminVisurePricingManager() {
   };
 
   if (status === "loading") {
-    return <p className="text-sm text-slate-300">Sto caricando il listino visure...</p>;
+    return <p className="text-sm text-slate-500">Sto caricando il listino visure...</p>;
   }
 
   if (status === "error") {
     return (
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-300">
+      <Card className="rounded-2xl border-red-200">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-600">
           Listino non disponibile
         </p>
-        <p className="mt-3 text-base font-medium text-red-200">{message}</p>
-        <p className="mt-3 text-sm text-slate-300">
+        <p className="mt-3 text-base font-medium text-red-700">{message}</p>
+        <p className="mt-3 text-sm text-slate-600">
           Il pannello c&apos;&egrave;, ma il backend locale non sta ancora esponendo le route del
           listino visure. In genere basta riavviare `npm run dev:backend` oppure `npm run dev:full`.
         </p>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      <Card className="rounded-2xl">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Listino Visure
         </p>
-        <h2 className="mt-3 text-2xl font-semibold text-white">
+        <h2 className="mt-3 text-2xl font-semibold text-slate-950">
           Qui definisco il prezzo reale per ogni tipo di visura.
         </h2>
-        <p className="mt-3 text-sm text-slate-300">
+        <p className="mt-3 text-sm text-slate-600">
           Appena salvo una regola, il prezzo mostrato in area clienti e quello usato in Stripe si
           allineano automaticamente.
         </p>
-        {message ? <p className="mt-4 text-sm font-medium text-cyan-200">{message}</p> : null}
+        {message ? <p className="mt-4 text-sm font-medium text-cyan-700">{message}</p> : null}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <AdminMetricCard eyebrow="Regole totali" value={rules.length} description="Intero listino visure" />
+        <AdminMetricCard eyebrow="Tipologie coperte" value={rulesByService.filter((group) => group.rules.length > 0).length} description="Servizi con almeno un prezzo" />
+        <AdminMetricCard eyebrow="Attive" value={rules.filter((rule) => rule.active).length} description="Regole visibili al cliente" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="admin-adaptive-split-grid grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="glass-card rounded-4xl p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
             Regola {form.id ? `#${form.id}` : "nuova"}
@@ -208,10 +222,10 @@ export default function AdminVisurePricingManager() {
               <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Etichetta
               </span>
-              <input
+              <Input
                 value={form.label}
                 onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                className="h-11 rounded-2xl"
                 placeholder="Visura camerale base"
               />
             </label>
@@ -220,12 +234,12 @@ export default function AdminVisurePricingManager() {
               <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Prezzo euro
               </span>
-              <input
+              <Input
                 type="number"
                 step="0.01"
                 value={form.priceEUR}
                 onChange={(event) => setForm((current) => ({ ...current, priceEUR: event.target.value }))}
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                className="h-11 rounded-2xl"
               />
             </label>
 
@@ -233,14 +247,14 @@ export default function AdminVisurePricingManager() {
               <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Ordine
               </span>
-              <input
+              <Input
                 type="number"
                 step="1"
                 value={form.sortOrder}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, sortOrder: event.target.value }))
                 }
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                className="h-11 rounded-2xl"
               />
             </label>
 
@@ -256,32 +270,29 @@ export default function AdminVisurePricingManager() {
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <button
+            <Button
               type="button"
               onClick={onSave}
               disabled={saving || !form.label.trim()}
-              className="rounded-full border border-cyan-400/30 bg-cyan-500 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              variant="secondary"
+              className="rounded-full"
             >
               {saving ? "Sto salvando..." : form.id ? "Aggiorna regola" : "Salva regola"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={resetForm}
-              className="rounded-full border border-white/10 bg-slate-900/60 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-900"
+              variant="outline"
+              className="rounded-full"
             >
               Nuova regola
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="space-y-4">
           {rules.length === 0 ? (
-            <div className="glass-card rounded-4xl p-6">
-              <p className="text-sm text-slate-300">
-                Non ho ancora un prezzo visura salvato. Appena ne creo uno, il costo live del
-                cliente diventa coerente con il listino.
-              </p>
-            </div>
+            <AdminEmptyState title="Nessun prezzo visura" description="Appena salvo una regola, il costo cliente diventa coerente col listino." />
           ) : (
             rulesByService.map((group) => (
               <div key={group.value} className="glass-card rounded-4xl p-6">
@@ -337,4 +348,3 @@ export default function AdminVisurePricingManager() {
     </div>
   );
 }
-

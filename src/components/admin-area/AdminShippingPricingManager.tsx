@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminEmptyState, AdminMetricCard } from "@/components/admin-area/AdminUi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   deleteAdminShippingPricing,
   fetchAdminShippingPricing,
@@ -12,6 +16,8 @@ import {
 type PricingFormState = {
   id?: number;
   label: string;
+  carrierProvider: "brt" | "inpost";
+  packageSize: "" | "small" | "medium" | "large";
   serviceScope: "national" | "international" | "all";
   countryCode: string;
   minWeightKG: string;
@@ -26,6 +32,8 @@ type PricingFormState = {
 function buildInitialFormState(): PricingFormState {
   return {
     label: "",
+    carrierProvider: "brt",
+    packageSize: "",
     serviceScope: "national",
     countryCode: "IT",
     minWeightKG: "0",
@@ -40,6 +48,13 @@ function buildInitialFormState(): PricingFormState {
 
 function formatDecimal(value: number) {
   return value.toFixed(2).replace(".", ",");
+}
+
+function inpostPackageLabel(value: string) {
+  if (value === "small") return "Piccolo (S)";
+  if (value === "medium") return "Medio (M)";
+  if (value === "large") return "Grande (L)";
+  return "-";
 }
 
 const EUROPE_COUNTRY_OPTIONS = [
@@ -89,9 +104,14 @@ function normalizeScope(scope: string | undefined): ShippingPricingRule["service
   return "all";
 }
 
-function normalizeRules(payload: ShippingPricingRule[]) {
+function normalizeRules(payload: ShippingPricingRule[]): ShippingPricingRule[] {
   return payload.map((rule) => ({
     ...rule,
+    carrierProvider: (rule.carrierProvider === "inpost" ? "inpost" : "brt") as "brt" | "inpost",
+    packageSize:
+      rule.packageSize === "small" || rule.packageSize === "medium" || rule.packageSize === "large"
+        ? rule.packageSize
+        : "",
     serviceScope: normalizeScope(rule.serviceScope),
     countryCode: String(rule.countryCode || "").trim().toUpperCase(),
   }));
@@ -104,6 +124,7 @@ export default function AdminShippingPricingManager() {
   const [form, setForm] = useState<PricingFormState>(() => buildInitialFormState());
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [carrierTab, setCarrierTab] = useState<"brt" | "inpost">("brt");
   const [activeTab, setActiveTab] = useState<"national" | "international" | "all">("national");
 
   useEffect(() => {
@@ -129,6 +150,12 @@ export default function AdminShippingPricingManager() {
     };
   }, []);
 
+  useEffect(() => {
+    if (carrierTab === "inpost" && activeTab !== "national") {
+      setActiveTab("national");
+    }
+  }, [activeTab, carrierTab]);
+
   const resetForm = () => {
     setForm(buildInitialFormState());
   };
@@ -143,10 +170,15 @@ export default function AdminShippingPricingManager() {
     setForm({
       id: rule.id,
       label: rule.label,
+      carrierProvider: rule.carrierProvider === "inpost" ? "inpost" : "brt",
+      packageSize:
+        rule.packageSize === "small" || rule.packageSize === "medium" || rule.packageSize === "large"
+          ? rule.packageSize
+          : "",
       serviceScope: normalizeScope(rule.serviceScope),
       countryCode: rule.countryCode || "",
-      minWeightKG: String(rule.minWeightKG),
-      maxWeightKG: String(rule.maxWeightKG),
+      minWeightKG: rule.carrierProvider === "inpost" ? "0" : String(rule.minWeightKG),
+      maxWeightKG: rule.carrierProvider === "inpost" ? "25" : String(rule.maxWeightKG),
       minVolumeM3: String(rule.minVolumeM3),
       maxVolumeM3: String(rule.maxVolumeM3),
       priceEUR: String(rule.priceEUR),
@@ -165,23 +197,28 @@ export default function AdminShippingPricingManager() {
       const resultMessage = await upsertAdminShippingPricing(token, {
         id: form.id,
         label: form.label.trim(),
-        serviceScope: form.serviceScope,
+        carrierProvider: form.carrierProvider,
+        packageSize: form.carrierProvider === "inpost" ? form.packageSize : "",
+        serviceScope: form.carrierProvider === "inpost" ? "national" : form.serviceScope,
         countryCode:
-          form.serviceScope === "national"
+          form.carrierProvider === "inpost"
+            ? "IT"
+            : form.serviceScope === "national"
             ? "IT"
             : form.serviceScope === "international"
               ? (form.countryCode || "ALL")
               : "",
-        minWeightKG: Number(form.minWeightKG) || 0,
-        maxWeightKG: Number(form.maxWeightKG) || 0,
-        minVolumeM3: Number(form.minVolumeM3) || 0,
-        maxVolumeM3: Number(form.maxVolumeM3) || 0,
+        minWeightKG: form.carrierProvider === "inpost" ? 0 : Number(form.minWeightKG) || 0,
+        maxWeightKG: form.carrierProvider === "inpost" ? 25 : Number(form.maxWeightKG) || 0,
+        minVolumeM3: form.carrierProvider === "inpost" ? 0 : Number(form.minVolumeM3) || 0,
+        maxVolumeM3: form.carrierProvider === "inpost" ? 0 : Number(form.maxVolumeM3) || 0,
         priceEUR: Number(form.priceEUR) || 0,
         sortOrder: Number(form.sortOrder) || 0,
         active: form.active,
       });
       await reloadRules();
       setMessage(resultMessage);
+      setCarrierTab(form.carrierProvider);
       if (form.serviceScope === "national" || form.serviceScope === "international") {
         setActiveTab(form.serviceScope);
       }
@@ -214,46 +251,57 @@ export default function AdminShippingPricingManager() {
   };
 
   if (status === "loading") {
-    return <p className="text-sm text-slate-300">Sto caricando il listino spedizioni...</p>;
+    return <p className="text-sm text-slate-500">Sto caricando il listino spedizioni...</p>;
   }
 
   if (status === "error") {
     return (
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-300">
+      <Card className="rounded-2xl border-red-200">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-600">
           Listino non disponibile
         </p>
-        <p className="mt-3 text-base font-medium text-red-200">{message}</p>
-        <p className="mt-3 text-sm text-slate-300">
+        <p className="mt-3 text-base font-medium text-red-700">{message}</p>
+        <p className="mt-3 text-sm text-slate-600">
           Qui il pannello c&apos;&egrave;, ma il backend locale non sta ancora esponendo le route del
           listino. Di solito basta riavviare `npm run dev:backend` oppure `npm run dev:full`.
         </p>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   const filteredRules = rules.filter((rule) => {
+    if (rule.carrierProvider !== carrierTab) return false;
     if (activeTab === "all") return true;
     return normalizeScope(rule.serviceScope) === activeTab;
   });
 
   return (
     <div className="space-y-6">
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      <Card className="rounded-2xl">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Listino Spedizioni
         </p>
-        <h2 className="mt-3 text-2xl font-semibold text-white">
-          Qui definisco listino nazionale e listino internazionale.
+        <h2 className="mt-3 text-2xl font-semibold text-slate-950">
+          Qui definisco listini separati per BRT e InPost.
         </h2>
-        <p className="mt-3 text-sm text-slate-300">
-          Ogni regola ora ha un ambito: nazionale o internazionale. Per l&apos;internazionale posso
-          impostare il prezzo per singola nazione europea o usare una regola generale.
+        <p className="mt-3 text-sm text-slate-600">
+          Ogni regola appartiene a un corriere preciso e a un ambito: nazionale o internazionale.
+          BRT legge solo il proprio listino, mentre InPost usa un listino dedicato separato.
         </p>
-        {message ? <p className="mt-4 text-sm font-medium text-cyan-200">{message}</p> : null}
+        {message ? <p className="mt-4 text-sm font-medium text-cyan-700">{message}</p> : null}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <AdminMetricCard eyebrow="Regole totali" value={rules.length} description="Intero listino spedizioni" />
+        <AdminMetricCard eyebrow="Regole nel tab" value={filteredRules.length} description="Voci nel focus corrente" />
+        <AdminMetricCard eyebrow="Attive" value={rules.filter((rule) => rule.active).length} description="Usate in area clienti" />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="admin-adaptive-split-grid grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="glass-card rounded-4xl p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
             Regola {form.id ? `#${form.id}` : "nuova"}
@@ -263,13 +311,68 @@ export default function AdminShippingPricingManager() {
               <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Etichetta
               </span>
-              <input
+              <Input
                 value={form.label}
                 onChange={(event) => setForm((current) => ({ ...current, label: event.target.value }))}
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                className="h-11 rounded-2xl"
                 placeholder="Italia 0-3 kg / volume base"
               />
             </label>
+
+            <label className="block">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Corriere
+              </span>
+              <select
+                value={form.carrierProvider}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    carrierProvider: event.target.value === "inpost" ? "inpost" : "brt",
+                    packageSize:
+                      event.target.value === "inpost"
+                        ? current.packageSize || "small"
+                        : "",
+                    minWeightKG: event.target.value === "inpost" ? "0" : current.minWeightKG,
+                    maxWeightKG: event.target.value === "inpost" ? "25" : current.maxWeightKG,
+                    minVolumeM3: event.target.value === "inpost" ? "0" : current.minVolumeM3,
+                    maxVolumeM3: event.target.value === "inpost" ? "0" : current.maxVolumeM3,
+                    serviceScope:
+                      event.target.value === "inpost"
+                        ? "national"
+                        : current.serviceScope,
+                    countryCode:
+                      event.target.value === "inpost" ? "IT" : current.countryCode,
+                  }))
+                }
+                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+              >
+                <option value="brt">BRT</option>
+                <option value="inpost">InPost</option>
+              </select>
+            </label>
+
+            {form.carrierProvider === "inpost" ? (
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Taglia InPost
+                </span>
+                <select
+                  value={form.packageSize}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      packageSize: event.target.value as PricingFormState["packageSize"],
+                    }))
+                  }
+                  className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                >
+                  <option value="small">Piccolo (S)</option>
+                  <option value="medium">Medio (M)</option>
+                  <option value="large">Grande (L)</option>
+                </select>
+              </label>
+            ) : null}
 
             <label className="block">
               <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -280,9 +383,15 @@ export default function AdminShippingPricingManager() {
                 onChange={(event) =>
                   setForm((current) => ({
                     ...current,
-                    serviceScope: event.target.value as PricingFormState["serviceScope"],
+                    serviceScope:
+                      current.carrierProvider === "inpost" &&
+                      event.target.value === "international"
+                        ? "national"
+                        : (event.target.value as PricingFormState["serviceScope"]),
                     countryCode:
-                      event.target.value === "national"
+                      current.carrierProvider === "inpost"
+                        ? "IT"
+                        : event.target.value === "national"
                         ? "IT"
                         : event.target.value === "international"
                           ? (current.countryCode && current.countryCode !== "IT"
@@ -294,9 +403,18 @@ export default function AdminShippingPricingManager() {
                 className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
               >
                 <option value="national">Nazionale</option>
-                <option value="international">Internazionale</option>
-                <option value="all">Generica (legacy)</option>
+                <option value="international" disabled={form.carrierProvider === "inpost"}>
+                  Internazionale
+                </option>
+                <option value="all" disabled={form.carrierProvider === "inpost"}>
+                  Generica (legacy)
+                </option>
               </select>
+              {form.carrierProvider === "inpost" ? (
+                <span className="mt-2 block text-xs text-cyan-300">
+                  InPost e vincolato a regole nazionali Italia e a tre taglie dedicate: S, M, L.
+                </span>
+              ) : null}
             </label>
 
             <label className="block">
@@ -305,7 +423,9 @@ export default function AdminShippingPricingManager() {
               </span>
               <select
                 value={
-                  form.serviceScope === "national"
+                  form.carrierProvider === "inpost"
+                    ? "IT"
+                    : form.serviceScope === "national"
                     ? "IT"
                     : form.serviceScope === "international"
                       ? (form.countryCode || "ALL")
@@ -317,7 +437,11 @@ export default function AdminShippingPricingManager() {
                     countryCode: event.target.value,
                   }))
                 }
-                disabled={form.serviceScope === "national" || form.serviceScope === "all"}
+                disabled={
+                  form.carrierProvider === "inpost" ||
+                  form.serviceScope === "national" ||
+                  form.serviceScope === "all"
+                }
                 className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
               >
                 {form.serviceScope === "international" ? <option value="ALL">Tutte le nazioni (fallback)</option> : null}
@@ -340,8 +464,12 @@ export default function AdminShippingPricingManager() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, minWeightKG: event.target.value }))
                 }
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                disabled={form.carrierProvider === "inpost"}
+                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
               />
+              {form.carrierProvider === "inpost" ? (
+                <span className="mt-2 block text-xs text-slate-400">Per InPost il limite operativo e gestito a 25 kg.</span>
+              ) : null}
             </label>
 
             <label className="block">
@@ -355,8 +483,12 @@ export default function AdminShippingPricingManager() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, maxWeightKG: event.target.value }))
                 }
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                disabled={form.carrierProvider === "inpost"}
+                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
               />
+              {form.carrierProvider === "inpost" ? (
+                <span className="mt-2 block text-xs text-slate-400">Per tutte le taglie InPost il peso massimo resta 25 kg.</span>
+              ) : null}
             </label>
 
             <label className="block">
@@ -370,7 +502,8 @@ export default function AdminShippingPricingManager() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, minVolumeM3: event.target.value }))
                 }
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                disabled={form.carrierProvider === "inpost"}
+                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
               />
             </label>
 
@@ -385,7 +518,8 @@ export default function AdminShippingPricingManager() {
                 onChange={(event) =>
                   setForm((current) => ({ ...current, maxVolumeM3: event.target.value }))
                 }
-                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                disabled={form.carrierProvider === "inpost"}
+                className="w-full rounded-3xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none disabled:opacity-60"
               />
             </label>
 
@@ -429,67 +563,76 @@ export default function AdminShippingPricingManager() {
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
-            <button
+            <Button
               type="button"
               onClick={onSave}
               disabled={saving || !form.label.trim()}
-              className="rounded-full border border-cyan-400/30 bg-cyan-500 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              variant="secondary"
+              className="rounded-full"
             >
               {saving ? "Sto salvando..." : form.id ? "Aggiorna regola" : "Salva regola"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={resetForm}
-              className="rounded-full border border-white/10 bg-slate-900/60 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-900"
+              variant="outline"
+              className="rounded-full"
             >
               Nuova regola
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="glass-card rounded-4xl p-4">
             <div className="flex flex-wrap gap-2">
-              <button
+              <Button
+                type="button"
+                onClick={() => setCarrierTab("brt")}
+                variant={carrierTab === "brt" ? "secondary" : "outline"}
+                className="rounded-full"
+              >
+                BRT
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setCarrierTab("inpost")}
+                variant={carrierTab === "inpost" ? "secondary" : "outline"}
+                className="rounded-full"
+              >
+                InPost
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setActiveTab("national")}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === "national"
-                    ? "bg-cyan-500 text-slate-950"
-                    : "border border-white/10 bg-slate-900/60 text-slate-200"
-                }`}
+                variant={activeTab === "national" ? "secondary" : "outline"}
+                className="rounded-full"
               >
                 Nazionale
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setActiveTab("international")}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === "international"
-                    ? "bg-cyan-500 text-slate-950"
-                    : "border border-white/10 bg-slate-900/60 text-slate-200"
-                }`}
+                variant={activeTab === "international" ? "secondary" : "outline"}
+                disabled={carrierTab === "inpost"}
+                className="rounded-full"
               >
                 Internazionale
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setActiveTab("all")}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === "all"
-                    ? "bg-cyan-500 text-slate-950"
-                    : "border border-white/10 bg-slate-900/60 text-slate-200"
-                }`}
+                variant={activeTab === "all" ? "secondary" : "outline"}
+                disabled={carrierTab === "inpost"}
+                className="rounded-full"
               >
                 Tutte
-              </button>
+              </Button>
             </div>
           </div>
 
           {filteredRules.length === 0 ? (
-            <div className="glass-card rounded-4xl p-6">
-              <p className="text-sm text-slate-300">Nessuna regola nel tab selezionato.</p>
-            </div>
+            <AdminEmptyState title="Nessuna regola" description="Nessuna regola nel tab selezionato." />
           ) : (
             <div className="glass-card overflow-hidden rounded-4xl">
               <div className="overflow-x-auto">
@@ -498,6 +641,8 @@ export default function AdminShippingPricingManager() {
                     <tr>
                       <th className="px-4 py-3 font-semibold">ID</th>
                       <th className="px-4 py-3 font-semibold">Etichetta</th>
+                      <th className="px-4 py-3 font-semibold">Corriere</th>
+                      <th className="px-4 py-3 font-semibold">Taglia</th>
                       <th className="px-4 py-3 font-semibold">Ambito</th>
                       <th className="px-4 py-3 font-semibold">Nazione</th>
                       <th className="px-4 py-3 font-semibold">Peso kg</th>
@@ -513,6 +658,12 @@ export default function AdminShippingPricingManager() {
                       <tr key={rule.id} className="border-t border-white/10 align-top">
                         <td className="whitespace-nowrap px-4 py-3 text-cyan-300">#{rule.id}</td>
                         <td className="px-4 py-3 font-medium text-white">{rule.label}</td>
+                        <td className="whitespace-nowrap px-4 py-3">
+                          {rule.carrierProvider === "inpost" ? "InPost" : "BRT"}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">
+                          {rule.carrierProvider === "inpost" ? inpostPackageLabel(rule.packageSize) : "-"}
+                        </td>
                         <td className="whitespace-nowrap px-4 py-3">{scopeLabel(rule.serviceScope)}</td>
                         <td className="whitespace-nowrap px-4 py-3">
                           {rule.serviceScope === "international"
@@ -522,10 +673,14 @@ export default function AdminShippingPricingManager() {
                               : "-"}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">
-                          {rule.minWeightKG} - {rule.maxWeightKG}
+                          {rule.carrierProvider === "inpost"
+                            ? "Fino a 25 kg"
+                            : `${rule.minWeightKG} - ${rule.maxWeightKG}`}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">
-                          {rule.minVolumeM3} - {rule.maxVolumeM3}
+                          {rule.carrierProvider === "inpost"
+                            ? "Gestito dalla taglia"
+                            : `${rule.minVolumeM3} - ${rule.maxVolumeM3}`}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 font-semibold text-white">
                           {formatDecimal(rule.priceEUR)} euro

@@ -18,7 +18,7 @@ function resolveClientPortalApiBase() {
     clientPortalApiBase === "https://www.agenziaplinio.it";
 
   if (isLocalhost && (!clientPortalApiBase || pointsToProduction)) {
-    return "http://localhost:3001";
+    return window.location.origin;
   }
 
   return clientPortalApiBase;
@@ -59,6 +59,7 @@ export function readClientPortalTokenPayload() {
         : Buffer.from(padded, "base64").toString("utf8");
     const parsed = JSON.parse(raw) as {
       username?: string;
+      fullName?: string;
       userId?: number | null;
       source?: string;
       exp?: number;
@@ -68,6 +69,7 @@ export function readClientPortalTokenPayload() {
 
     return {
       username: String(parsed.username),
+      fullName: parsed.fullName ? String(parsed.fullName) : "",
       userId: typeof parsed.userId === "number" ? parsed.userId : null,
       source: parsed.source || "unknown",
     };

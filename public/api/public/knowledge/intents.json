@@ -93,7 +93,7 @@
     {
       "intent": "spedizione_pacco",
       "scope": "spedizioni",
-      "triggers": ["spedire pacco", "spedizione nazionale"]
+      "triggers": ["spedire pacco", "spedizione nazionale", "spedire", "vinted", "inpost", "locker"]
     },
     {
       "intent": "spedizione_estero",

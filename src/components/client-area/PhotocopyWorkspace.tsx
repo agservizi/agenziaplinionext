@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
 
 type CheckoutPayload = {
   url?: string;
@@ -22,6 +23,35 @@ export default function PhotocopyWorkspace() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [profileStatus, setProfileStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+
+  useEffect(() => {
+    let active = true;
+    const token = getClientPortalToken();
+    if (!token) {
+      return () => {
+        active = false;
+      };
+    }
+
+    setProfileStatus("loading");
+    fetchClientPortalProfile(token)
+      .then(({ profile }) => {
+        if (!active) return;
+        setCustomerName((current) => current || profile.fullName || "");
+        setEmail((current) => current || profile.email || profile.username || "");
+        setPhone((current) => current || profile.phone || "");
+        setProfileStatus("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setProfileStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -41,6 +71,7 @@ export default function PhotocopyWorkspace() {
       payload.append("notes", notes);
       payload.append("residentConfirmed", residentConfirmed ? "1" : "0");
       payload.append("pickupConfirmed", pickupConfirmed ? "1" : "0");
+      payload.append("token", getClientPortalToken());
       payload.append("pdfFile", pdfFile);
 
       const response = await fetch("/api/client-area/fotocopie/checkout", {
@@ -66,7 +97,7 @@ export default function PhotocopyWorkspace() {
 
   return (
     <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr]">
-      <div className="lux-card rounded-3xl p-6">
+      <div className="lux-card rounded-3xl p-6 md:sticky md:top-28 md:self-start">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">Servizio attivo</p>
         <h2 className="mt-3 text-xl font-semibold text-slate-900">Fotocopie online con ritiro in sede</h2>
         <p className="mt-3 text-sm leading-7 text-slate-600">
@@ -103,6 +134,11 @@ export default function PhotocopyWorkspace() {
       <form onSubmit={onSubmit} className="lux-card rounded-3xl p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">Nuovo ordine</p>
         <h2 className="mt-3 text-xl font-semibold text-slate-900">Carica il PDF e procedi al pagamento</h2>
+        {profileStatus === "ready" ? (
+          <p className="mt-3 text-xs font-medium text-cyan-700">
+            Dati anagrafici caricati dal profilo cliente.
+          </p>
+        ) : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="block md:col-span-2">

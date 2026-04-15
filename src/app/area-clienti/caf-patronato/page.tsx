@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import Container from "@/components/Container";
 import CafPatronatoWorkspace from "@/components/client-area/CafPatronatoWorkspace";
@@ -15,46 +16,63 @@ export function generateMetadata() {
   });
 }
 
+function Chevron() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0" fill="none" aria-hidden="true">
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function AreaClientiCafPage() {
   if (!area) return null;
 
   return (
-    <div className="pb-24">
-      <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
-        <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">{area.eyebrow}</p>
-            <h1 className="text-4xl font-semibold text-white md:text-5xl">{area.title}</h1>
-            <p className="text-base text-slate-300 md:text-lg">{area.description}</p>
-            <Link
-              href="/area-clienti"
-              className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition hover:border-slate-600 hover:bg-slate-900"
-            >
-              Torna alla dashboard
-            </Link>
-          </div>
-          <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Come funziona adesso
-            </p>
-            <div className="mt-4 space-y-4 text-sm text-slate-200">
-              <p>Compili il modulo, alleghi i documenti già pronti e scegli il servizio corretto.</p>
-              <p>
-                La pratica viene registrata subito e il team riceve una mail operativa con link
-                diretto per lavorarla.
-              </p>
-              <p>
-                Quando il documento è pronto, lo ritrovi nello storico pratiche senza dover passare
-                in sede.
-              </p>
+    <div className="min-h-full">
+      <div className="relative">
+        <div className="h-px bg-linear-to-r from-emerald-500/50 via-emerald-400/20 to-transparent" />
+        <div className="border-b border-white/6 bg-slate-950 px-6 pt-5 pb-6 md:px-10">
+          <nav className="mb-5 flex items-center gap-2 text-xs text-slate-600">
+            <Link href="/area-clienti" className="transition hover:text-slate-400">Dashboard</Link>
+            <Chevron />
+            <span className="text-slate-500">{area.eyebrow}</span>
+          </nav>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                  <rect x="5" y="4" width="14" height="17" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                  <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  <path d="M8 10h8M8 14h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-white md:text-3xl">{area.title}</h1>
+                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
+                  {area.description}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Link
+                href="/area-clienti/caf-patronato/storico"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
+              >
+                Storico pratiche
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
             </div>
           </div>
-        </Container>
-      </section>
+        </div>
+      </div>
 
-      <div className="lux-surface pt-10 text-slate-900">
-        <Container>
-          <CafPatronatoWorkspace />
+      <div className="lux-surface text-slate-900">
+        <Container className="py-8">
+          <Suspense fallback={<p className="text-sm text-slate-500">Caricamento...</p>}>
+            <CafPatronatoWorkspace />
+          </Suspense>
         </Container>
       </div>
     </div>

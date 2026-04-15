@@ -135,6 +135,8 @@ if (!client_area_has_database_config()) {
 }
 
 try {
+    $token = trim((string) ($_POST['token'] ?? ''));
+    $clientProfile = client_area_require_authenticated_client($token);
     $customerName = trim((string) ($_POST['customerName'] ?? ''));
     $email = strtolower(trim((string) ($_POST['email'] ?? '')));
     $phone = trim((string) ($_POST['phone'] ?? ''));
@@ -142,6 +144,16 @@ try {
     $notes = trim((string) ($_POST['notes'] ?? ''));
     $residentConfirmed = (string) ($_POST['residentConfirmed'] ?? '0') === '1';
     $pickupConfirmed = (string) ($_POST['pickupConfirmed'] ?? '0') === '1';
+
+    if ($customerName === '' && $clientProfile['fullName'] !== '') {
+        $customerName = (string) $clientProfile['fullName'];
+    }
+    if ($email === '' && $clientProfile['email'] !== '') {
+        $email = (string) $clientProfile['email'];
+    }
+    if ($phone === '' && $clientProfile['phone'] !== '') {
+        $phone = (string) $clientProfile['phone'];
+    }
 
     if ($customerName === '' || !str_contains($email, '@') || $phone === '') {
         client_area_json(['message' => 'Compila nome, email e telefono prima di procedere.'], 400);
@@ -191,6 +203,12 @@ try {
         'unitPriceCents' => $unitPriceCents,
         'amountCents' => $amountCents,
         'pdfUrl' => (string) $storedFile['fileUrl'],
+        'clientUsername' => (string) ($clientProfile['username'] ?? ''),
+        'clientUserId' => (int) ($clientProfile['userId'] ?? 0),
+        'clientSource' => (string) ($clientProfile['source'] ?? 'unknown'),
+        'clientEmail' => (string) ($clientProfile['email'] ?? $email),
+        'clientPhone' => (string) ($clientProfile['phone'] ?? $phone),
+        'clientCompanyName' => (string) ($clientProfile['companyName'] ?? ''),
     ];
 
     if ($notes !== '') {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getClientPortalToken } from "@/lib/client-portal-auth";
 
 type VisuraHistoryItem = {
   id: number;
@@ -46,6 +47,12 @@ export default function OpenApiVisureHistory() {
         const response = await fetch("/api/client-area/visure/history", {
           method: "POST",
           cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: getClientPortalToken(),
+          }),
         });
         const payload = (await response.json()) as {
           visure?: VisuraHistoryItem[];

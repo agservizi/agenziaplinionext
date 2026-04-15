@@ -184,14 +184,18 @@ function client_auth_env_password(): string
     return trim((string) client_auth_env('CLIENT_PORTAL_PASSWORD', ''));
 }
 
-function client_auth_create_token(string $username, ?int $userId = null, string $source = 'env'): string
+function client_auth_create_token(string $username, ?int $userId = null, string $source = 'env', string $fullName = ''): string
 {
-    $payload = client_auth_base64url_encode((string) json_encode([
+    $tokenData = [
         'username' => $username,
         'userId' => $userId,
         'source' => $source,
         'exp' => (int) round(microtime(true) * 1000) + (1000 * 60 * 60 * 12),
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    ];
+    if ($fullName !== '') {
+        $tokenData['fullName'] = $fullName;
+    }
+    $payload = client_auth_base64url_encode((string) json_encode($tokenData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
     $signature = client_auth_base64url_encode(hash_hmac('sha256', $payload, client_auth_secret(), true));
     return $payload . '.' . $signature;
@@ -246,8 +250,30 @@ function client_auth_verify_password(string $password, string $storedHash): bool
     }
 
     if (str_contains($storedHash, ':')) {
-        // Legacy Node scrypt hash; keep fallback env access but do not silently accept invalid legacy hashes.
-        return false;
+        // Node.js scrypt hash: "salt_hex:hash_hex"
+        // crypto.scryptSync(password, salt_hex, 64) with defaults N=16384, r=8, p=1
+        // sodium pickparams: memlimit=33554432 → N=16384, opslimit=524288 → p=1, r=8
+        if (!function_exists('sodium_crypto_pwhash_scryptsalsa208sha256')) {
+            return false;
+        }
+
+        [$salt, $hash] = explode(':', $storedHash, 2);
+        if (strlen($salt) !== 32 || $hash === '') {
+            return false;
+        }
+
+        try {
+            $derived = sodium_crypto_pwhash_scryptsalsa208sha256(
+                64,
+                $password,
+                $salt,       // 32 hex chars = 32 bytes (same as Node.js passes the hex string)
+                524288,      // opslimit → p=1
+                33554432     // memlimit (32 MB) → N=16384
+            );
+            return hash_equals($hash, bin2hex($derived));
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     return password_verify($password, $storedHash);

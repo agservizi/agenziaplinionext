@@ -131,6 +131,20 @@ function plinio_is_topic_switch_request(string $text): bool
     ]) > 0;
 }
 
+function plinio_has_explicit_scope_switch(string $text, ?string $currentScope = null): bool
+{
+    $detectedScope = plinio_detect_service_scope(plinio_normalize($text));
+    if ($detectedScope === null) {
+        return false;
+    }
+
+    if ($currentScope === null) {
+        return true;
+    }
+
+    return $detectedScope !== $currentScope;
+}
+
 function plinio_detect_service_scope(string $text): ?string
 {
     $map = plinio_scope_keyword_map();
@@ -316,7 +330,7 @@ function plinio_scope_keyword_map(): array
         'spid' => ['spid', 'identita digitale'],
         'pec' => ['pec', 'posta certificata'],
         'firma-digitale' => ['firma digitale', 'firma elettronica'],
-        'spedizioni' => ['spedizione', 'spedizioni', 'corriere', 'pacco', 'tracking', 'internazionale', 'nazionale'],
+        'spedizioni' => ['spedizione', 'spedizioni', 'spedire', 'corriere', 'pacco', 'tracking', 'internazionale', 'nazionale', 'vinted', 'inpost', 'in post', 'locker', 'fermopoint'],
         'digitali' => ['servizi digitali', 'pubblica amministrazione'],
         'contatti' => ['dove', 'sede', 'indirizzo', 'contatti', 'telefono', 'email', 'orari'],
     ];
@@ -1285,7 +1299,7 @@ function plinio_default_master_knowledge_json(): array
                 'slug' => 'spedizioni',
                 'name' => 'Spedizioni',
                 'scope' => 'spedizioni',
-                'keywords' => ['spedizione', 'spedizioni', 'corriere', 'pacco', 'tracking', 'traccia', 'nazionale', 'internazionale', 'brt', 'poste', 'sda', 'fedex', 'tnt'],
+                'keywords' => ['spedizione', 'spedizioni', 'spedire', 'corriere', 'pacco', 'tracking', 'traccia', 'nazionale', 'internazionale', 'brt', 'poste', 'sda', 'fedex', 'tnt', 'vinted', 'inpost', 'in post', 'locker', 'fermopoint'],
                 'description' => 'Spedizioni nazionali e internazionali con supporto logistico di base',
                 'documents' => ['dati mittente e destinatario', 'peso del collo', 'contenuto dichiarato'],
             ],
@@ -3084,6 +3098,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
     $last = plinio_normalize($lastRaw);
     $lastAssistant = plinio_normalize($lastAssistantRaw);
     $all = plinio_normalize($allRaw);
+    $explicitScopeSwitch = plinio_has_explicit_scope_switch($lastRaw, $focusScope);
     if ($last === '') {
         return null;
     }
@@ -3173,7 +3188,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
         'beneficiario bollettino',
         'elenco beneficiari bollettini',
     ]) > 0;
-    if ($assistantAskedBeneficiaryName && !plinio_is_topic_switch_request($lastRaw) && count(plinio_query_tokens($lastRaw)) <= 6) {
+    if ($assistantAskedBeneficiaryName && !$explicitScopeSwitch && !plinio_is_topic_switch_request($lastRaw) && count(plinio_query_tokens($lastRaw)) <= 6) {
         $asksPayabilityFollowup = plinio_contains_any($last, [
             'posso pagarlo', 'posso pagare', 'quindi posso', 'da voi', 'in agenzia',
             'si puo pagare', 'si può pagare', 'pagabile',
@@ -3196,7 +3211,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
         }
     }
 
-    if ($scope === null && $focusScope !== null && !plinio_is_topic_switch_request($lastRaw)) {
+    if ($scope === null && $focusScope !== null && !$explicitScopeSwitch && !plinio_is_topic_switch_request($lastRaw)) {
         $scope = $focusScope;
     }
 
@@ -3210,7 +3225,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
     if (!$contactIntent && $assistantAskedContactDetails && $hasContactInCurrentMessage) {
         $contactIntent = true;
     }
-    if ($scope !== null && !plinio_is_topic_switch_request($lastRaw) && plinio_is_short_followup_message($lastRaw)) {
+    if ($scope !== null && !$explicitScopeSwitch && !plinio_is_topic_switch_request($lastRaw) && plinio_is_short_followup_message($lastRaw)) {
         $guided = plinio_scope_guided_followup_reply($scope, $lastRaw, $lastAssistantRaw);
         if (is_string($guided) && trim($guided) !== '') {
             return $guided;
@@ -3303,6 +3318,12 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
         && plinio_contains_any($last, ['preventivo', 'stima', 'quanto costa', 'prezzo', 'costo']) > 0;
     if ($shippingQuoteIntent) {
         return "Certo. Posso preparare un preventivo indicativo rapido per la spedizione: inserisci nel pannello preventivo servizio (nazionale/internazionale), paese di destinazione, peso e misure del pacco.";
+    }
+
+    $vintedInpostIntent = $scope === 'spedizioni'
+        && plinio_contains_any($last, ['vinted', 'inpost', 'in post', 'locker', 'fermopoint']) > 0;
+    if ($vintedInpostIntent) {
+        return "Si, possiamo aiutarti su spedizioni collegate a Vinted e consegna tramite punti locker/corriere. Dimmi se devi spedire un pacco oppure tracciare una spedizione, e ti guido nel passo giusto.";
     }
 
     $knownServicePriceIntent = plinio_contains_any($last, ['prezzo', 'costo', 'quanto costa', 'quanto viene', 'tariffa']) > 0;

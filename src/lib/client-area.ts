@@ -3,6 +3,7 @@ export type ClientAreaKey =
   | "visure"
   | "caf-patronato"
   | "consulenza-utenze"
+  | "web-agency"
   | "fotocopie-online";
 
 export type ClientAreaServiceOption = {
@@ -244,6 +245,65 @@ export const clientAreas: ClientAreaConfig[] = [
         id: "city",
         label: "Città di fornitura",
         placeholder: "Inserisci la città",
+      },
+    ],
+  },
+  {
+    key: "web-agency",
+    title: "Web Agency e progetti digitali in area dedicata",
+    subtitle: "Invii il brief, ricevi proposta, segui lo stato e centralizzi i materiali.",
+    description:
+      "Uno spazio operativo per richiedere siti web, e-commerce, SEO locale, landing page o gestionali su misura. Il cliente invia il brief, allega indicazioni chiave e riceve aggiornamenti ordinati.",
+    path: "/area-clienti/web-agency",
+    eyebrow: "Web Agency",
+    cta: "Apri area web agency",
+    highlights: [
+      "Brief progetto guidato e lead qualificata",
+      "Proposta commerciale allegata dal team",
+      "Storico richieste e stato progetto",
+    ],
+    serviceOptions: [
+      {
+        value: "sito-vetrina",
+        label: "Sito vetrina",
+        description: "Presenza online chiara, professionale e orientata ai contatti.",
+      },
+      {
+        value: "ecommerce",
+        label: "E-commerce",
+        description: "Vendita online con struttura catalogo, checkout e supporto operativo.",
+      },
+      {
+        value: "seo-local",
+        label: "SEO e posizionamento locale",
+        description: "Ottimizzazione visibilità locale e richieste da Google.",
+      },
+      {
+        value: "gestionale",
+        label: "Gestionale su misura",
+        description: "Flussi operativi digitali costruiti sul lavoro reale dell'attività.",
+      },
+      {
+        value: "landing-page",
+        label: "Landing page",
+        description: "Pagina focalizzata su conversione, contatti o raccolta lead per un singolo obiettivo.",
+      },
+    ],
+    fields: [
+      {
+        id: "project_goal",
+        label: "Obiettivo principale",
+        placeholder: "Es. più contatti, vendite online, prenotazioni, brand",
+      },
+      {
+        id: "budget_range",
+        label: "Budget indicativo",
+        placeholder: "Es. 1500-3000 EUR",
+      },
+      {
+        id: "timeline",
+        label: "Tempistica desiderata",
+        placeholder: "Es. entro 30 giorni",
       },
     ],
   },

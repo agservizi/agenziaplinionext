@@ -10,6 +10,8 @@ import { webAgencyServiceDetails } from "@/lib/web-agency-services";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date().toISOString();
+
   const publicRoutes = [
     "",
     "/chi-siamo",
@@ -22,7 +24,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/servizi/web-agency",
     "/servizi/spid-pec-firma-digitale",
     "/web-agency",
-    "/servizi/web-agency",
     "/consulenza",
     "/prenota",
     "/contatti",
@@ -61,10 +62,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ]),
   ).filter((path) => isIndexablePath(path));
 
-  return routes.map((path) => ({
-    url: `${SITE_URL}${path}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: path === "" ? "weekly" : "monthly",
-    priority: path === "" ? 1 : path.startsWith("/servizi/") ? 0.8 : 0.7,
-  }));
+  return routes.map((path) => {
+    const url = `${SITE_URL}${path}`;
+    const isHome = path === "";
+    const isService = path.startsWith("/servizi/");
+    const isTopLevel = !isService && path.split("/").length <= 2;
+
+    return {
+      url,
+      lastModified: now,
+      changeFrequency: isHome ? "weekly" : isService ? "monthly" : "monthly",
+      priority: isHome ? 1.0 : isService ? 0.8 : isTopLevel ? 0.7 : 0.6,
+      alternates: {
+        languages: {
+          "it-IT": url,
+          "x-default": url,
+        },
+      },
+    };
+  });
 }

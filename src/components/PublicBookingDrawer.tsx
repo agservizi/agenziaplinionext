@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { BOOKING_SERVICE_OPTIONS, resolveClientBookingApiBase } from "@/lib/booking-api";
 
 type BookingHealthResponse = {
@@ -287,22 +288,31 @@ export default function PublicBookingDrawer({
 
   return (
     <>
-      <div
-        className={
-          open
-            ? "fixed inset-0 z-[60] bg-slate-950/70 opacity-100 transition-opacity"
-            : "pointer-events-none fixed inset-0 z-[60] bg-slate-950/70 opacity-0 transition-opacity"
-        }
-        onClick={onClose}
-      />
-      <aside
-        className={
-          open
-            ? "fixed right-0 top-0 z-[70] h-[100svh] w-full max-w-xl translate-x-0 overflow-y-auto bg-slate-950 text-white shadow-2xl transition-transform"
-            : "fixed right-0 top-0 z-[70] h-[100svh] w-full max-w-xl translate-x-full overflow-y-auto bg-slate-950 text-white shadow-2xl transition-transform"
-        }
-        aria-hidden={!open}
-      >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="booking-overlay"
+            className="fixed inset-0 z-60 bg-slate-950/70"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            key="booking-drawer"
+            className="fixed right-0 top-0 z-70 h-svh w-full max-w-xl overflow-y-auto bg-slate-950 text-white shadow-2xl"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            aria-modal="true"
+            aria-label="Prenota appuntamento"
+          >
         <div className="min-h-full bg-[radial-gradient(circle_at_top,_rgba(6,182,212,0.22),_transparent_38%),linear-gradient(180deg,#020617_0%,#020617_55%,#0f172a_100%)] p-6 md:p-8">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-3">
@@ -505,7 +515,9 @@ export default function PublicBookingDrawer({
             </form>
           ) : null}
         </div>
-      </aside>
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </>
   );
 }

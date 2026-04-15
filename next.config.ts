@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: "/api/admin-auth/login",
+        destination: `${localPhpApiOrigin}/api/admin-auth/login.php`,
+      },
+      {
+        source: "/api/admin-auth/session",
+        destination: `${localPhpApiOrigin}/api/admin-auth/session.php`,
+      },
+      {
         source: "/api/public/plinio-assistant",
         destination: `${localPhpApiOrigin}/api/public/plinio-assistant.php`,
       },
@@ -46,12 +54,24 @@ const nextConfig: NextConfig = {
         destination: `${localPhpApiOrigin}/api/client-area/fotocopie/verify.php`,
       },
       {
+        source: "/api/client-area/fotocopie/history",
+        destination: `${localPhpApiOrigin}/api/client-area/fotocopie/history.php`,
+      },
+      {
         source: "/api/client-area/consulenza-utenze/history",
         destination: `${localPhpApiOrigin}/api/client-area/consulenza-utenze/history.php`,
       },
       {
         source: "/api/client-area/consulenza-utenze/create",
         destination: `${localPhpApiOrigin}/api/client-area/consulenza-utenze/create.php`,
+      },
+      {
+        source: "/api/client-area/web-agency/history",
+        destination: `${localPhpApiOrigin}/api/client-area/web-agency/history.php`,
+      },
+      {
+        source: "/api/client-area/web-agency/create",
+        destination: `${localPhpApiOrigin}/api/client-area/web-agency/create.php`,
       },
       {
         source: "/api/client-area/caf-patronato/file-download",
@@ -170,6 +190,18 @@ const nextConfig: NextConfig = {
         destination: `${localPhpApiOrigin}/api/admin/client-area/consulting-leads/quote.php`,
       },
       {
+        source: "/api/admin/client-area/web-agency",
+        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency.php`,
+      },
+      {
+        source: "/api/admin/client-area/web-agency/status",
+        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency/status.php`,
+      },
+      {
+        source: "/api/admin/client-area/web-agency/quote",
+        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency/quote.php`,
+      },
+      {
         source: "/api/admin/client-area/payments",
         destination: `${localPhpApiOrigin}/api/admin/client-area/payments.php`,
       },
@@ -184,6 +216,10 @@ const nextConfig: NextConfig = {
       {
         source: "/api/admin/client-area/visure",
         destination: `${localPhpApiOrigin}/api/admin/client-area/visure.php`,
+      },
+      {
+        source: "/api/admin/client-area/visure-upload",
+        destination: `${localPhpApiOrigin}/api/admin/client-area/visure-upload.php`,
       },
       {
         source: "/api/admin/client-area/email-notifications",

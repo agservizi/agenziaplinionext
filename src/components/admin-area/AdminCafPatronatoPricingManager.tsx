@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CAF_PATRONATO_CATALOG,
   getCafPatronatoService,
@@ -48,12 +49,24 @@ function formatDecimal(value: number) {
 }
 
 export default function AdminCafPatronatoPricingManager() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [message, setMessage] = useState("");
   const [rules, setRules] = useState<CafPatronatoPricingRule[]>([]);
   const [form, setForm] = useState<PricingFormState>(() => buildInitialFormState());
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const handleSessionError = (error: unknown) => {
+    const currentMessage =
+      error instanceof Error ? error.message : "Sessione admin non valida. Esegui di nuovo il login.";
+    if (currentMessage.toLowerCase().includes("sessione admin")) {
+      router.replace(`/admin-login?next=${encodeURIComponent(pathname)}`);
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     let active = true;
@@ -67,6 +80,7 @@ export default function AdminCafPatronatoPricingManager() {
         setStatus("ready");
       } catch (error) {
         if (!active) return;
+        if (handleSessionError(error)) return;
         setStatus("error");
         setMessage(
           error instanceof Error ? error.message : "Errore caricamento listino CAF e Patronato",
@@ -140,6 +154,7 @@ export default function AdminCafPatronatoPricingManager() {
       resetForm();
       setStatus("ready");
     } catch (error) {
+      if (handleSessionError(error)) return;
       setMessage(
         error instanceof Error ? error.message : "Errore salvataggio listino CAF e Patronato",
       );
@@ -161,6 +176,7 @@ export default function AdminCafPatronatoPricingManager() {
       }
       setMessage(resultMessage);
     } catch (error) {
+      if (handleSessionError(error)) return;
       setMessage(
         error instanceof Error ? error.message : "Errore rimozione regola CAF e Patronato",
       );
@@ -200,7 +216,7 @@ export default function AdminCafPatronatoPricingManager() {
         {message ? <p className="mt-4 text-sm font-medium text-cyan-700">{message}</p> : null}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
+      <div className="admin-adaptive-split-grid grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Regola {form.id ? `#${form.id}` : "nuova"}

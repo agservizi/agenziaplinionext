@@ -11,56 +11,61 @@ export function generateMetadata() {
   });
 }
 
+function Chevron() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0" fill="none" aria-hidden="true">
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function AreaClientiVisureStoricoPage() {
   return (
-    <div className="pb-24">
-      <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
-        <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-              Storico visure
-            </p>
-            <h1 className="text-4xl font-semibold text-white md:text-5xl">
-              Le richieste gia inviate e in gestione.
-            </h1>
-            <p className="text-base text-slate-300 md:text-lg">
-              Qui controlli in un solo posto stato pratica, riferimento richiesta e documento
-              disponibile.
-            </p>
-            <div className="flex flex-wrap gap-3">
+    <div className="min-h-full">
+      <div className="relative">
+        <div className="h-px bg-linear-to-r from-indigo-500/50 via-indigo-400/20 to-transparent" />
+        <div className="border-b border-white/6 bg-slate-950 px-6 pt-5 pb-6 md:px-10">
+          <nav className="mb-5 flex items-center gap-2 text-xs text-slate-600">
+            <Link href="/area-clienti" className="transition hover:text-slate-400">Dashboard</Link>
+            <Chevron />
+            <Link href="/area-clienti/visure" className="transition hover:text-slate-400">Visure</Link>
+            <Chevron />
+            <span className="text-slate-500">Storico</span>
+          </nav>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                  <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9L14 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                  <path d="M14 3v6h6M8 13h8M8 17h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-white md:text-3xl">Storico visure</h1>
+                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
+                  Stato pratica, riferimento richiesta e documento disponibile per ogni visura inviata.
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
               <Link
                 href="/area-clienti/visure"
-                className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition hover:border-slate-600 hover:bg-slate-900"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
               >
-                Torna all'area visure
-              </Link>
-              <Link
-                href="/area-clienti"
-                className="inline-flex rounded-full border border-slate-700 bg-transparent px-6 py-3 text-sm font-semibold text-white transition hover:border-slate-600 hover:bg-slate-900/60"
-              >
-                Dashboard clienti
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+                  <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Nuova visura
               </Link>
             </div>
           </div>
-          <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Cosa vedo qui
-            </p>
-            <ul className="mt-4 space-y-3 text-sm text-slate-200">
-              <li>• Stato della pratica interna</li>
-              <li>• Stato di lavorazione della richiesta</li>
-              <li>• Riferimento e documento, se già pronto</li>
-            </ul>
-          </div>
-        </Container>
-      </section>
+        </div>
+      </div>
 
-      <div className="lux-surface pt-10 text-slate-900">
-        <section className="py-10">
-          <Container>
-            <OpenApiVisureHistory />
-          </Container>
-        </section>
+      <div className="lux-surface text-slate-900">
+        <Container className="py-8">
+          <OpenApiVisureHistory />
+        </Container>
       </div>
     </div>
   );

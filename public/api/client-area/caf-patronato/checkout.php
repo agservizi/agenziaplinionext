@@ -74,6 +74,18 @@ $preferredContactMethod = trim((string) ($_POST['preferredContactMethod'] ?? '')
 $preferredContactDate = trim((string) ($_POST['preferredContactDate'] ?? ''));
 $documentSummary = trim((string) ($_POST['documentSummary'] ?? ''));
 $notes = trim((string) ($_POST['notes'] ?? ''));
+$token = trim((string) ($_POST['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
+
+if ($customerName === '' && $clientProfile['fullName'] !== '') {
+    $customerName = (string) $clientProfile['fullName'];
+}
+if ($email === '' && $clientProfile['email'] !== '') {
+    $email = (string) $clientProfile['email'];
+}
+if ($phone === '' && $clientProfile['phone'] !== '') {
+    $phone = (string) $clientProfile['phone'];
+}
 
 if ($customerName === '' || !str_contains($email, '@') || $serviceType === '' || !in_array($scope, ['caf', 'patronato'], true)) {
     client_area_json(['message' => 'Compila nominativo, email, ambito e servizio prima del pagamento.'], 400);
@@ -147,6 +159,12 @@ try {
         'documentSummary' => $documentSummary,
         'notes' => $notes,
         'pendingFiles' => $pendingFiles,
+        'clientUsername' => (string) ($clientProfile['username'] ?? ''),
+        'clientUserId' => (int) ($clientProfile['userId'] ?? 0),
+        'clientSource' => (string) ($clientProfile['source'] ?? 'unknown'),
+        'clientEmail' => (string) ($clientProfile['email'] ?? $email),
+        'clientPhone' => (string) ($clientProfile['phone'] ?? $phone),
+        'clientCompanyName' => (string) ($clientProfile['companyName'] ?? ''),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     $stmt = $db->prepare(

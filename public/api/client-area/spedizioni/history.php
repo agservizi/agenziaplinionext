@@ -8,6 +8,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     client_area_json(['message' => 'Metodo non consentito.'], 405);
 }
 
+$body = client_area_parse_json_body();
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
+
 if (!client_area_has_database_config()) {
     client_area_json(['shipments' => [], 'message' => 'Database non configurato.'], 200);
 }
@@ -55,23 +59,27 @@ try {
 
     $shipments = [];
     while ($row = $result->fetch_assoc()) {
-        $details = [];
-        $brtResponse = [];
+        $details = client_area_decode_json_value($row['details_json'] ?? null);
+        $brtResponse = client_area_decode_json_value($row['brt_response_json'] ?? null);
 
-        $detailsJson = $row['details_json'] ?? null;
-        if (is_string($detailsJson) && $detailsJson !== '') {
-            $decoded = json_decode($detailsJson, true);
-            if (is_array($decoded)) {
-                $details = $decoded;
-            }
+        $payloadUserId = (int) ($details['clientUserId'] ?? 0);
+        $payloadUsername = strtolower(trim((string) ($details['clientUsername'] ?? '')));
+        $payloadEmail = strtolower(trim((string) ($details['clientEmail'] ?? ($row['email'] ?? ''))));
+        $currentUsername = strtolower(trim((string) ($clientProfile['username'] ?? '')));
+        $currentEmail = strtolower(trim((string) ($clientProfile['email'] ?? '')));
+        $currentUserId = (int) ($clientProfile['userId'] ?? 0);
+
+        $ownedByClient = false;
+        if ($currentUserId > 0 && $payloadUserId > 0 && $currentUserId === $payloadUserId) {
+            $ownedByClient = true;
+        } elseif ($currentEmail !== '' && $payloadEmail !== '' && $currentEmail === $payloadEmail) {
+            $ownedByClient = true;
+        } elseif ($currentUsername !== '' && $payloadUsername !== '' && $currentUsername === $payloadUsername) {
+            $ownedByClient = true;
         }
 
-        $brtJson = $row['brt_response_json'] ?? null;
-        if (is_string($brtJson) && $brtJson !== '') {
-            $decoded = json_decode($brtJson, true);
-            if (is_array($decoded)) {
-                $brtResponse = $decoded;
-            }
+        if (!$ownedByClient) {
+            continue;
         }
 
         $manifest = [];

@@ -3,13 +3,17 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ClientAreaConfig } from "@/lib/client-area";
+import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
 import { SHIPMENT_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/shipment-payment";
 import type { PublicShippingPricingRule } from "@/lib/shipping-pricing";
 
 export type BrtShipmentLiveSummary = {
+  carrierProvider: string;
   serviceLabel: string;
   destinationCountry: string;
   parcelCount: number;
+  packageSize: string;
+  packageLabel: string;
   actualWeightKG: number;
   volumetricWeightKG: number;
   taxableWeightKG: number;
@@ -23,10 +27,11 @@ type BrtShipmentFormProps = {
   area: ClientAreaConfig;
   pricingRules?: PublicShippingPricingRule[];
   onSummaryChange?: (summary: BrtShipmentLiveSummary) => void;
-  onShipmentCreated?: () => void;
 };
 
 type ShipmentFormState = {
+  carrierProvider: string;
+  inpostPackageSize: string;
   customerName: string;
   email: string;
   phone: string;
@@ -102,6 +107,12 @@ const DESTINATION_COUNTRY_OPTIONS: Array<{ code: string; label: string }> = [
   { code: "GB", label: "Regno Unito" },
 ];
 
+const INPOST_PACKAGE_OPTIONS = [
+  { value: "small", label: "Piccolo", shortLabel: "S", dimensions: "8 x 38 x 64 cm", lengthCM: 64, heightCM: 8, depthCM: 38 },
+  { value: "medium", label: "Medio", shortLabel: "M", dimensions: "19 x 38 x 64 cm", lengthCM: 64, heightCM: 19, depthCM: 38 },
+  { value: "large", label: "Grande", shortLabel: "L", dimensions: "41 x 38 x 64 cm", lengthCM: 64, heightCM: 41, depthCM: 38 },
+] as const;
+
 function getCountryLabelByCode(code: string) {
   const normalized = String(code || "").trim().toUpperCase();
   return DESTINATION_COUNTRY_OPTIONS.find((country) => country.code === normalized)?.label || normalized;
@@ -109,6 +120,8 @@ function getCountryLabelByCode(code: string) {
 
 function buildInitialState(area: ClientAreaConfig): ShipmentFormState {
   return {
+    carrierProvider: "brt",
+    inpostPackageSize: "small",
     customerName: "",
     email: "",
     phone: "",
@@ -153,39 +166,61 @@ function getServiceCountryValidationMessage(serviceCode: string, destinationCoun
   return "";
 }
 
+function getCarrierValidationMessage(carrierProvider: string, destinationCountry: string) {
+  if (carrierProvider === "inpost" && destinationCountry !== "IT") {
+    return "InPost e disponibile in questo flusso solo per destinazioni italiane (IT).";
+  }
+  return "";
+}
+
+function getInpostParcelValidationMessage(input: {
+  carrierProvider: string;
+  inpostPackageSize: string;
+  parcelCount: string;
+  parcelLengthCM: string;
+  parcelHeightCM: string;
+  parcelDepthCM: string;
+  weightKG: string;
+}) {
+  if (input.carrierProvider !== "inpost") return "";
+  if (!input.inpostPackageSize) return "Seleziona un formato InPost tra S, M o L.";
+
+  const parcelCount = Number(input.parcelCount) || 0;
+  const length = Number(input.parcelLengthCM) || 0;
+  const height = Number(input.parcelHeightCM) || 0;
+  const depth = Number(input.parcelDepthCM) || 0;
+  const totalWeight = Number(input.weightKG) || 0;
+  const perParcelWeight = parcelCount > 0 ? totalWeight / parcelCount : 0;
+  const ordered = [length, height, depth].sort((left, right) => left - right);
+  const [smallest, medium, largest] = ordered;
+
+  if (medium > 38 || largest > 64) {
+    return "Per InPost ogni collo deve rientrare al massimo in 38 x 64 cm sui due lati maggiori.";
+  }
+  if (smallest > 41) {
+    return "Per InPost il lato minore del collo non puo superare 41 cm (formato L).";
+  }
+  if (perParcelWeight > 25) {
+    return "Per InPost ogni collo non puo superare 25 kg.";
+  }
+
+  return "";
+}
+
 export default function BrtShipmentForm({
   area,
   pricingRules = [],
   onSummaryChange,
-  onShipmentCreated,
 }: BrtShipmentFormProps) {
   const searchParams = useSearchParams();
   const [form, setForm] = useState<ShipmentFormState>(() => buildInitialState(area));
   const [billingAccordionOpen, setBillingAccordionOpen] = useState(false);
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-  const [message, setMessage] = useState("");
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "loading" | "redirecting" | "error">(
     "idle",
   );
   const [paymentMessage, setPaymentMessage] = useState("");
   const [step, setStep] = useState(1);
   const [stepError, setStepError] = useState("");
-  const [routingInfo, setRoutingInfo] = useState<{
-    arrivalTerminal: string;
-    arrivalDepot: string;
-    deliveryZone: string;
-  } | null>(null);
-  const [trackingStatus, setTrackingStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [trackingMessage, setTrackingMessage] = useState("");
-  const [trackingInfo, setTrackingInfo] = useState<{
-    shipmentId: string;
-    status: string;
-    statusDescription: string;
-    events: Array<{ date: string; time: string; description: string; branch: string }>;
-  } | null>(null);
-  const [trackingCode, setTrackingCode] = useState("");
-  const [parcelId, setParcelId] = useState("");
-  const [labelPdfBase64, setLabelPdfBase64] = useState("");
   const [pudoStatus, setPudoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [pudoMessage, setPudoMessage] = useState("");
   const [pudoPoints, setPudoPoints] = useState<
@@ -200,28 +235,17 @@ export default function BrtShipmentForm({
     }>
   >([]);
   const [pudoModalOpen, setPudoModalOpen] = useState(false);
-  const [confirmStatus, setConfirmStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [confirmMessage, setConfirmMessage] = useState("");
-  const [confirmed, setConfirmed] = useState(false);
-  const [numericSenderReference, setNumericSenderReference] = useState(0);
-  const [alphanumericSenderReference, setAlphanumericSenderReference] = useState("");
-  const [deleteStatus, setDeleteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [deleteMessage, setDeleteMessage] = useState("");
-  const [manifestStatus, setManifestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [manifestMessage, setManifestMessage] = useState("");
+  const [profileStatus, setProfileStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const totalSteps = 5;
+  const isInpost = form.carrierProvider === "inpost";
   const stepLabels = [
     "Anagrafica",
-    "Ritiro e Destinazione",
+    isInpost ? "Destinazione e Punto InPost" : "Ritiro e Destinazione",
     "Colli e Peso",
     "Fatturazione",
     "Riepilogo e Pagamento",
   ];
 
-  const labelHref = useMemo(() => {
-    if (!labelPdfBase64) return "";
-    return `data:application/pdf;base64,${labelPdfBase64}`;
-  }, [labelPdfBase64]);
   const parcelCount = Number(form.parcelCount) || 0;
   const parcelLengthCM = Number(form.parcelLengthCM) || 0;
   const parcelHeightCM = Number(form.parcelHeightCM) || 0;
@@ -232,48 +256,103 @@ export default function BrtShipmentForm({
   const actualWeightKG = Number(form.weightKG) || 0;
   const taxableWeightKG = Math.max(actualWeightKG, volumetricWeightKG);
   const selectedService = area.serviceOptions.find((option) => option.value === form.serviceCode);
-  const estimatedCostLabel =
-    form.destinationCountry === "IT"
-      ? taxableWeightKG <= 3
-        ? "7,90 - 9,90 euro"
-        : taxableWeightKG <= 10
-          ? "9,90 - 14,90 euro"
-          : "14,90+ euro"
-      : "preventivo dinamico";
+  const selectedCarrierLabel = form.carrierProvider === "inpost" ? "InPost" : "BRT";
   const serviceCountryError = getServiceCountryValidationMessage(
     form.serviceCode,
     form.destinationCountry,
   );
-  const listinoStrictError = useMemo(() => {
-    if (serviceCountryError) return "";
-    if (taxableWeightKG <= 0) return "";
+  const carrierValidationError = getCarrierValidationMessage(
+    form.carrierProvider,
+    form.destinationCountry,
+  );
+  const inpostParcelValidationError = getInpostParcelValidationMessage({
+    carrierProvider: form.carrierProvider,
+    inpostPackageSize: form.inpostPackageSize,
+    parcelCount: form.parcelCount,
+    parcelLengthCM: form.parcelLengthCM,
+    parcelHeightCM: form.parcelHeightCM,
+    parcelDepthCM: form.parcelDepthCM,
+    weightKG: form.weightKG,
+  });
+  const matchedPricingRule = useMemo(() => {
+    if (serviceCountryError || carrierValidationError || inpostParcelValidationError) return null;
+    if (taxableWeightKG <= 0) return null;
 
     const destinationCountry = String(form.destinationCountry || "IT").trim().toUpperCase();
     const serviceScope = destinationCountry === "IT" ? "national" : "international";
-    const candidates = pricingRules.filter((rule) => {
-      if (!rule.active) return false;
-      const ruleScope = String(rule.serviceScope || "all").trim().toLowerCase();
-      if (ruleScope !== serviceScope) return false;
-      if (serviceScope === "international") {
-        const ruleCountry = String(rule.countryCode || "").trim().toUpperCase();
-        return ruleCountry === destinationCountry || ruleCountry === "ALL" || ruleCountry === "";
+    const sortedRules = [...pricingRules].sort((left, right) => {
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
       }
-      return true;
+
+      return left.minWeightKG - right.minWeightKG;
     });
 
-    const hasMatchingRule = candidates.some((rule) => {
-      const weightMatches =
-        taxableWeightKG >= rule.minWeightKG &&
-        (rule.maxWeightKG <= 0 || taxableWeightKG <= rule.maxWeightKG);
-      return weightMatches;
-    });
+    return (
+      sortedRules.find((rule) => {
+        if (!rule.active) return false;
+        if (rule.carrierProvider !== form.carrierProvider) return false;
+        if (form.carrierProvider === "inpost") {
+          return rule.packageSize === form.inpostPackageSize;
+        }
+        const ruleScope = String(rule.serviceScope || "all").trim().toLowerCase();
+        if (ruleScope !== serviceScope && ruleScope !== "all") return false;
+        if (serviceScope === "international") {
+          const ruleCountry = String(rule.countryCode || "").trim().toUpperCase();
+          if (
+            ruleCountry !== destinationCountry &&
+            ruleCountry !== "ALL" &&
+            ruleCountry !== ""
+          ) {
+            return false;
+          }
+        }
 
-    if (hasMatchingRule) return "";
-    return "Il servizio selezionato non consente spedizioni con peso superiore al listino disponibile. Per colli extra ti invitiamo a portare il pacco in agenzia.";
-  }, [form.destinationCountry, pricingRules, serviceCountryError, taxableWeightKG]);
+        const weightMatches =
+          taxableWeightKG >= rule.minWeightKG &&
+          (rule.maxWeightKG <= 0 || taxableWeightKG <= rule.maxWeightKG);
+        const volumeMatches =
+          volumeM3 >= rule.minVolumeM3 &&
+          (rule.maxVolumeM3 <= 0 || volumeM3 <= rule.maxVolumeM3);
+
+        return weightMatches && volumeMatches;
+      }) || null
+    );
+  }, [
+    carrierValidationError,
+    form.carrierProvider,
+    form.destinationCountry,
+    form.inpostPackageSize,
+    inpostParcelValidationError,
+    pricingRules,
+    serviceCountryError,
+    taxableWeightKG,
+    volumeM3,
+  ]);
+  const estimatedCostLabel = matchedPricingRule
+    ? `${matchedPricingRule.priceEUR.toFixed(2).replace(".", ",")} euro`
+    : `Listino ${selectedCarrierLabel} non disponibile`;
+  const listinoStrictError = useMemo(() => {
+    if (serviceCountryError || carrierValidationError || inpostParcelValidationError) return "";
+    if (taxableWeightKG <= 0) return "";
+
+    if (matchedPricingRule) return "";
+    return `Nessuna fascia attiva trovata nel listino ${selectedCarrierLabel} per peso, volume o destinazione.`;
+  }, [
+    carrierValidationError,
+    inpostParcelValidationError,
+    matchedPricingRule,
+    selectedCarrierLabel,
+    serviceCountryError,
+    taxableWeightKG,
+  ]);
   const selectedPudoPoint = useMemo(
     () => pudoPoints.find((point) => point.id === form.pudoId) || null,
     [form.pudoId, pudoPoints],
+  );
+  const selectedInpostPackage = useMemo(
+    () => INPOST_PACKAGE_OPTIONS.find((option) => option.value === form.inpostPackageSize) || INPOST_PACKAGE_OPTIONS[0],
+    [form.inpostPackageSize],
   );
 
   const updateField = <K extends keyof ShipmentFormState>(key: K, value: ShipmentFormState[K]) => {
@@ -289,13 +368,16 @@ export default function BrtShipmentForm({
       if (!form.serviceCode.trim()) return "Seleziona un servizio.";
       if (!form.destinationCountry.trim()) return "Inserisci la nazione di destinazione.";
       if (serviceCountryError) return serviceCountryError;
+      if (carrierValidationError) return carrierValidationError;
       return "";
     }
     if (currentStep === 2) {
-      if (!form.pickupAddress.trim()) return "Inserisci l'indirizzo di ritiro.";
-      if (!form.pickupZIPCode.trim()) return "Inserisci il CAP di ritiro.";
-      if (!form.pickupCity.trim()) return "Inserisci la citta di ritiro.";
-      if (!form.pickupProvince.trim()) return "Inserisci la provincia di ritiro.";
+      if (!isInpost) {
+        if (!form.pickupAddress.trim()) return "Inserisci l'indirizzo di ritiro.";
+        if (!form.pickupZIPCode.trim()) return "Inserisci il CAP di ritiro.";
+        if (!form.pickupCity.trim()) return "Inserisci la citta di ritiro.";
+        if (!form.pickupProvince.trim()) return "Inserisci la provincia di ritiro.";
+      }
       if (!form.destinationCompanyName.trim()) return "Inserisci il destinatario/azienda.";
       if (!form.destinationAddress.trim()) return "Inserisci l'indirizzo di destinazione.";
       if (!form.destinationZIPCode.trim()) return "Inserisci il CAP di destinazione.";
@@ -303,6 +385,7 @@ export default function BrtShipmentForm({
       if (!form.destinationProvince.trim()) return "Inserisci la provincia di destinazione.";
       if (!form.destinationCountry.trim()) return "Inserisci la nazione di destinazione.";
       if (serviceCountryError) return serviceCountryError;
+      if (carrierValidationError) return carrierValidationError;
       return "";
     }
     if (currentStep === 3) {
@@ -311,6 +394,7 @@ export default function BrtShipmentForm({
       if ((Number(form.parcelHeightCM) || 0) <= 0) return "Inserisci un'altezza valida.";
       if ((Number(form.parcelDepthCM) || 0) <= 0) return "Inserisci una profondita valida.";
       if ((Number(form.weightKG) || 0) <= 0) return "Inserisci un peso valido.";
+      if (inpostParcelValidationError) return inpostParcelValidationError;
       if (listinoStrictError) return listinoStrictError;
       return "";
     }
@@ -342,10 +426,70 @@ export default function BrtShipmentForm({
   });
 
   useEffect(() => {
+    let active = true;
+    const token = getClientPortalToken();
+    if (!token) {
+      return () => {
+        active = false;
+      };
+    }
+
+      setProfileStatus("loading");
+    fetchClientPortalProfile(token)
+      .then(({ profile }) => {
+        if (!active) return;
+        setForm((current) => ({
+          ...current,
+          customerName: current.customerName || profile.fullName || "",
+          email: current.email || profile.email || profile.username || "",
+          phone: current.phone || profile.phone || "",
+          billingCompanyName: current.billingCompanyName || profile.companyName || "",
+        }));
+        setProfileStatus("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setProfileStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (form.carrierProvider !== "inpost") return;
+    const nextPackage = INPOST_PACKAGE_OPTIONS.find((option) => option.value === form.inpostPackageSize);
+    if (!nextPackage) return;
+
+    setForm((current) => {
+      if (
+        current.parcelLengthCM === String(nextPackage.lengthCM) &&
+        current.parcelHeightCM === String(nextPackage.heightCM) &&
+        current.parcelDepthCM === String(nextPackage.depthCM)
+      ) {
+        return current;
+      }
+
+      return {
+        ...current,
+        parcelLengthCM: String(nextPackage.lengthCM),
+        parcelHeightCM: String(nextPackage.heightCM),
+        parcelDepthCM: String(nextPackage.depthCM),
+      };
+    });
+  }, [form.carrierProvider, form.inpostPackageSize]);
+
+  useEffect(() => {
     onSummaryChange?.({
-      serviceLabel: selectedService?.label || "Spedizione",
+      carrierProvider: form.carrierProvider,
+      serviceLabel: `${selectedCarrierLabel} • ${selectedService?.label || "Spedizione"}`,
       destinationCountry: form.destinationCountry,
       parcelCount,
+      packageSize: isInpost ? form.inpostPackageSize : "",
+      packageLabel: isInpost
+        ? `${selectedInpostPackage.label} (${selectedInpostPackage.shortLabel})`
+        : "",
       actualWeightKG,
       volumetricWeightKG,
       taxableWeightKG,
@@ -357,14 +501,20 @@ export default function BrtShipmentForm({
   }, [
     actualWeightKG,
     area.serviceOptions,
+    form.carrierProvider,
     form.destinationCountry,
+    isInpost,
     form.pudoId,
     form.serviceCode,
+    form.inpostPackageSize,
     onSummaryChange,
     parcelCount,
+    selectedCarrierLabel,
     parcelDepthCM,
     parcelHeightCM,
     parcelLengthCM,
+    selectedInpostPackage.label,
+    selectedInpostPackage.shortLabel,
     selectedService?.label,
     taxableWeightKG,
     volumetricWeightKG,
@@ -393,14 +543,17 @@ export default function BrtShipmentForm({
       const isLocalhost =
         typeof window !== "undefined" &&
         (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      const isInpost = form.carrierProvider === "inpost";
 
-      const endpoint = isLocalhost
-        ? "/api/client-area/spedizioni/brt/pudo"
-        : `/api/public/brt-pudo?${new URLSearchParams({
-            zipCode: form.destinationZIPCode,
-            city: form.destinationCity,
-            country: form.destinationCountry,
-          }).toString()}`;
+      const endpoint = isInpost
+        ? "/api/client-area/spedizioni/inpost/points"
+        : isLocalhost
+          ? "/api/client-area/spedizioni/brt/pudo"
+          : `/api/public/brt-pudo?${new URLSearchParams({
+              zipCode: form.destinationZIPCode,
+              city: form.destinationCity,
+              country: form.destinationCountry,
+            }).toString()}`;
 
       const response = await fetch(
         endpoint,
@@ -433,7 +586,9 @@ export default function BrtShipmentForm({
       };
 
       if (!response.ok) {
-        throw new Error(payload.message || "Ricerca PUDO non disponibile.");
+        throw new Error(
+          payload.message || `Ricerca punti ${isInpost ? "InPost" : "PUDO"} non disponibile.`,
+        );
       }
 
       setPudoStatus("success");
@@ -458,141 +613,6 @@ export default function BrtShipmentForm({
     }
   };
 
-  const onRefreshTracking = async () => {
-    if (!parcelId) return;
-
-    setTrackingStatus("loading");
-    setTrackingMessage("");
-
-    try {
-      const response = await fetch("/api/client-area/spedizioni/brt/tracking", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parcelId }),
-      });
-
-      const payload = (await response.json()) as {
-        message?: string;
-        shipmentId?: string;
-        status?: string;
-        statusDescription?: string;
-        events?: Array<{ date?: string; time?: string; description?: string; branch?: string }>;
-      };
-
-      if (!response.ok) {
-        throw new Error(payload.message || "Tracking BRT non disponibile.");
-      }
-
-      setTrackingStatus("success");
-      setTrackingMessage(payload.message || "Tracking aggiornato.");
-      setTrackingInfo({
-        shipmentId: String(payload.shipmentId || ""),
-        status: String(payload.status || ""),
-        statusDescription: String(payload.statusDescription || ""),
-        events: Array.isArray(payload.events)
-          ? payload.events.map((item) => ({
-              date: String(item?.date || ""),
-              time: String(item?.time || ""),
-              description: String(item?.description || ""),
-              branch: String(item?.branch || ""),
-            }))
-          : [],
-      });
-    } catch (error) {
-      setTrackingStatus("error");
-      setTrackingMessage(error instanceof Error ? error.message : "Errore tracking.");
-    }
-  };
-
-  const onConfirmShipment = async () => {
-    if (!numericSenderReference || !alphanumericSenderReference) return;
-
-    setConfirmStatus("loading");
-    setConfirmMessage("");
-
-    try {
-      const response = await fetch("/api/client-area/spedizioni/brt/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numericSenderReference,
-          alphanumericSenderReference,
-        }),
-      });
-
-      const payload = (await response.json()) as { message?: string; confirmed?: boolean };
-      if (!response.ok) {
-        throw new Error(payload.message || "Conferma BRT non riuscita.");
-      }
-
-      setConfirmStatus("success");
-      setConfirmMessage(payload.message || "Spedizione confermata.");
-      setConfirmed(Boolean(payload.confirmed));
-    } catch (error) {
-      setConfirmStatus("error");
-      setConfirmMessage(error instanceof Error ? error.message : "Errore conferma BRT.");
-    }
-  };
-
-  const onDeleteShipment = async () => {
-    if (!numericSenderReference || !alphanumericSenderReference) return;
-
-    setDeleteStatus("loading");
-    setDeleteMessage("");
-
-    try {
-      const response = await fetch("/api/client-area/spedizioni/brt/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numericSenderReference,
-          alphanumericSenderReference,
-        }),
-      });
-
-      const payload = (await response.json()) as { message?: string; deleted?: boolean };
-      if (!response.ok) {
-        throw new Error(payload.message || "Annullamento BRT non riuscito.");
-      }
-
-      setDeleteStatus("success");
-      setDeleteMessage(payload.message || "Spedizione annullata.");
-      setConfirmed(false);
-    } catch (error) {
-      setDeleteStatus("error");
-      setDeleteMessage(error instanceof Error ? error.message : "Errore annullamento BRT.");
-    }
-  };
-
-  const onCreateManifest = async () => {
-    if (!numericSenderReference || !alphanumericSenderReference) return;
-
-    setManifestStatus("loading");
-    setManifestMessage("");
-
-    try {
-      const response = await fetch("/api/client-area/spedizioni/brt/manifest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          numericSenderReference,
-          alphanumericSenderReference,
-        }),
-      });
-
-      const payload = (await response.json()) as { message?: string; created?: boolean };
-      if (!response.ok) {
-        throw new Error(payload.message || "Manifest BRT non disponibile.");
-      }
-
-      setManifestStatus("success");
-      setManifestMessage(payload.message || "Manifest richiesto a BRT.");
-    } catch (error) {
-      setManifestStatus("error");
-      setManifestMessage(error instanceof Error ? error.message : "Errore manifest BRT.");
-    }
-  };
-
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (step < totalSteps) {
@@ -608,6 +628,11 @@ export default function BrtShipmentForm({
         setPaymentMessage(serviceCountryError);
         return;
       }
+      if (carrierValidationError) {
+        setPaymentStatus("error");
+        setPaymentMessage(carrierValidationError);
+        return;
+      }
       if (listinoStrictError) {
         setPaymentStatus("error");
         setPaymentMessage(listinoStrictError);
@@ -615,11 +640,15 @@ export default function BrtShipmentForm({
       }
 
       const shipmentPayload = buildSubmissionPayload();
+      const token = getClientPortalToken();
 
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem(
           SHIPMENT_PAYMENT_DRAFT_STORAGE_KEY,
-          JSON.stringify(shipmentPayload),
+          JSON.stringify({
+            ...shipmentPayload,
+            token,
+          }),
         );
       }
 
@@ -684,9 +713,14 @@ export default function BrtShipmentForm({
         </p>
         <h2 className="text-2xl font-semibold text-slate-900">Prepara e avvia la spedizione</h2>
         <p className="text-sm text-slate-600">
-          Compila i dati, avvia il checkout Stripe e crea la spedizione BRT dopo conferma
-          pagamento.
+          Compila i dati, avvia il checkout Stripe e crea la spedizione con BRT o InPost dopo
+          conferma pagamento.
         </p>
+        {profileStatus === "ready" ? (
+          <p className="text-xs font-medium text-cyan-700">
+            Ho precaricato i dati base dal tuo profilo cliente.
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-5">
@@ -736,6 +770,35 @@ export default function BrtShipmentForm({
           />
         </label>
         <label className="space-y-2">
+          <span className="block text-sm font-medium text-slate-700">Corriere</span>
+          <select
+            value={form.carrierProvider}
+            onChange={(event) => {
+              const nextProvider = event.target.value;
+              setStepError("");
+              setForm((current) => ({
+                ...current,
+                carrierProvider: nextProvider,
+                inpostPackageSize: nextProvider === "inpost" ? current.inpostPackageSize || "small" : current.inpostPackageSize,
+                serviceCode:
+                  nextProvider === "inpost"
+                    ? "ritiro-nazionale"
+                    : current.serviceCode || area.serviceOptions[0]?.value || "ritiro-nazionale",
+                pudoId: "",
+                destinationCountry:
+                  nextProvider === "inpost" ? "IT" : current.destinationCountry || "IT",
+              }));
+              setPudoPoints([]);
+              setPudoModalOpen(false);
+              setPudoMessage("");
+            }}
+            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+          >
+            <option value="brt">BRT</option>
+            <option value="inpost">InPost</option>
+          </select>
+        </label>
+        <label className="space-y-2">
           <span className="block text-sm font-medium text-slate-700">Servizio</span>
           <select
             value={form.serviceCode}
@@ -744,7 +807,9 @@ export default function BrtShipmentForm({
               const nextServiceCode = event.target.value;
               setForm((current) => {
                 const nextCountry =
-                  nextServiceCode === "ritiro-nazionale"
+                  current.carrierProvider === "inpost"
+                    ? "IT"
+                    : nextServiceCode === "ritiro-nazionale"
                     ? "IT"
                     : nextServiceCode === "ritiro-internazionale" && current.destinationCountry === "IT"
                       ? "FR"
@@ -758,12 +823,23 @@ export default function BrtShipmentForm({
             }}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
           >
-            {area.serviceOptions.map((option) => (
+            {area.serviceOptions
+              .filter((option) =>
+                form.carrierProvider === "inpost"
+                  ? option.value === "ritiro-nazionale"
+                  : true,
+              )
+              .map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
-            ))}
+              ))}
           </select>
+          {form.carrierProvider === "inpost" ? (
+            <span className="block text-xs font-medium text-cyan-700">
+              Per InPost il flusso attivo resta solo nazionale su Italia.
+            </span>
+          ) : null}
         </label>
       </div>
       ) : null}
@@ -890,51 +966,66 @@ export default function BrtShipmentForm({
       </div>
       ) : null}
 
-      {step === 2 ? (
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="space-y-2 md:col-span-2">
-          <span className="block text-sm font-medium text-slate-700">Indirizzo ritiro</span>
-          <input
-            value={form.pickupAddress}
-            onChange={(event) => updateField("pickupAddress", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            placeholder="Via, civico"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">CAP ritiro</span>
-          <input
-            value={form.pickupZIPCode}
-            onChange={(event) => updateField("pickupZIPCode", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Citta ritiro</span>
-          <input
-            value={form.pickupCity}
-            onChange={(event) => updateField("pickupCity", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Provincia ritiro</span>
-          <input
-            value={form.pickupProvince}
-            onChange={(event) => updateField("pickupProvince", event.target.value.toUpperCase())}
-            maxLength={2}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-      </div>
+      {step === 2 && !isInpost ? (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <label className="space-y-2 md:col-span-2">
+            <span className="block text-sm font-medium text-slate-700">Indirizzo ritiro</span>
+            <input
+              value={form.pickupAddress}
+              onChange={(event) => updateField("pickupAddress", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              placeholder="Via, civico"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">CAP ritiro</span>
+            <input
+              value={form.pickupZIPCode}
+              onChange={(event) => updateField("pickupZIPCode", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Citta ritiro</span>
+            <input
+              value={form.pickupCity}
+              onChange={(event) => updateField("pickupCity", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Provincia ritiro</span>
+            <input
+              value={form.pickupProvince}
+              onChange={(event) => updateField("pickupProvince", event.target.value.toUpperCase())}
+              maxLength={2}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {step === 2 && isInpost ? (
+        <div className="mt-6 rounded-2xl border border-cyan-100 bg-cyan-50 p-4 text-sm text-cyan-950">
+          <p className="font-semibold">Consegna al punto InPost</p>
+          <p className="mt-2">
+            Per InPost non e previsto il ritiro a domicilio in questo flusso: prepari il collo e lo
+            consegni nel punto InPost che selezioni qui sotto.
+          </p>
+        </div>
       ) : null}
 
       {step === 2 ? (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+            {isInpost ? "Destinazione e Consegna" : "Destinazione"}
+          </p>
+        </div>
         <label className="space-y-2 md:col-span-2">
           <span className="block text-sm font-medium text-slate-700">Destinatario / Azienda</span>
           <input
@@ -989,16 +1080,26 @@ export default function BrtShipmentForm({
             value={form.destinationCountry}
             onChange={(event) => updateField("destinationCountry", event.target.value)}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            disabled={form.carrierProvider === "inpost"}
             required
           >
             {DESTINATION_COUNTRY_OPTIONS.filter((country) =>
-              form.serviceCode === "ritiro-nazionale" ? country.code === "IT" : country.code !== "IT",
+              form.carrierProvider === "inpost"
+                ? country.code === "IT"
+                : form.serviceCode === "ritiro-nazionale"
+                  ? country.code === "IT"
+                  : country.code !== "IT",
             ).map((country) => (
               <option key={country.code} value={country.code}>
                 {country.label}
               </option>
             ))}
           </select>
+          {form.carrierProvider === "inpost" ? (
+            <span className="block text-xs font-medium text-cyan-700">
+              InPost resta disponibile solo per destinazioni italiane.
+            </span>
+          ) : null}
         </label>
       </div>
       ) : null}
@@ -1006,16 +1107,28 @@ export default function BrtShipmentForm({
       {step === 2 && serviceCountryError ? (
         <p className="mt-3 text-sm font-medium text-red-600">{serviceCountryError}</p>
       ) : null}
+      {step === 2 && carrierValidationError ? (
+        <p className="mt-3 text-sm font-medium text-red-600">{carrierValidationError}</p>
+      ) : null}
 
       {step === 2 ? (
       <div className="mt-4">
+        <p className="text-sm font-medium text-slate-700">
+          {isInpost
+            ? "Seleziona il punto InPost dove consegnerai il pacco."
+            : "Se vuoi, puoi associare anche un punto BRT PUDO alla spedizione."}
+        </p>
         <button
           type="button"
           onClick={onSearchPudo}
           disabled={pudoStatus === "loading"}
           className="inline-flex rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-900 transition hover:border-cyan-500 hover:text-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pudoStatus === "loading" ? "Ricerca punti BRT..." : "Cerca punto BRT PUDO"}
+          {pudoStatus === "loading"
+            ? `Ricerca punti ${selectedCarrierLabel}...`
+            : form.carrierProvider === "inpost"
+              ? "Cerca punto InPost"
+              : "Cerca punto BRT PUDO"}
         </button>
         {pudoMessage ? (
           <p
@@ -1034,13 +1147,13 @@ export default function BrtShipmentForm({
             onClick={() => setPudoModalOpen(true)}
             className="mt-3 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-5 py-2 text-sm font-semibold text-cyan-900 transition hover:border-cyan-300 hover:bg-cyan-100"
           >
-            {`Apri risultati PUDO (${pudoPoints.length})`}
+            {`Apri risultati ${form.carrierProvider === "inpost" ? "InPost" : "PUDO"} (${pudoPoints.length})`}
           </button>
         ) : null}
         {form.pudoId ? (
           <div className="mt-3 rounded-2xl border border-cyan-100 bg-cyan-50 p-4 text-sm text-cyan-950">
             <p className="font-semibold">
-              Punto BRT selezionato: {selectedPudoPoint?.name || form.pudoId}
+              Punto {selectedCarrierLabel} selezionato: {selectedPudoPoint?.name || form.pudoId}
             </p>
             {selectedPudoPoint ? (
               <p className="mt-1">
@@ -1053,80 +1166,151 @@ export default function BrtShipmentForm({
       </div>
       ) : null}
 
-      {step === 3 ? (
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Numero colli</span>
-          <input
-            type="number"
-            min="1"
-            value={form.parcelCount}
-            onChange={(event) => updateField("parcelCount", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Lunghezza (cm)</span>
-          <input
-            type="number"
-            min="1"
-            value={form.parcelLengthCM}
-            onChange={(event) => updateField("parcelLengthCM", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Altezza (cm)</span>
-          <input
-            type="number"
-            min="1"
-            value={form.parcelHeightCM}
-            onChange={(event) => updateField("parcelHeightCM", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Profondita (cm)</span>
-          <input
-            type="number"
-            min="1"
-            value={form.parcelDepthCM}
-            onChange={(event) => updateField("parcelDepthCM", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Peso totale (kg)</span>
-          <input
-            type="number"
-            min="0.1"
-            step="0.1"
-            value={form.weightKG}
-            onChange={(event) => updateField("weightKG", event.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
-            required
-          />
-        </label>
-      </div>
+      {step === 3 && !isInpost ? (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Numero colli</span>
+            <input
+              type="number"
+              min="1"
+              value={form.parcelCount}
+              onChange={(event) => updateField("parcelCount", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Lunghezza (cm)</span>
+            <input
+              type="number"
+              min="1"
+              value={form.parcelLengthCM}
+              onChange={(event) => updateField("parcelLengthCM", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Altezza (cm)</span>
+            <input
+              type="number"
+              min="1"
+              value={form.parcelHeightCM}
+              onChange={(event) => updateField("parcelHeightCM", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Profondita (cm)</span>
+            <input
+              type="number"
+              min="1"
+              value={form.parcelDepthCM}
+              onChange={(event) => updateField("parcelDepthCM", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Peso totale (kg)</span>
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              value={form.weightKG}
+              onChange={(event) => updateField("weightKG", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+        </div>
       ) : null}
 
-      {step === 3 ? (
+      {step === 3 && isInpost ? (
+        <div className="mt-6 space-y-4">
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Numero colli</span>
+            <input
+              type="number"
+              min="1"
+              value={form.parcelCount}
+              onChange={(event) => updateField("parcelCount", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+
+          <div className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Formato pacco InPost</span>
+            <div className="grid gap-3 md:grid-cols-3">
+              {INPOST_PACKAGE_OPTIONS.map((option) => {
+                const active = form.inpostPackageSize === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => updateField("inpostPackageSize", option.value)}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      active
+                        ? "border-cyan-500 bg-cyan-50 shadow-[0_0_0_2px_rgba(6,182,212,0.15)]"
+                        : "border-slate-200 bg-white hover:border-cyan-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold text-slate-900">{option.label}</span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                        {option.shortLabel}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-slate-600">{option.dimensions}</p>
+                    <p className="mt-1 text-sm text-slate-600">25 kg</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Peso totale (kg)</span>
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              value={form.weightKG}
+              onChange={(event) => updateField("weightKG", event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+              required
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {step === 3 && !isInpost ? (
       <div className="mt-4 rounded-2xl border border-cyan-100 bg-cyan-50 p-4 text-sm text-cyan-950">
-        <p className="font-semibold">Calcolo BRT ufficiale</p>
+        <p className="font-semibold">Calcolo peso volumetrico {selectedCarrierLabel}</p>
         <p className="mt-1">
           Formula volume: <strong>L x H x P / 4000</strong> moltiplicata per il numero colli.
         </p>
         <p className="mt-2">
-          Peso volumetrico BRT: <strong>{volumetricWeightKG || 0} kg</strong>
+          Peso volumetrico {selectedCarrierLabel}: <strong>{volumetricWeightKG || 0} kg</strong>
         </p>
         <p className="mt-1">
           Volume totale: <strong>{volumeM3 || 0} m3</strong>
         </p>
       </div>
+      ) : null}
+
+      {step === 3 && form.carrierProvider === "inpost" ? (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+          <p className="font-semibold">Formati InPost supportati</p>
+          <p className="mt-2">S: 8 x 38 x 64 cm, massimo 25 kg</p>
+          <p className="mt-1">M: 19 x 38 x 64 cm, massimo 25 kg</p>
+          <p className="mt-1">L: 41 x 38 x 64 cm, massimo 25 kg</p>
+          <p className="mt-2 text-amber-800">
+            Hai selezionato: <strong>{selectedInpostPackage.label} ({selectedInpostPackage.shortLabel})</strong>.
+          </p>
+        </div>
       ) : null}
 
       {step === 5 ? (
@@ -1147,7 +1331,7 @@ export default function BrtShipmentForm({
           <p className="font-semibold text-slate-900">Riepilogo spedizione</p>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <p>
-              <strong>Servizio:</strong> {selectedService?.label || form.serviceCode}
+              <strong>Servizio:</strong> {selectedCarrierLabel} • {selectedService?.label || form.serviceCode}
             </p>
             <p>
               <strong>Destinazione:</strong> {form.destinationCity} (
@@ -1158,14 +1342,28 @@ export default function BrtShipmentForm({
               {taxableWeightKG || 0} kg
             </p>
             <p>
-              <strong>Stima costo:</strong> {estimatedCostLabel}
+              <strong>{isInpost ? "Stima InPost" : "Stima costo"}:</strong> {estimatedCostLabel}
             </p>
+            {isInpost ? (
+              <p>
+                <strong>Formato InPost:</strong> {selectedInpostPackage.label} ({selectedInpostPackage.shortLabel})
+              </p>
+            ) : null}
             <p className="md:col-span-2">
-              <strong>PUDO:</strong>{" "}
+              <strong>{form.carrierProvider === "inpost" ? "Punto InPost" : "PUDO"}:</strong>{" "}
               {form.pudoId
                 ? selectedPudoPoint?.name || form.pudoId
                 : "Nessun punto selezionato (consegna standard)"}
             </p>
+            {isInpost ? (
+              <p className="md:col-span-2">
+                <strong>Operativita InPost:</strong> consegni il pacco al punto selezionato dopo il pagamento.
+              </p>
+            ) : (
+              <p className="md:col-span-2">
+                <strong>Operativita BRT:</strong> il ritiro resta gestito all&apos;indirizzo indicato oppure tramite punto PUDO.
+              </p>
+            )}
           </div>
         </div>
       ) : null}
@@ -1196,33 +1394,17 @@ export default function BrtShipmentForm({
         ) : (
           <button
             type="submit"
-            disabled={
-              status === "submitting" || paymentStatus === "loading" || paymentStatus === "redirecting"
-            }
+            disabled={paymentStatus === "loading" || paymentStatus === "redirecting"}
             className="inline-flex rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/15 transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {paymentStatus === "loading"
               ? "Preparo il pagamento..."
               : paymentStatus === "redirecting"
                 ? "Reindirizzamento a Stripe..."
-                : status === "submitting"
-                  ? "Pagamento confermato, creo la spedizione..."
-                  : "Paga con Stripe e crea spedizione BRT"}
+                : `Paga con Stripe e crea spedizione ${selectedCarrierLabel}`}
           </button>
         )}
       </div>
-
-      {message ? (
-        <p
-          className={
-            status === "success"
-              ? "mt-4 text-sm font-medium text-emerald-600"
-              : "mt-4 text-sm font-medium text-red-600"
-          }
-        >
-          {message}
-        </p>
-      ) : null}
 
       {paymentMessage ? (
         <p
@@ -1236,147 +1418,10 @@ export default function BrtShipmentForm({
         </p>
       ) : null}
 
-      {status === "success" ? (
-        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          {routingInfo ? (
-            <div className="mb-3 rounded-2xl border border-cyan-100 bg-white p-4 text-cyan-950">
-              <p className="font-semibold">Instradamento BRT verificato</p>
-              <p className="mt-1">
-                Terminale arrivo: <strong>{routingInfo.arrivalTerminal || "n/d"}</strong>
-              </p>
-              <p className="mt-1">
-                Deposito arrivo: <strong>{routingInfo.arrivalDepot || "n/d"}</strong>
-              </p>
-              <p className="mt-1">
-                Zona consegna: <strong>{routingInfo.deliveryZone || "n/d"}</strong>
-              </p>
-            </div>
-          ) : null}
-          <p className="font-semibold">Tracking: {trackingCode || "non disponibile"}</p>
-          <p className="mt-1">Parcel ID: {parcelId || "non disponibile"}</p>
-          <p className="mt-1">
-            Peso volumetrico BRT: <strong>{volumetricWeightKG || 0} kg</strong>
-          </p>
-          <p className="mt-1">
-            Conferma BRT: <strong>{confirmed ? "confermata" : "da confermare"}</strong>
-          </p>
-          {labelHref ? (
-            <a
-              href={labelHref}
-              download={`etichetta-brt-${trackingCode || "spedizione"}.pdf`}
-              className="mt-3 inline-flex rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white"
-            >
-              Scarica etichetta PDF
-            </a>
-          ) : null}
-          {!confirmed && numericSenderReference && alphanumericSenderReference ? (
-            <button
-              type="button"
-              onClick={onConfirmShipment}
-              disabled={confirmStatus === "loading"}
-              className="ml-3 inline-flex rounded-full border border-cyan-300 bg-white px-5 py-2 text-sm font-semibold text-cyan-800 transition hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {confirmStatus === "loading" ? "Confermo..." : "Conferma spedizione BRT"}
-            </button>
-          ) : null}
-          {parcelId ? (
-            <button
-              type="button"
-              onClick={onRefreshTracking}
-              disabled={trackingStatus === "loading"}
-              className="ml-3 inline-flex rounded-full border border-emerald-300 bg-white px-5 py-2 text-sm font-semibold text-emerald-800 transition hover:border-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {trackingStatus === "loading" ? "Aggiorno tracking..." : "Aggiorna tracking"}
-            </button>
-          ) : null}
-          {numericSenderReference && alphanumericSenderReference ? (
-            <button
-              type="button"
-              onClick={onCreateManifest}
-              disabled={manifestStatus === "loading"}
-              className="ml-3 inline-flex rounded-full border border-indigo-300 bg-white px-5 py-2 text-sm font-semibold text-indigo-700 transition hover:border-indigo-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {manifestStatus === "loading" ? "Invio manifest..." : "Genera manifest BRT"}
-            </button>
-          ) : null}
-          {numericSenderReference && alphanumericSenderReference ? (
-            <button
-              type="button"
-              onClick={onDeleteShipment}
-              disabled={deleteStatus === "loading"}
-              className="ml-3 inline-flex rounded-full border border-red-300 bg-white px-5 py-2 text-sm font-semibold text-red-700 transition hover:border-red-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {deleteStatus === "loading" ? "Annullamento..." : "Annulla spedizione BRT"}
-            </button>
-          ) : null}
-          {confirmMessage ? (
-            <p
-              className={
-                confirmStatus === "error"
-                  ? "mt-3 font-medium text-red-600"
-                  : "mt-3 font-medium text-emerald-700"
-              }
-            >
-              {confirmMessage}
-            </p>
-          ) : null}
-          {manifestMessage ? (
-            <p
-              className={
-                manifestStatus === "error"
-                  ? "mt-3 font-medium text-red-600"
-                  : "mt-3 font-medium text-indigo-700"
-              }
-            >
-              {manifestMessage}
-            </p>
-          ) : null}
-          {deleteMessage ? (
-            <p
-              className={
-                deleteStatus === "error"
-                  ? "mt-3 font-medium text-red-600"
-                  : "mt-3 font-medium text-red-700"
-              }
-            >
-              {deleteMessage}
-            </p>
-          ) : null}
-          {trackingMessage ? <p className="mt-3 font-medium">{trackingMessage}</p> : null}
-          {trackingInfo ? (
-            <div className="mt-3 rounded-2xl border border-emerald-200 bg-white p-4 text-slate-900">
-              <p>
-                Stato: <strong>{trackingInfo.status || "n/d"}</strong>
-              </p>
-              <p className="mt-1">
-                Descrizione: <strong>{trackingInfo.statusDescription || "n/d"}</strong>
-              </p>
-              {trackingInfo.shipmentId ? (
-                <p className="mt-1">
-                  Shipment ID: <strong>{trackingInfo.shipmentId}</strong>
-                </p>
-              ) : null}
-              {trackingInfo.events.length > 0 ? (
-                <div className="mt-3 space-y-2">
-                  {trackingInfo.events.slice(0, 5).map((eventItem, index) => (
-                    <div key={`${eventItem.date}-${eventItem.time}-${index}`} className="text-sm">
-                      <strong>
-                        {eventItem.date || "--"} {eventItem.time || "--"}
-                      </strong>
-                      : {eventItem.description || "Evento"} {eventItem.branch ? `(${eventItem.branch})` : ""}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
       {step === totalSteps ? (
         <p className="mt-3 text-sm text-slate-600">
           Il pagamento viene completato prima: solo dopo la conferma Stripe il sistema crea la
-          spedizione BRT.
+          spedizione {selectedCarrierLabel}.
         </p>
       ) : null}
 
@@ -1386,7 +1431,7 @@ export default function BrtShipmentForm({
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-                  Punti BRT PUDO
+                  {form.carrierProvider === "inpost" ? "Punti InPost" : "Punti BRT PUDO"}
                 </p>
                 <p className="mt-1 text-sm text-slate-600">
                   Seleziona il punto piu comodo tra i risultati trovati.
@@ -1427,7 +1472,11 @@ export default function BrtShipmentForm({
                             : "inline-flex rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                         }
                       >
-                        {form.pudoId === point.id ? "Punto selezionato" : "Usa questo punto BRT"}
+                        {form.pudoId === point.id
+                          ? "Punto selezionato"
+                          : form.carrierProvider === "inpost"
+                            ? "Usa questo punto InPost"
+                            : "Usa questo punto BRT"}
                       </button>
                     </div>
                   </div>

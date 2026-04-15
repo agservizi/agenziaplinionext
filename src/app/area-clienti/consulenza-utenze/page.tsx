@@ -15,53 +15,60 @@ export function generateMetadata() {
   });
 }
 
+function Chevron() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3 w-3 shrink-0" fill="none" aria-hidden="true">
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function AreaClientiConsulenzaUtenzePage() {
   if (!area) return null;
 
   return (
-    <div className="pb-24">
-      <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
-        <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-              {area.eyebrow}
-            </p>
-            <h1 className="text-4xl font-semibold text-white md:text-5xl">{area.title}</h1>
-            <p className="text-base text-slate-300 md:text-lg">{area.description}</p>
-            <div className="flex flex-wrap gap-3">
+    <div className="min-h-full">
+      <div className="relative">
+        <div className="h-px bg-linear-to-r from-amber-500/50 via-amber-400/20 to-transparent" />
+        <div className="border-b border-white/6 bg-slate-950 px-6 pt-5 pb-6 md:px-10">
+          <nav className="mb-5 flex items-center gap-2 text-xs text-slate-600">
+            <Link href="/area-clienti" className="transition hover:text-slate-400">Dashboard</Link>
+            <Chevron />
+            <span className="text-slate-500">{area.eyebrow}</span>
+          </nav>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                  <path d="M13 2L4.09 12.96A.5.5 0 0 0 4.5 13.75H11L10 22l9.91-11.96a.5.5 0 0 0-.41-.79H13L13 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold text-white md:text-3xl">{area.title}</h1>
+                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
+                  {area.description}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
               <Link
                 href="/area-clienti/consulenza-utenze/storico"
-                className="inline-flex rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-900/30 transition hover:bg-cyan-400"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/8 hover:text-white"
               >
                 Storico lead
-              </Link>
-              <Link
-                href="/area-clienti"
-                className="inline-flex rounded-full border border-slate-700 bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/15 transition hover:border-slate-600 hover:bg-slate-900"
-              >
-                Torna alla dashboard
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </Link>
             </div>
           </div>
-          <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Come funziona
-            </p>
-            <ol className="mt-4 space-y-3 text-sm text-slate-200">
-              <li>1. Seleziona il servizio: telefonia, luce o gas.</li>
-              <li>2. Inserisci i dati attuali di fornitura e contatto.</li>
-              <li>3. La richiesta viene registrata come lead commerciale.</li>
-            </ol>
-          </div>
-        </Container>
-      </section>
+        </div>
+      </div>
 
-      <div className="lux-surface pt-10 text-slate-900">
-        <section className="py-10">
-          <Container>
-            <UtilityConsultingWorkspace area={area} />
-          </Container>
-        </section>
+      <div className="lux-surface text-slate-900">
+        <Container className="py-8">
+          <UtilityConsultingWorkspace area={area} />
+        </Container>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getClientPortalToken } from "@/lib/client-portal-auth";
 
 function parseApiPayload<T>(raw: string): T {
   try {
@@ -84,6 +85,8 @@ export default function UtilityConsultingHistory() {
         const response = await fetch("/api/client-area/consulenza-utenze/history", {
           method: "POST",
           cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: getClientPortalToken() }),
         });
         const raw = await response.text();
         const payload = parseApiPayload<{

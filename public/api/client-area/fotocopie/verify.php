@@ -26,6 +26,8 @@ try {
     $body = client_area_parse_json_body();
     $sessionId = trim((string) ($body['sessionId'] ?? ''));
     $orderToken = trim((string) ($body['orderToken'] ?? ''));
+    $token = trim((string) ($body['token'] ?? ''));
+    $clientProfile = client_area_require_authenticated_client($token);
 
     if ($sessionId === '' || $orderToken === '') {
         client_area_json(['message' => 'Sessione pagamento o token ordine mancanti.'], 400);
@@ -80,6 +82,41 @@ try {
 
     $orderId = (int) ($order['id'] ?? 0);
     $requestId = (int) ($order['request_id'] ?? 0);
+    $requestOwnership = $db->prepare(
+        "SELECT details_json, email FROM client_area_requests WHERE id = ? AND area = 'fotocopie-online' LIMIT 1"
+    );
+    $requestDetails = [];
+    $requestEmail = '';
+    if ($requestOwnership) {
+        $requestOwnership->bind_param('i', $requestId);
+        $requestOwnership->execute();
+        $requestRow = $requestOwnership->get_result()?->fetch_assoc();
+        $requestOwnership->close();
+        if (is_array($requestRow)) {
+            $requestDetails = client_area_decode_json_value($requestRow['details_json'] ?? null);
+            $requestEmail = strtolower(trim((string) ($requestRow['email'] ?? '')));
+        }
+    }
+
+    $payloadUserId = (int) ($requestDetails['clientUserId'] ?? 0);
+    $payloadUsername = strtolower(trim((string) ($requestDetails['clientUsername'] ?? '')));
+    $payloadEmail = strtolower(trim((string) ($requestDetails['clientEmail'] ?? $requestEmail)));
+    $currentUsername = strtolower(trim((string) ($clientProfile['username'] ?? '')));
+    $currentEmail = strtolower(trim((string) ($clientProfile['email'] ?? '')));
+    $currentUserId = (int) ($clientProfile['userId'] ?? 0);
+
+    $ownedByClient = false;
+    if ($currentUserId > 0 && $payloadUserId > 0 && $currentUserId === $payloadUserId) {
+        $ownedByClient = true;
+    } elseif ($currentEmail !== '' && $payloadEmail !== '' && $currentEmail === $payloadEmail) {
+        $ownedByClient = true;
+    } elseif ($currentUsername !== '' && $payloadUsername !== '' && $currentUsername === $payloadUsername) {
+        $ownedByClient = true;
+    }
+
+    if (!$ownedByClient) {
+        client_area_json(['message' => 'Ordine fotocopie non associato al profilo cliente attivo.'], 403);
+    }
 
     $updateOrderStmt = $db->prepare(
         'UPDATE client_area_photocopy_orders

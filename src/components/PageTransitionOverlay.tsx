@@ -149,9 +149,7 @@ export default function PageTransitionOverlay() {
         }
       >
         <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300">
-            Caricamento pagina
-          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Caricamento pagina</p>
           <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
             <div
               className="h-full origin-left rounded-full bg-gradient-to-r from-cyan-300 via-cyan-500 to-white transition-transform duration-200 ease-out"

@@ -3,6 +3,8 @@
 export type PublicShippingPricingRule = {
   id: number;
   label: string;
+  carrierProvider: "brt" | "inpost";
+  packageSize: "" | "small" | "medium" | "large";
   serviceScope: "national" | "international" | "all";
   countryCode: string;
   minWeightKG: number;
@@ -32,7 +34,7 @@ function resolveShippingPricingApiBase() {
     shippingPricingApiBase === "https://www.agenziaplinio.it";
 
   if (isLocalhost && (!shippingPricingApiBase || pointsToProduction)) {
-    return "http://localhost:3001";
+    return window.location.origin;
   }
 
   return shippingPricingApiBase;
@@ -57,5 +59,19 @@ export async function fetchPublicShippingPricing() {
     throw new Error(payload.message || "Caricamento listino spedizioni non riuscito");
   }
 
-  return payload.rules || [];
+  return (payload.rules || []).map((rule): PublicShippingPricingRule => ({
+    ...rule,
+    carrierProvider: rule.carrierProvider === "inpost" ? "inpost" : "brt",
+    packageSize:
+      rule.packageSize === "small" || rule.packageSize === "medium" || rule.packageSize === "large"
+        ? rule.packageSize
+        : ("" as const),
+    serviceScope:
+      rule.serviceScope === "national" ||
+      rule.serviceScope === "international" ||
+      rule.serviceScope === "all"
+        ? rule.serviceScope
+        : "all",
+    countryCode: String(rule.countryCode || "").trim().toUpperCase(),
+  }));
 }

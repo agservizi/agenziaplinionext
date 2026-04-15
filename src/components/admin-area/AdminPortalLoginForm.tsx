@@ -41,7 +41,13 @@ export default function AdminPortalLoginForm() {
     setMessage("");
 
     try {
-      await loginAdminPortal(username, password);
+      const token = await loginAdminPortal(username, password);
+      const valid = await validateAdminPortalSession(token);
+      if (!valid) {
+        setStatus("error");
+        setMessage("Sessione admin non valida. Riprova ad accedere.");
+        return;
+      }
       router.replace(nextPath);
     } catch (error) {
       setStatus("error");
@@ -50,45 +56,51 @@ export default function AdminPortalLoginForm() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="glass-card rounded-4xl p-8">
-      <div className="space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-          Controllo interno
-        </p>
-        <div className="space-y-3">
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-200">Nome utente</span>
-            <input
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              placeholder="Scrivo il nome utente admin"
-              autoComplete="username"
-              required
-            />
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-200">Password</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-              placeholder="Scrivo la password admin"
-              autoComplete="current-password"
-              required
-            />
-          </label>
-        </div>
-        {message ? <p className="text-sm font-medium text-red-400">{message}</p> : null}
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="inline-flex w-full items-center justify-center rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/25 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {status === "loading" ? "Verifico le credenziali..." : "Entro nel pannello"}
-        </button>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-3">
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold text-slate-500">Nome utente</span>
+          <input
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white"
+            placeholder="es. admin"
+            autoComplete="username"
+            required
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-semibold text-slate-500">Password</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+          />
+        </label>
       </div>
+      {message ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {message}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {status === "loading" ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            Verifica in corso...
+          </>
+        ) : (
+          "Accedi al pannello"
+        )}
+      </button>
     </form>
   );
 }

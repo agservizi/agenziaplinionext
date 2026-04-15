@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 import { getPool } from "@/lib/db";
-import { verifyAdminPortalToken } from "@/lib/admin-portal-server";
+import { verifyAdminPortalSession } from "@/lib/admin-portal-server";
 
 export const runtime = "nodejs";
 
@@ -298,7 +298,7 @@ async function listTickets(body: Record<string, unknown>) {
 
 export async function POST(request: Request) {
   const token = String(request.headers.get("x-admin-token") || "").trim();
-  if (!verifyAdminPortalToken(token)) {
+  if (!(await verifyAdminPortalSession(token))) {
     return NextResponse.json({ message: "Sessione admin non valida" }, { status: 401 });
   }
 

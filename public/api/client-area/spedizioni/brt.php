@@ -22,6 +22,8 @@ if (!client_area_is_stripe_configured()) {
 }
 
 $body = client_area_parse_json_body();
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
 $stripeSessionId = client_area_require_string($body['stripeSessionId'] ?? '');
 
 $payload = [
@@ -57,6 +59,19 @@ $payload = [
     'notes' => client_area_require_string($body['notes'] ?? ''),
     'serviceCode' => client_area_require_string($body['serviceCode'] ?? 'ritiro-nazionale'),
 ];
+
+if ($payload['customerName'] === '' && $clientProfile['fullName'] !== '') {
+    $payload['customerName'] = (string) $clientProfile['fullName'];
+}
+if ($payload['email'] === '' && $clientProfile['email'] !== '') {
+    $payload['email'] = (string) $clientProfile['email'];
+}
+if ($payload['phone'] === '' && $clientProfile['phone'] !== '') {
+    $payload['phone'] = (string) $clientProfile['phone'];
+}
+if ($payload['billingCompanyName'] === '' && $clientProfile['companyName'] !== '') {
+    $payload['billingCompanyName'] = (string) $clientProfile['companyName'];
+}
 
 $volumeCM3 = $payload['parcelLengthCM'] * $payload['parcelHeightCM'] * $payload['parcelDepthCM'] * $payload['parcelCount'];
 $volumeM3 = round($volumeCM3 / 1000000, 4);
@@ -147,6 +162,13 @@ try {
         'billingZIPCode' => $payload['billingZIPCode'],
         'billingCity' => $payload['billingCity'],
         'billingProvince' => $payload['billingProvince'],
+        'clientUsername' => (string) ($clientProfile['username'] ?? ''),
+        'clientUserId' => (int) ($clientProfile['userId'] ?? 0),
+        'clientSource' => (string) ($clientProfile['source'] ?? 'unknown'),
+        'clientEmail' => (string) ($clientProfile['email'] ?? $payload['email']),
+        'clientPhone' => (string) ($clientProfile['phone'] ?? $payload['phone']),
+        'clientCompanyName' => (string) ($clientProfile['companyName'] ?? ''),
+        'source' => 'client-area-spedizioni',
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     $requestStmt->bind_param('ssssss', $payload['serviceCode'], $payload['customerName'], $payload['email'], $payload['phone'], $payload['notes'], $detailsJson);

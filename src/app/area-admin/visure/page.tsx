@@ -4,7 +4,7 @@ import { buildMetadata } from "@/lib/seo";
 export function generateMetadata() {
   return buildMetadata({
     title: "Area Admin Visure | AG SERVIZI",
-    description: "Controllo interno delle visure con stato provider OpenAPI e riferimenti pratica.",
+    description: "Controllo interno delle visure con stato pratica, provider e documenti cliente.",
     path: "/area-admin/visure",
   });
 }
@@ -16,10 +16,10 @@ export default function AreaAdminVisurePage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Focus Visure
         </p>
-        <h1 className="mt-3 text-2xl font-semibold text-slate-950">Monitoraggio pratiche OpenAPI</h1>
+        <h1 className="mt-3 text-2xl font-semibold text-slate-950">Monitoraggio pratiche visure</h1>
         <p className="mt-3 text-sm leading-7 text-slate-600">
-          Qui tengo sott'occhio lo stato del provider, il riferimento OpenAPI e l'eventuale
-          documento già pronto per il cliente.
+          Qui tengo sott'occhio lo stato della pratica, il provider e l'eventuale documento
+          già pronto per il cliente.
         </p>
       </div>
 
@@ -27,4 +27,3 @@ export default function AreaAdminVisurePage() {
     </div>
   );
 }
-

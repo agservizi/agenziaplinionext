@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { SHIPMENT_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/shipment-payment";
 
 type ShipmentDraft = {
+  token?: string;
+  carrierProvider?: string;
   customerName: string;
   email: string;
   phone: string;
@@ -40,6 +42,7 @@ type ShipmentDraft = {
 };
 
 type FinalizeResult = {
+  provider?: string;
   message?: string;
   trackingCode?: string;
   parcelId?: string;
@@ -90,6 +93,8 @@ export default function ShipmentPaymentConfirmationClient() {
     }).format(date);
   }, [result?.orm?.collectionDate]);
 
+  const carrierLabel = result?.provider === "inpost" ? "InPost" : "BRT";
+
   useEffect(() => {
     let active = true;
 
@@ -111,12 +116,14 @@ export default function ShipmentPaymentConfirmationClient() {
         }
 
         const draft = JSON.parse(draftRaw) as ShipmentDraft;
-        const response = await fetch("/api/client-area/spedizioni/brt", {
+        const providerPath = draft.carrierProvider === "inpost" ? "inpost" : "brt";
+        const response = await fetch(`/api/client-area/spedizioni/${providerPath}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...draft,
             stripeSessionId: sessionId,
+            token: draft.token || "",
           }),
         });
 
@@ -199,12 +206,14 @@ export default function ShipmentPaymentConfirmationClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
           <div className="w-full max-w-xl rounded-[32px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
-              Avviso ritiro merce
+              {result?.provider === "inpost" ? "Avviso consegna al punto" : "Avviso ritiro merce"}
             </p>
             <h3 className="mt-3 text-2xl font-semibold text-slate-950">
               {result?.orm?.created
                 ? "Ritiro automatico programmato"
-                : "Consegna il pacco a un BRT | Fermopoint"}
+                : result?.provider === "inpost"
+                  ? "Consegna il pacco al punto InPost selezionato"
+                  : "Consegna il pacco a un BRT | Fermopoint"}
             </h3>
             {result?.orm?.created ? (
               <>
@@ -229,11 +238,16 @@ export default function ShipmentPaymentConfirmationClient() {
             ) : (
               <>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Per questa spedizione non risulta un ritiro automatico confermato.
+                  {result?.provider === "inpost"
+                    ? "Per questa spedizione InPost non risulta un ritiro automatico confermato."
+                    : "Per questa spedizione non risulta un ritiro automatico confermato."}
                 </p>
                 <p className="mt-3 text-sm leading-7 text-slate-600">
-                  Porta il pacco, insieme all&apos;etichetta BRT, in un <strong>BRT | Fermopoint</strong>{" "}
-                  per affidarlo al circuito e farlo partire.
+                  {result?.provider === "inpost" ? (
+                    <>Porta il pacco, insieme all&apos;etichetta InPost, al punto selezionato per affidarlo al circuito e farlo partire.</>
+                  ) : (
+                    <>Porta il pacco, insieme all&apos;etichetta BRT, in un <strong>BRT | Fermopoint</strong> per affidarlo al circuito e farlo partire.</>
+                  )}
                 </p>
               </>
             )}
@@ -280,6 +294,14 @@ export default function ShipmentPaymentConfirmationClient() {
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Corriere
+            </p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">
+              {carrierLabel}
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               Pagato
             </p>
             <p className="mt-2 text-sm font-semibold text-slate-950">
@@ -312,49 +334,55 @@ export default function ShipmentPaymentConfirmationClient() {
               result?.orm?.created ? "text-cyan-700" : "text-amber-700"
             }`}
           >
-            Ritiro merce
+            {result?.provider === "inpost" ? "Consegna al punto" : "Ritiro merce"}
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
             {result?.orm?.created
               ? `Ritiro previsto per il ${pickupDateLabel || result?.orm?.collectionDate || "giorno programmato"} alle ${result?.orm?.collectionTime || "ora programmata"}.`
-              : "Se non attendi il ritiro, porta il collo in un BRT | Fermopoint per far partire la spedizione."}
+              : result?.provider === "inpost"
+                ? "Porta il collo al punto InPost selezionato per far partire la spedizione."
+                : "Se non attendi il ritiro, porta il collo in un BRT | Fermopoint per far partire la spedizione."}
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             {result?.orm?.message ||
-              "Non ho ricevuto un dettaglio aggiuntivo sul ritiro automatico."}
+              (result?.provider === "inpost"
+                ? "Usa questo riepilogo come promemoria operativo per consegnare il pacco nel punto InPost scelto."
+                : "Non ho ricevuto un dettaglio aggiuntivo sul ritiro automatico.")}
           </p>
         </div>
 
-        <div
-          className={`mt-5 rounded-3xl border p-4 ${
-            result?.manifest?.created
-              ? "border-emerald-100 bg-emerald-50"
-              : "border-amber-100 bg-amber-50"
-          }`}
-        >
-          <p
-            className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
-              result?.manifest?.created ? "text-emerald-700" : "text-amber-700"
+        {result?.provider !== "inpost" ? (
+          <div
+            className={`mt-5 rounded-3xl border p-4 ${
+              result?.manifest?.created
+                ? "border-emerald-100 bg-emerald-50"
+                : "border-amber-100 bg-amber-50"
             }`}
           >
-            Manifest driver
-          </p>
-          <p className="mt-2 text-sm font-semibold text-slate-950">
-            {result?.manifest?.created
-              ? "Il manifest BRT per il driver è stato creato insieme all'etichetta."
-              : "La spedizione è pronta, ma il manifest va ancora controllato."}
-          </p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {result?.manifest?.message ||
-              "Non ho ricevuto un dettaglio aggiuntivo dal servizio BRT."}
-          </p>
-        </div>
+            <p
+              className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                result?.manifest?.created ? "text-emerald-700" : "text-amber-700"
+              }`}
+            >
+              Manifest driver
+            </p>
+            <p className="mt-2 text-sm font-semibold text-slate-950">
+              {result?.manifest?.created
+                ? "Il manifest BRT per il driver è stato creato insieme all'etichetta."
+                : "La spedizione è pronta, ma il manifest va ancora controllato."}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {result?.manifest?.message ||
+                "Non ho ricevuto un dettaglio aggiuntivo dal servizio BRT."}
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">
           {labelHref ? (
             <a
               href={labelHref}
-              download={`etichetta-brt-${result?.trackingCode || "spedizione"}.pdf`}
+              download={`etichetta-${result?.provider === "inpost" ? "inpost" : "brt"}-${result?.trackingCode || "spedizione"}.pdf`}
               className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
             >
               Scarica etichetta PDF
@@ -364,7 +392,7 @@ export default function ShipmentPaymentConfirmationClient() {
             href="/area-clienti/spedizioni"
             className="rounded-full border border-cyan-200 bg-cyan-50 px-5 py-3 text-sm font-semibold text-cyan-900 transition hover:border-cyan-300 hover:bg-cyan-100"
           >
-            Cerca un BRT | Fermopoint
+            {result?.provider === "inpost" ? "Cerca un punto InPost" : "Cerca un BRT | Fermopoint"}
           </Link>
           <Link
             href="/area-clienti/spedizioni/storico"

@@ -29,10 +29,22 @@ $customerName = trim((string) ($body['customerName'] ?? ''));
 $email = strtolower(trim((string) ($body['email'] ?? '')));
 $phone = trim((string) ($body['phone'] ?? ''));
 $notes = trim((string) ($body['notes'] ?? ''));
+$token = trim((string) ($body['token'] ?? ''));
 $stripeSessionId = trim((string) ($body['stripeSessionId'] ?? ''));
 $resolvedServiceHash = trim((string) ($body['resolvedServiceHash'] ?? ''));
 $resolvedServiceLabel = trim((string) ($body['resolvedServiceLabel'] ?? ''));
 $formData = is_array($body['formData'] ?? null) ? $body['formData'] : [];
+$clientProfile = client_area_require_authenticated_client($token);
+
+if ($customerName === '' && $clientProfile['fullName'] !== '') {
+    $customerName = (string) $clientProfile['fullName'];
+}
+if ($email === '' && $clientProfile['email'] !== '') {
+    $email = (string) $clientProfile['email'];
+}
+if ($phone === '' && $clientProfile['phone'] !== '') {
+    $phone = (string) $clientProfile['phone'];
+}
 
 if ($serviceType === '' || $customerName === '' || !str_contains($email, '@')) {
     client_area_json(['message' => 'Compila almeno nome, email e tipologia di visura.'], 400);
@@ -125,6 +137,12 @@ try {
             'providerStatus' => (string) ($providerResult['status'] ?? ''),
             'providerSummary' => is_array($providerResult['summary'] ?? null) ? $providerResult['summary'] : [],
             'formData' => $formData,
+            'clientUsername' => (string) ($clientProfile['username'] ?? ''),
+            'clientUserId' => (int) ($clientProfile['userId'] ?? 0),
+            'clientSource' => (string) ($clientProfile['source'] ?? 'unknown'),
+            'clientEmail' => (string) ($clientProfile['email'] ?? $email),
+            'clientPhone' => (string) ($clientProfile['phone'] ?? $phone),
+            'clientCompanyName' => (string) ($clientProfile['companyName'] ?? ''),
         ];
 
         $requestStmt = $db->prepare(

@@ -6,4 +6,52 @@ Disallow: /area-clienti/
 Disallow: /login
 Disallow: /admin-login
 
+User-Agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: anthropic-ai
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: Bytespider
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
+User-Agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+
 Sitemap: https://agenziaplinio.it/sitemap.xml

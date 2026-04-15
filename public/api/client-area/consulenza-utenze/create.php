@@ -13,6 +13,8 @@ if (!client_area_has_database_config()) {
 }
 
 $body = client_area_parse_json_body();
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
 
 $serviceType = trim((string) ($body['serviceType'] ?? ''));
 $customerName = trim((string) ($body['customerName'] ?? ''));
@@ -28,6 +30,19 @@ $bestContactTime = trim((string) ($body['bestContactTime'] ?? ''));
 $notes = trim((string) ($body['notes'] ?? ''));
 $privacyConsent = (bool) ($body['privacyConsent'] ?? false);
 $marketingConsent = (bool) ($body['marketingConsent'] ?? false);
+
+if ($customerName === '' && $clientProfile['fullName'] !== '') {
+    $customerName = (string) $clientProfile['fullName'];
+}
+if ($email === '' && $clientProfile['email'] !== '') {
+    $email = (string) $clientProfile['email'];
+}
+if ($phone === '' && $clientProfile['phone'] !== '') {
+    $phone = (string) $clientProfile['phone'];
+}
+if ($businessName === '' && $clientProfile['companyName'] !== '') {
+    $businessName = (string) $clientProfile['companyName'];
+}
 
 $allowedServiceTypes = ['telefonia', 'luce', 'gas'];
 if (!in_array($serviceType, $allowedServiceTypes, true)) {
@@ -68,6 +83,12 @@ try {
         'bestContactTime' => $bestContactTime,
         'privacyConsent' => $privacyConsent,
         'marketingConsent' => $marketingConsent,
+        'clientUsername' => (string) ($clientProfile['username'] ?? ''),
+        'clientUserId' => (int) ($clientProfile['userId'] ?? 0),
+        'clientSource' => (string) ($clientProfile['source'] ?? 'unknown'),
+        'clientEmail' => (string) ($clientProfile['email'] ?? $email),
+        'clientPhone' => (string) ($clientProfile['phone'] ?? $phone),
+        'clientCompanyName' => (string) ($clientProfile['companyName'] ?? ''),
         'source' => 'client-area-consulenza-utenze',
     ];
 

@@ -394,14 +394,17 @@ function createClientPortalToken({
   username = clientPortalUsername,
   userId = null,
   source = "env",
+  fullName = "",
 } = {}) {
+  const tokenData = {
+    username,
+    userId,
+    source,
+    exp: Date.now() + 1000 * 60 * 60 * 12,
+  };
+  if (fullName) tokenData.fullName = fullName;
   const payload = Buffer.from(
-    JSON.stringify({
-      username,
-      userId,
-      source,
-      exp: Date.now() + 1000 * 60 * 60 * 12,
-    }),
+    JSON.stringify(tokenData),
   ).toString("base64url");
 
   const signature = crypto
@@ -683,7 +686,7 @@ app.post("/api/client-auth/login", async (req, res) => {
       const pool = getPool();
       const identifier = username.toLowerCase();
       const [rows] = await pool.query(
-        `SELECT id, username, email, password_hash, status
+        `SELECT id, full_name, username, email, password_hash, status
          FROM client_portal_users
          WHERE LOWER(username) = ? OR LOWER(email) = ?
          LIMIT 1`,
@@ -697,15 +700,19 @@ app.post("/api/client-auth/login", async (req, res) => {
           return res.status(401).json({ message: "Credenziali non valide" });
         }
 
+        const resolvedUsername = String(user.username || user.email || username);
+        const userFullName = String(user.full_name || "").trim();
         return res.json({
           ok: true,
           token: createClientPortalToken({
-            username: String(user.username || user.email || username),
+            username: resolvedUsername,
             userId: Number(user.id || 0) || null,
             source: "db",
+            fullName: userFullName,
           }),
           user: {
-            username: String(user.username || user.email || username),
+            username: resolvedUsername,
+            fullName: userFullName,
             role: "client",
             source: "database",
           },

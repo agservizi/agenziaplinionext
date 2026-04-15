@@ -12,6 +12,34 @@ function hasDatabaseConfig() {
   );
 }
 
+function parseTokenPayload(
+  token: string,
+): { username: string; userId: number | null } | null {
+  if (!token) return null;
+  const [payloadPart] = token.split(".");
+  if (!payloadPart) return null;
+
+  try {
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    const raw = Buffer.from(padded, "base64").toString("utf8");
+    const parsed = JSON.parse(raw) as {
+      username?: string;
+      userId?: number | null;
+    };
+    if (!parsed?.username) return null;
+    return {
+      username: String(parsed.username).toLowerCase().trim(),
+      userId:
+        typeof parsed.userId === "number" && parsed.userId > 0
+          ? parsed.userId
+          : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function ensureClientAreaRequestsTable() {
   const pool = getPool();
   await pool.execute(`
@@ -97,9 +125,23 @@ async function ensureClientAreaInvoicesTable() {
   `);
 }
 
-export async function POST() {
+export async function POST(request: Request) {
+  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+  const token = String(body?.token || "").trim();
+  const identity = parseTokenPayload(token);
+
+  if (!identity) {
+    return NextResponse.json(
+      { shipments: [], message: "Autenticazione richiesta." },
+      { status: 401 },
+    );
+  }
+
   if (!hasDatabaseConfig()) {
-    return NextResponse.json({ shipments: [], message: "Database non configurato." }, { status: 200 });
+    return NextResponse.json(
+      { shipments: [], message: "Database non configurato." },
+      { status: 200 },
+    );
   }
 
   try {
@@ -109,8 +151,17 @@ export async function POST() {
     await ensureClientAreaInvoicesTable();
 
     const pool = getPool();
+
+    const queryParams: (string | number)[] = [identity.username];
+    let ownershipClause = `LOWER(JSON_UNQUOTE(JSON_EXTRACT(r.details_json, '$.clientUsername'))) = ?`;
+
+    if (identity.userId !== null) {
+      ownershipClause += ` OR CAST(JSON_EXTRACT(r.details_json, '$.clientUserId') AS UNSIGNED) = ?`;
+      queryParams.push(identity.userId);
+    }
+
     const [rows] = await pool.query(
-       `SELECT
+      `SELECT
          s.id,
          s.request_id,
          s.tracking_code,
@@ -135,12 +186,15 @@ export async function POST() {
        LEFT JOIN client_area_requests r ON r.id = s.request_id
        LEFT JOIN client_area_payments p ON p.shipment_id = s.id OR p.request_id = s.request_id
        LEFT JOIN client_area_invoices i ON i.shipment_id = s.id OR i.request_id = s.request_id
+       WHERE (${ownershipClause})
        ORDER BY s.created_at DESC
-       LIMIT 20`,
+       LIMIT 50`,
+      queryParams,
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const shipments = Array.isArray(rows)
-      ? rows.map((row: any) => {
+      ? (rows as any[]).map((row: Record<string, unknown>) => {
           let details: Record<string, unknown> = {};
           let brtResponse: Record<string, unknown> = {};
 
@@ -148,7 +202,7 @@ export async function POST() {
             if (typeof row.details_json === "string") {
               details = JSON.parse(row.details_json);
             } else if (row.details_json && typeof row.details_json === "object") {
-              details = row.details_json;
+              details = row.details_json as Record<string, unknown>;
             }
           } catch {
             details = {};
@@ -158,7 +212,7 @@ export async function POST() {
             if (typeof row.brt_response_json === "string") {
               brtResponse = JSON.parse(row.brt_response_json);
             } else if (row.brt_response_json && typeof row.brt_response_json === "object") {
-              brtResponse = row.brt_response_json;
+              brtResponse = row.brt_response_json as Record<string, unknown>;
             }
           } catch {
             brtResponse = {};
@@ -172,6 +226,9 @@ export async function POST() {
           return {
             id: Number(row.id || 0),
             requestId: Number(row.request_id || 0),
+            carrierProvider: String(
+              details.carrierProvider || brtResponse.provider || "brt",
+            ),
             trackingCode: String(row.tracking_code || ""),
             parcelId: String(row.parcel_id || ""),
             shipmentNumberFrom: String(row.shipment_number_from || ""),

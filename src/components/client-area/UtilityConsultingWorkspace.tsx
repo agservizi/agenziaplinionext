@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { ClientAreaConfig } from "@/lib/client-area";
+import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
 
 function parseApiPayload<T>(raw: string): T {
   try {
@@ -154,6 +155,7 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [draftMessage, setDraftMessage] = useState("");
+  const [profileStatus, setProfileStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   const selectedService = useMemo(
     () => area.serviceOptions.find((option) => option.value === form.serviceType) || null,
@@ -236,6 +238,38 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
   const canGoNext = step === 1 ? stepOneValid : step === 2 ? stepTwoValid : true;
 
   useEffect(() => {
+    let active = true;
+    const token = getClientPortalToken();
+    if (!token) {
+      return () => {
+        active = false;
+      };
+    }
+
+    setProfileStatus("loading");
+    fetchClientPortalProfile(token)
+      .then(({ profile }) => {
+        if (!active) return;
+        setForm((current) => ({
+          ...current,
+          customerName: current.customerName || profile.fullName || "",
+          email: current.email || profile.email || profile.username || "",
+          phone: current.phone || profile.phone || "",
+          businessName: current.businessName || profile.companyName || "",
+        }));
+        setProfileStatus("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setProfileStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -306,6 +340,7 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          token: getClientPortalToken(),
           serviceType: form.serviceType,
           customerName: form.customerName,
           email: form.email,
@@ -354,7 +389,12 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
 
   return (
     <div className="grid gap-8 md:grid-cols-[0.95fr_1.05fr]">
-      <div className="space-y-6">
+      <div className="space-y-6 md:sticky md:top-28 md:self-start">
+        {profileStatus === "ready" ? (
+          <div className="rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-3 text-xs font-medium text-cyan-800">
+            Dati profilo cliente caricati automaticamente nel form.
+          </div>
+        ) : null}
         <div className="lux-card rounded-3xl p-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
             Lead in presa in carico

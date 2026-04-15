@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ClientAreaConfig } from "@/lib/client-area";
+import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
 import { VISURA_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/visure-payment";
 import {
   fetchPublicVisurePricing,
@@ -67,6 +68,38 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
   const [pricingRules, setPricingRules] = useState<PublicVisurePricingRule[]>([]);
   const [status, setStatus] = useState<"idle" | "redirecting" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [profileStatus, setProfileStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+
+  useEffect(() => {
+    let active = true;
+    const token = getClientPortalToken();
+    if (!token) {
+      return () => {
+        active = false;
+      };
+    }
+
+    setProfileStatus("loading");
+    fetchClientPortalProfile(token)
+      .then(({ profile }) => {
+        if (!active) return;
+        setForm((current) => ({
+          ...current,
+          customerName: current.customerName || profile.fullName || "",
+          email: current.email || profile.email || profile.username || "",
+          phone: current.phone || profile.phone || "",
+        }));
+        setProfileStatus("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setProfileStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -188,6 +221,7 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
             email: form.email,
             phone: form.phone,
             notes: form.notes,
+            token: getClientPortalToken(),
             resolvedServiceHash: catalogItem?.resolvedServiceHash || "",
             resolvedServiceLabel: catalogItem?.resolvedServiceLabel || catalogItem?.title || "",
             formData: buildFormData(),
@@ -293,6 +327,11 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
           Richiesta visura
         </p>
         <h2 className="mt-3 text-xl font-semibold text-slate-900">Compila i dati e avvio la richiesta</h2>
+        {profileStatus === "ready" ? (
+          <p className="mt-2 text-xs font-medium text-emerald-700">
+            Dati profilo cliente precaricati nel modulo.
+          </p>
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/area-clienti/visure/storico"

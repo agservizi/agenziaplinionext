@@ -43,6 +43,8 @@ if (!client_area_has_database_config()) {
 $body = client_area_parse_json_body();
 $draftToken = trim((string) ($body['draftToken'] ?? ''));
 $stripeSessionId = trim((string) ($body['stripeSessionId'] ?? ''));
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
 
 if ($draftToken === '' || $stripeSessionId === '') {
     client_area_json(['message' => 'Pagamento o pratica non trovati. Riparti dal modulo.'], 400);
@@ -128,6 +130,12 @@ try {
         'documentSummary' => (string) ($draft['documentSummary'] ?? ''),
         'customerUploadCount' => is_array($draft['pendingFiles'] ?? null) ? count($draft['pendingFiles']) : 0,
         'paymentRequired' => true,
+        'clientUsername' => (string) ($draft['clientUsername'] ?? ($clientProfile['username'] ?? '')),
+        'clientUserId' => (int) ($draft['clientUserId'] ?? ($clientProfile['userId'] ?? 0)),
+        'clientSource' => (string) ($draft['clientSource'] ?? ($clientProfile['source'] ?? 'unknown')),
+        'clientEmail' => (string) ($draft['clientEmail'] ?? ($clientProfile['email'] ?? '')),
+        'clientPhone' => (string) ($draft['clientPhone'] ?? ($clientProfile['phone'] ?? '')),
+        'clientCompanyName' => (string) ($draft['clientCompanyName'] ?? ($clientProfile['companyName'] ?? '')),
     ];
 
     $requestStmt = $db->prepare(
@@ -171,6 +179,12 @@ try {
         $intakePayloadJson = json_encode([
             'submittedAt' => (new DateTimeImmutable())->format(DATE_ATOM),
             'notes' => $notes,
+            'clientUsername' => (string) ($details['clientUsername'] ?? ''),
+            'clientUserId' => (int) ($details['clientUserId'] ?? 0),
+            'clientSource' => (string) ($details['clientSource'] ?? ''),
+            'clientEmail' => (string) ($details['clientEmail'] ?? ''),
+            'clientPhone' => (string) ($details['clientPhone'] ?? ''),
+            'clientCompanyName' => (string) ($details['clientCompanyName'] ?? ''),
             'payment' => [
                 'amountCents' => $expectedAmount,
                 'priceLabel' => (string) ($draftRow['price_label'] ?? ''),

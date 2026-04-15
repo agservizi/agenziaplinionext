@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Container from "@/components/Container";
 import PhotocopyPaymentConfirmationClient from "@/components/client-area/PhotocopyPaymentConfirmationClient";
 import { buildMetadata } from "@/lib/seo";
@@ -30,7 +31,9 @@ export default function AreaClientiFotocopieConfermaPagamentoPage() {
       <div className="lux-surface pt-10 text-slate-900">
         <section className="py-10">
           <Container>
-            <PhotocopyPaymentConfirmationClient />
+            <Suspense fallback={<p className="text-sm text-slate-500">Caricamento...</p>}>
+              <PhotocopyPaymentConfirmationClient />
+            </Suspense>
           </Container>
         </section>
       </div>

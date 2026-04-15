@@ -83,6 +83,7 @@ export async function POST(request: Request) {
   try {
     await resolveShippingPrice(taxableWeightKG, volumeM3, payload.destinationCountry, {
       strict: true,
+      carrierProvider: "brt",
     });
     const result = await routeBrtShipment({
       ...payload,

@@ -1,280 +1,273 @@
 import Link from "next/link";
-import Container from "@/components/Container";
-import SectionHeading from "@/components/SectionHeading";
-import HomeHeroCopyRotator from "@/components/HomeHeroCopyRotator";
 import ClientAreaInteractiveHero from "@/components/ClientAreaInteractiveHero";
-import { serviceCategories, values } from "@/lib/site-data";
+import Container from "@/components/Container";
+import HomeSeasonalHero from "@/components/HomeSeasonalHero";
+import { values } from "@/lib/site-data";
 import { buildMetadata } from "@/lib/seo";
-import {
-  PaymentsIcon,
-  PhoneIcon,
-  EnergyIcon,
-  LogisticsIcon,
-  DigitalIcon,
-  WebIcon,
-} from "@/components/Icons";
+import HomeServicesGrid from "@/components/HomeServicesGrid";
+import Reveal from "@/components/ui/Reveal";
+import { StaggerContainer, StaggerItem } from "@/components/ui/Stagger";
+import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import HomeReviews from "@/components/HomeReviews";
+import MarqueeStrip from "@/components/ui/MarqueeStrip";
 
 export default function Home() {
   return (
-    <div className="pb-24">
-      <section className="hero-gradient relative isolate min-h-screen overflow-hidden py-16">
-        <div className="hero-grid-glow" aria-hidden="true" />
-        <Container className="grid min-h-[calc(100vh-64px)] gap-12 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <div className="hero-reveal space-y-6">
-            <p className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-              Agenzia di servizi dal 2016
+    <div>
+      {/* ══════════════════════════════════════
+          HERO
+      ══════════════════════════════════════ */}
+      <HomeSeasonalHero />
+      <MarqueeStrip />
+
+      {/* ══════════════════════════════════════
+          SERVIZI — dark
+      ══════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-950 py-24 text-white">
+        {/* Decorative bg text */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-10 top-0 select-none text-[18rem] font-black leading-none text-white/2.5 md:text-[26rem]"
+        >
+          30+
+        </div>
+        {/* Orbs */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-32 top-20 h-80 w-80 rounded-full bg-cyan-500/15 blur-[60px] md:blur-[120px]" />
+          <div className="absolute bottom-0 right-10 h-64 w-64 rounded-full bg-violet-500/10 blur-[50px] md:blur-[100px]" />
+        </div>
+
+        <Container className="relative">
+          <Reveal className="mb-14 space-y-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
+              I nostri servizi
+            </span>
+            <h2 className="text-5xl font-black leading-[0.95] tracking-tight text-white md:text-7xl">
+              Tutto quello
+              <br />
+              che cerchi.
+              <br />
+              <span className="bg-linear-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                Da noi.
+              </span>
+            </h2>
+            <p className="max-w-xl text-lg text-slate-400">
+              Pagamenti, telefonia, energia, logistica, SPID, PEC e siti web.
+              Un unico punto, zero call center.
             </p>
-            <HomeHeroCopyRotator />
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/contatti"
-                className="rounded-full bg-cyan-500 px-7 py-3 text-sm font-semibold text-slate-950 shadow-[0_14px_32px_rgba(6,182,212,0.35)] transition hover:-translate-y-0.5 hover:bg-cyan-400"
-              >
-                Contattaci
-              </Link>
+          </Reveal>
+
+          <HomeServicesGrid />
+
+          <Reveal delay={0.1}>
+            <div className="mt-12 text-center">
               <Link
                 href="/servizi"
-                className="rounded-full border border-white/20 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:border-cyan-400 hover:text-cyan-200"
+                className="inline-flex items-center gap-2.5 rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-cyan-400 hover:text-cyan-300"
               >
-                Scopri i servizi
+                Esplora tutti i servizi
+                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none">
+                  <path d="M4.5 10h11M10.5 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </Link>
             </div>
-            <div className="grid gap-4 pt-8 md:grid-cols-3">
-              {values.map((value) => (
-                <div
-                  key={value.title}
-                  className="premium-panel rounded-2xl p-5 transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(8,47,73,0.45)]"
-                >
-                  <p className="text-base font-semibold text-white">{value.title}</p>
-                  <p className="mt-2 text-sm text-slate-300">
-                    {value.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="hero-reveal-delayed glass-card rounded-4xl p-8">
-            <div className="space-y-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                Quadro progetto
-              </p>
-              <h2 className="text-2xl font-semibold text-white">
-                Un unico partner per servizi essenziali e digitalizzazione.
-              </h2>
-              <p className="text-sm text-slate-300">
-                Ottimizzazione contratti, supporto operativo e soluzioni su
-                misura per ridurre tempi di gestione e aumentare la serenità
-                operativa.
-              </p>
-              <ul className="space-y-3 text-sm text-slate-200">
-                <li>• Analisi dei consumi e consulenza trasparente.</li>
-                <li>• Presenza locale con supporto continuativo.</li>
-                <li>• Servizi digitali per aziende e privati.</li>
-              </ul>
-              <div className="grid grid-cols-3 gap-2 pt-2">
-                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
-                  <p className="text-lg font-semibold text-cyan-300">2016</p>
-                  <p className="text-[11px] text-slate-400">Attivi dal</p>
-                </div>
-                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
-                  <p className="text-lg font-semibold text-cyan-300">6+</p>
-                  <p className="text-[11px] text-slate-400">Aree servizio</p>
-                </div>
-                <div className="rounded-xl border border-cyan-300/20 bg-slate-900/60 p-3 text-center">
-                  <p className="text-lg font-semibold text-cyan-300">Dedicato</p>
-                  <p className="text-[11px] text-slate-400">Supporto personalizzato</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </Reveal>
         </Container>
       </section>
 
+      {/* ══════════════════════════════════════
+          COME LAVORIAMO — white
+      ══════════════════════════════════════ */}
+      <section className="bg-white py-24">
+        <Container>
+          <Reveal className="mb-16 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+                Come lavoriamo
+              </p>
+              <h2 className="text-4xl font-black leading-none tracking-tight text-slate-900 md:text-6xl">
+                Tre passi.
+                <br />
+                Nessuna sorpresa.
+              </h2>
+            </div>
+            <p className="max-w-sm text-slate-500">
+              Un processo lineare, tempi chiari e un consulente reale dall'inizio alla fine.
+            </p>
+          </Reveal>
 
-      {/* ── Sezione 1: I nostri servizi ─────────────────────────── */}
-      <div className="lux-surface text-slate-900">
-        <section className="py-16 md:py-24">
-          <Container className="space-y-10">
-            <SectionHeading
-              eyebrow="I nostri servizi"
-              title="Tutto ciò che serve, in un unico punto"
-              description="Pagamenti, telefonia, energia, logistica, servizi digitali e soluzioni web: competenza locale per ogni esigenza."
-              tone="dark"
-              align="center"
-            />
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {serviceCategories.map((cat) => {
-                const icons: Record<string, React.FC> = {
-                  payments: PaymentsIcon,
-                  phone: PhoneIcon,
-                  energy: EnergyIcon,
-                  logistics: LogisticsIcon,
-                  digital: DigitalIcon,
-                  web: WebIcon,
-                };
-                const Icon = icons[cat.icon];
-                return (
-                  <Link
-                    key={cat.id}
-                    href={cat.id === "web-agency" ? "/web-agency" : `/servizi#${cat.id}`}
-                    className="lux-card group rounded-2xl p-6 transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="rounded-xl bg-cyan-500/10 p-3 text-cyan-700 ring-1 ring-cyan-500/20 transition group-hover:scale-110">
-                        <Icon />
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold text-slate-900">{cat.title}</p>
-                        <p className="mt-1 text-sm text-slate-500">{cat.subtitle}</p>
-                      </div>
+          <StaggerContainer className="grid gap-4 md:grid-cols-3">
+            {[
+              {
+                n: "01",
+                title: "Analizziamo",
+                desc: "Raccogliamo dati, obiettivi e consumi. Fotografia precisa della situazione, senza giri di parole.",
+                color: "text-cyan-600 bg-cyan-50 border-cyan-100",
+              },
+              {
+                n: "02",
+                title: "Proponiamo",
+                desc: "Confronto tra soluzioni disponibili, preventivo chiaro. Nessuna pressione, scelta guidata.",
+                color: "text-violet-600 bg-violet-50 border-violet-100",
+              },
+              {
+                n: "03",
+                title: "Supportiamo",
+                desc: "Assistenza post-attivazione dedicata. Se c'è un problema, lo risolviamo. Stesso numero, stessa persona.",
+                color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+              },
+            ].map((step) => (
+              <StaggerItem key={step.n}>
+                <div className={`group relative h-full overflow-hidden rounded-3xl border p-8 transition duration-300 hover:-translate-y-1 hover:shadow-xl ${step.color}`}>
+                  <div className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-current to-current opacity-30 transition-transform duration-500 group-hover:scale-x-100" />
+                  <p className="text-7xl font-black leading-none opacity-10">{step.n}</p>
+                  <h3 className="mt-4 text-xl font-black text-slate-900">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.desc}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </Container>
+      </section>
+
+      {/* ══════════════════════════════════════
+          PERCHÉ NOI — dark
+      ══════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-slate-950 py-24 text-white">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -right-40 top-0 h-96 w-96 rounded-full bg-emerald-500/10 blur-[65px] md:blur-[130px]" />
+          <div className="absolute -left-40 bottom-0 h-80 w-80 rounded-full bg-blue-500/10 blur-[60px] md:blur-[120px]" />
+        </div>
+
+        <Container className="relative">
+          <Reveal className="mb-16 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+              Perché AG SERVIZI
+            </p>
+            <h2 className="text-4xl font-black leading-none tracking-tight text-white md:text-6xl">
+              Un partner vero.
+              <br />
+              <span className="bg-linear-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                Dal 2016.
+              </span>
+            </h2>
+          </Reveal>
+
+          <StaggerContainer className="grid gap-4 md:grid-cols-3">
+            {values.map((val, i) => {
+              const icons = [
+                <svg key="s" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><path d="M12 2l8 4v6c0 5.55-3.84 10.74-8 12-4.16-1.26-8-6.45-8-12V6l8-4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+                <svg key="z" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><path d="M13 2L5 14h6l-1 8 9-14h-6l0-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /></svg>,
+                <svg key="u" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" /><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /><circle cx="19" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" /><path d="M22 21v-1.5a3 3 0 00-2.5-2.96" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
+              ];
+              const colors = [
+                { icon: "text-emerald-400 bg-emerald-400/10", line: "from-emerald-500 to-teal-500" },
+                { icon: "text-amber-400 bg-amber-400/10", line: "from-amber-500 to-orange-500" },
+                { icon: "text-blue-400 bg-blue-400/10", line: "from-blue-500 to-indigo-500" },
+              ];
+              const c = colors[i];
+              return (
+                <StaggerItem key={val.title}>
+                  <div className="group relative overflow-hidden rounded-3xl border border-white/8 bg-white/4 p-8 transition duration-300 hover:border-cyan-400/40 hover:bg-white/8">
+                    <div className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-cyan-500 to-teal-500 transition-transform duration-500 group-hover:scale-x-100" />
+                    <div className={`mb-5 inline-flex rounded-2xl p-3 ${c.icon}`}>
+                      {icons[i]}
                     </div>
-                    <ul className="mt-4 space-y-1 text-sm text-slate-600">
-                      {cat.items.slice(0, 3).map((item) => (
-                        <li key={item.title}>• {item.title}</li>
-                      ))}
-                      {cat.items.length > 3 && (
-                        <li className="font-medium text-cyan-600">
-                          + altri {cat.items.length - 3} servizi
-                        </li>
-                      )}
-                    </ul>
-                  </Link>
-                );
-              })}
-            </div>
-            <div className="text-center">
-              <Link
-                href="/servizi"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow transition hover:border-cyan-400 hover:text-cyan-700"
-              >
-                Esplora tutti i servizi →
-              </Link>
-            </div>
-          </Container>
-        </section>
-
-        {/* ── Sezione 2: Come lavoriamo ─────────────────────────── */}
-        <section className="py-16 md:py-20">
-          <Container className="space-y-8">
-            <SectionHeading
-              eyebrow="Metodo di lavoro"
-              title="Tre fasi per una consulenza efficace"
-              description="Un processo lineare per decisioni rapide e risultati affidabili."
-              tone="dark"
-              align="center"
-            />
-            <div className="grid gap-5 md:grid-cols-3">
-              {[
-                {
-                  title: "Analisi delle esigenze",
-                  description:
-                    "Raccolta dati, obiettivi e consumi per costruire una fotografia precisa della situazione.",
-                },
-                {
-                  title: "Proposta ottimizzata",
-                  description:
-                    "Confronto tra soluzioni disponibili, preventivo chiaro e scelta guidata senza pressioni.",
-                },
-                {
-                  title: "Supporto continuo",
-                  description:
-                    "Assistenza post-attivazione dedicata, con aggiornamenti e gestione delle criticità.",
-                },
-              ].map((step, index) => (
-                <div key={step.title} className="lux-card rounded-2xl p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      {index + 1}
-                    </span>
-                    <p className="text-base font-semibold text-slate-900">{step.title}</p>
+                    <h3 className="text-xl font-black text-white">{val.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-400">{val.description}</p>
                   </div>
-                  <p className="mt-3 text-sm text-slate-600">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </section>
-      </div>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
 
-      <ClientAreaInteractiveHero />
-
-      {/* ── Sezione 4: Perché sceglierci ────────────────────────── */}
-      <div className="lux-surface text-slate-900">
-        <section className="py-16 md:py-24">
-          <Container className="space-y-10">
-            <SectionHeading
-              eyebrow="Perché AG SERVIZI"
-              title="Un partner affidabile dal 2016"
-              description="Costruiamo fiducia attraverso trasparenza, competenza e presenza costante sul territorio."
-              tone="dark"
-              align="center"
-            />
-
-            <div className="grid gap-5 md:grid-cols-3">
-              {values.map((val) => (
-                <div
-                  key={val.title}
-                  className="lux-card rounded-2xl p-6 transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
-                >
-                  <p className="text-lg font-semibold text-slate-900">{val.title}</p>
-                  <p className="mt-2 text-sm text-slate-600">{val.description}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-4">
+          {/* Stats row */}
+          <Reveal delay={0.2}>
+            <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/8 bg-white/8 md:grid-cols-4">
               {[
                 { label: "Attivi dal", value: "2016" },
                 { label: "Servizi gestiti", value: "30+" },
-                { label: "Supporto", value: "Locale" },
                 { label: "Clienti attivi", value: "500+" },
+                { label: "Recensioni Google", value: "5★" },
               ].map((stat) => (
-                <div key={stat.label} className="lux-card rounded-2xl p-5 text-center">
-                  <p className="text-3xl font-bold text-cyan-600">{stat.value}</p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <div key={stat.label} className="flex flex-col items-center justify-center gap-2 bg-slate-950 px-6 py-10">
+                  <p className="text-4xl font-black text-white md:text-5xl">
+                    <AnimatedCounter value={stat.value} />
+                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                     {stat.label}
                   </p>
                 </div>
               ))}
             </div>
-          </Container>
-        </section>
+          </Reveal>
+        </Container>
+      </section>
 
-        {/* ── Sezione 5: CTA finale ──────────────────────────────── */}
-        <section className="py-16 md:py-20">
-          <Container>
-            <div className="lux-panel rounded-3xl p-10 md:p-14">
-              <div className="mx-auto max-w-2xl space-y-5 text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
-                  Pronto a iniziare
+      {/* ══════════════════════════════════════
+          RECENSIONI — white
+      ══════════════════════════════════════ */}
+      <section className="bg-white">
+        <Container className="py-6">
+          <Reveal className="mb-12 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+              Cosa dicono di noi
+            </p>
+            <h2 className="text-4xl font-black leading-tight text-slate-900 md:text-5xl">
+              Parla chi ha provato.
+            </h2>
+          </Reveal>
+        </Container>
+        <HomeReviews />
+      </section>
+
+      {/* ══════════════════════════════════════
+          AREA CLIENTI
+      ══════════════════════════════════════ */}
+      <ClientAreaInteractiveHero />
+
+      {/* ══════════════════════════════════════
+          CTA FINALE — dark
+      ══════════════════════════════════════ */}
+      <section className="bg-slate-950 pb-24 pt-8">
+        <Container>
+          <Reveal>
+            <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-12 text-center text-white shadow-2xl md:p-20">
+              <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-violet-500/15 blur-3xl" />
+              <div className="relative space-y-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+                  Pronto a iniziare?
                 </p>
-                <h2 className="text-3xl font-semibold text-slate-900 md:text-4xl">
-                  Porta efficienza e innovazione nei tuoi servizi quotidiani
+                <h2 className="text-4xl font-black leading-tight text-white md:text-6xl">
+                  Vieni da noi.
+                  <br />
+                  <span className="text-cyan-400">Risolviamo insieme.</span>
                 </h2>
-                <p className="text-base text-slate-600">
-                  Affidati ad AG SERVIZI per gestire attivazioni, pagamenti e servizi
-                  digitali in modo semplice e professionale. Parla con i nostri
-                  consulenti e ricevi una proposta mirata.
+                <p className="mx-auto max-w-md text-slate-400">
+                  Consulenza gratuita, senza impegno. Portaci il problema e troviamo la soluzione.
+                  Dal 2016, ogni giorno.
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <div className="flex flex-wrap justify-center gap-4 pt-2">
                   <Link
-                    href="/consulenza"
-                    className="rounded-full bg-cyan-600 px-7 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
+                    href="/contatti"
+                    className="rounded-full bg-cyan-500 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-cyan-500/30 transition hover:-translate-y-0.5 hover:bg-cyan-400"
                   >
-                    Richiedi una consulenza
+                    Parla con noi
                   </Link>
                   <Link
-                    href="/area-clienti"
-                    className="rounded-full border border-slate-200 px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700"
+                    href="/servizi"
+                    className="rounded-full border border-white/20 px-8 py-4 text-sm font-bold text-white transition hover:border-cyan-400 hover:text-cyan-300"
                   >
-                    {"Accedi all'Area Clienti"}
+                    Vedi i servizi
                   </Link>
                 </div>
               </div>
             </div>
-          </Container>
-        </section>
-      </div>
+          </Reveal>
+        </Container>
+      </section>
     </div>
   );
 }

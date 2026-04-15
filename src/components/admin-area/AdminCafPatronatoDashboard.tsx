@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   fetchAdminCafPatronatoRequests,
   getAdminPortalToken,
   updateAdminCafPatronatoStatus,
   type AdminCafPatronatoRecord,
 } from "@/lib/admin-portal-auth";
+import { AdminEmptyState, AdminMetricCard, AdminStatusBadge } from "@/components/admin-area/AdminUi";
 
 function formatDate(value: string | null) {
   if (!value) return "Non disponibile";
@@ -28,12 +30,28 @@ function formatMoney(amountCents: number, currency: string) {
 }
 
 export default function AdminCafPatronatoDashboard() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [items, setItems] = useState<AdminCafPatronatoRecord[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [message, setMessage] = useState("");
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [scopeFilter, setScopeFilter] = useState("all");
+  const [operatorNotesDrafts, setOperatorNotesDrafts] = useState<Record<number, string>>({});
 
   const token = getAdminPortalToken();
+
+  const handleSessionError = (error: unknown) => {
+    const message =
+      error instanceof Error ? error.message : "Sessione admin non valida. Esegui di nuovo il login.";
+    if (message.toLowerCase().includes("sessione admin")) {
+      router.replace(`/admin-login?next=${encodeURIComponent(pathname)}`);
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     let active = true;
@@ -46,6 +64,7 @@ export default function AdminCafPatronatoDashboard() {
         setStatus("ready");
       } catch (error) {
         if (!active) return;
+        if (handleSessionError(error)) return;
         setStatus("error");
         setMessage(
           error instanceof Error
@@ -74,6 +93,26 @@ export default function AdminCafPatronatoDashboard() {
     };
   }, [items]);
 
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const byStatus = statusFilter === "all" || item.intakeStatus === statusFilter;
+      const byScope = scopeFilter === "all" || item.serviceScope === scopeFilter;
+      const haystack = [
+        item.customerName,
+        item.email,
+        item.phone,
+        item.serviceLabel,
+        item.categoryLabel,
+        item.notes,
+        item.documentSummary,
+      ]
+        .join(" ")
+        .toLowerCase();
+      const bySearch = searchTerm.trim() === "" || haystack.includes(searchTerm.trim().toLowerCase());
+      return byStatus && byScope && bySearch;
+    });
+  }, [items, scopeFilter, searchTerm, statusFilter]);
+
   const onStatusChange = async (item: AdminCafPatronatoRecord, nextStatus: string) => {
     setSavingId(item.requestId);
     setMessage("");
@@ -83,18 +122,47 @@ export default function AdminCafPatronatoDashboard() {
         token,
         item.requestId,
         nextStatus,
-        item.operatorNotes || "",
+        operatorNotesDrafts[item.requestId] ?? item.operatorNotes ?? "",
       );
       setItems((current) =>
         current.map((entry) =>
           entry.requestId === item.requestId
-            ? { ...entry, intakeStatus: nextStatus, status: nextStatus }
+            ? {
+                ...entry,
+                intakeStatus: nextStatus,
+                status: nextStatus,
+                operatorNotes: operatorNotesDrafts[item.requestId] ?? entry.operatorNotes,
+              }
             : entry,
         ),
       );
     } catch (error) {
+      if (handleSessionError(error)) return;
       setMessage(
         error instanceof Error ? error.message : "Non riesco ad aggiornare questa pratica adesso.",
+      );
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const onSaveOperatorNotes = async (item: AdminCafPatronatoRecord) => {
+    setSavingId(item.requestId);
+    setMessage("");
+
+    try {
+      const note = operatorNotesDrafts[item.requestId] ?? item.operatorNotes ?? "";
+      await updateAdminCafPatronatoStatus(token, item.requestId, item.intakeStatus, note);
+      setItems((current) =>
+        current.map((entry) =>
+          entry.requestId === item.requestId ? { ...entry, operatorNotes: note } : entry,
+        ),
+      );
+      setMessage(`Note pratica #${item.requestId} salvate.`);
+    } catch (error) {
+      if (handleSessionError(error)) return;
+      setMessage(
+        error instanceof Error ? error.message : "Non riesco a salvare le note operatore adesso.",
       );
     } finally {
       setSavingId(null);
@@ -120,26 +188,10 @@ export default function AdminCafPatronatoDashboard() {
   return (
     <div className="space-y-5">
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Totali</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-950">{stats.total}</p>
-          <p className="mt-2 text-sm text-slate-600">Pratiche registrate</p>
-        </div>
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Da vedere</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-950">{stats.awaiting}</p>
-          <p className="mt-2 text-sm text-slate-600">Appena entrate</p>
-        </div>
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">In corso</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-950">{stats.processing}</p>
-          <p className="mt-2 text-sm text-slate-600">Sto lavorando qui</p>
-        </div>
-        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Chiuse</p>
-          <p className="mt-3 text-3xl font-semibold text-slate-950">{stats.completed}</p>
-          <p className="mt-2 text-sm text-slate-600">Con documento già consegnato</p>
-        </div>
+        <AdminMetricCard eyebrow="Totali" value={stats.total} description="Pratiche registrate" />
+        <AdminMetricCard eyebrow="Da vedere" value={stats.awaiting} description="Appena entrate" />
+        <AdminMetricCard eyebrow="In corso" value={stats.processing} description="Pratiche in lavorazione" />
+        <AdminMetricCard eyebrow="Chiuse" value={stats.completed} description="Con documento consegnato" />
       </section>
 
       {message ? (
@@ -148,8 +200,66 @@ export default function AdminCafPatronatoDashboard() {
         </div>
       ) : null}
 
+      <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)]">
+        <div className="grid gap-3 md:grid-cols-3">
+        <label className="block md:col-span-3">
+          <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Cerca pratica
+          </span>
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Cliente, email, telefono, servizio, note..."
+            className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Stato intake
+          </span>
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 outline-none"
+          >
+            <option value="all">Tutti</option>
+            <option value="awaiting_review">Da vedere</option>
+            <option value="processing">In lavorazione</option>
+            <option value="waiting-documents">In attesa documenti</option>
+            <option value="completed">Evasa</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Ambito pratica
+          </span>
+          <select
+            value={scopeFilter}
+            onChange={(event) => setScopeFilter(event.target.value)}
+            className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 outline-none"
+          >
+            <option value="all">Tutti</option>
+            <option value="caf">CAF</option>
+            <option value="patronato">Patronato</option>
+          </select>
+        </label>
+        <div className="flex items-end">
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            {filteredItems.length} pratiche visibili
+          </span>
+        </div>
+        </div>
+      </div>
+
+      {filteredItems.length === 0 ? (
+        <AdminEmptyState
+          title="Nessuna pratica trovata"
+          description="Con i filtri correnti non risultano pratiche CAF o Patronato visibili. Prova a rimuovere uno dei filtri."
+        />
+      ) : null}
+
       <div className="grid gap-5">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <article
             key={item.requestId}
             className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
@@ -163,6 +273,26 @@ export default function AdminCafPatronatoDashboard() {
                 <p className="text-sm text-slate-600">
                   {item.customerName} · {item.email}
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  {item.email ? (
+                    <a
+                      href={`mailto:${item.email}`}
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700"
+                    >
+                      Email
+                    </a>
+                  ) : null}
+                  {item.phone ? (
+                    <a
+                      href={`https://wa.me/${item.phone.replace(/\D+/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+                    >
+                      WhatsApp
+                    </a>
+                  ) : null}
+                </div>
                 <p className="text-sm text-slate-500">{item.categoryLabel}</p>
               </div>
 
@@ -178,13 +308,12 @@ export default function AdminCafPatronatoDashboard() {
                   <option value="waiting-documents">In attesa documenti</option>
                   <option value="completed">Evasa</option>
                 </select>
-                <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
-                  Mail: {item.operatorEmailStatus === "sent" ? "inviata" : "da verificare"}
-                </div>
+                <AdminStatusBadge label="Mail" value={item.operatorEmailStatus === "sent" ? "sent" : "pending"} />
+                <AdminStatusBadge label="Pratica" value={item.intakeStatus} />
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 xl:grid-cols-5">
+            <div className="admin-adaptive-kpi-grid mt-6 grid gap-4 xl:grid-cols-5">
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Apertura
@@ -224,7 +353,7 @@ export default function AdminCafPatronatoDashboard() {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 xl:grid-cols-2">
+            <div className="admin-adaptive-top-grid mt-6 grid gap-4 xl:grid-cols-2">
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-semibold text-slate-950">Documenti cliente</p>
                 {item.customerFiles.length ? (
@@ -277,9 +406,62 @@ export default function AdminCafPatronatoDashboard() {
                 {item.documentSummary ? ` Documenti segnalati: ${item.documentSummary}.` : ""}
                 {item.notes ? ` Nota cliente: ${item.notes}` : ""}
               </p>
-              {item.operatorNotes ? (
-                <p className="mt-3 text-sm leading-7 text-slate-700">Nota interna: {item.operatorNotes}</p>
-              ) : null}
+              <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+                <textarea
+                  value={operatorNotesDrafts[item.requestId] ?? item.operatorNotes ?? ""}
+                  onChange={(event) =>
+                    setOperatorNotesDrafts((current) => ({
+                      ...current,
+                      [item.requestId]: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  placeholder="Note operatore, passaggi fatti, documenti mancanti..."
+                  className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void onSaveOperatorNotes(item)}
+                  disabled={savingId === item.requestId}
+                  className="rounded-full bg-slate-950 px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                >
+                  {savingId === item.requestId ? "Salvataggio..." : "Salva note"}
+                </button>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Timeline
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">Creata: {formatDate(item.createdAt)}</p>
+                  <p className="mt-1 text-sm text-slate-700">
+                    Mail operatore: {item.operatorEmailSentAt ? formatDate(item.operatorEmailSentAt) : "non inviata"}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700">
+                    Risolta: {item.resolvedAt ? formatDate(item.resolvedAt) : "non ancora"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Contatto richiesto
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">
+                    {item.preferredContactMethod || "non indicato"}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700">
+                    {item.preferredContactDate ? formatDate(item.preferredContactDate) : "nessuna data"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Email operatore
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">{item.operatorEmail || "non configurata"}</p>
+                  <p className="mt-1 text-sm text-slate-700">
+                    Stato: {item.operatorEmailStatus === "sent" ? "inviata" : "da verificare"}
+                  </p>
+                </div>
+              </div>
             </div>
           </article>
         ))}

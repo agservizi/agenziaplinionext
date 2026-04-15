@@ -184,6 +184,7 @@ export async function POST(request: Request) {
     weightKG: requirePositiveNumber(body?.weightKG),
     notes: requireString(body?.notes),
     serviceCode: requireString(body?.serviceCode || "ritiro-nazionale"),
+    carrierProvider: "brt" as const,
   };
 
   const volumeCM3 =
@@ -237,7 +238,7 @@ export async function POST(request: Request) {
       taxableWeightKG,
       volumeM3,
       payload.destinationCountry,
-      { strict: true },
+      { strict: true, carrierProvider: payload.carrierProvider },
     );
     const stripeSession = await getStripeCheckoutSession(stripeSessionId);
     const paymentCompleted =
@@ -274,6 +275,7 @@ export async function POST(request: Request) {
         payload.phone,
         payload.notes,
         JSON.stringify({
+          carrierProvider: payload.carrierProvider,
           pickupAddress: payload.pickupAddress,
           pickupZIPCode: payload.pickupZIPCode,
           pickupCity: payload.pickupCity,
@@ -306,7 +308,7 @@ export async function POST(request: Request) {
       ],
     );
 
-    const requestId = Number((requestResult as any)?.insertId || 0);
+    const requestId = Number((requestResult as { insertId?: number })?.insertId || 0);
     const [paymentResult] = await pool.execute(
       `INSERT INTO client_area_payments
         (request_id, stripe_session_id, amount_cents, currency, payment_status, checkout_status, price_label, stripe_response_json)
@@ -331,7 +333,7 @@ export async function POST(request: Request) {
         JSON.stringify(stripeSession),
       ],
     );
-    const paymentId = Number((paymentResult as any)?.insertId || 0);
+    const paymentId = Number((paymentResult as { insertId?: number })?.insertId || 0);
     const routing = await routeBrtShipment({
       destinationCompanyName: payload.destinationCompanyName,
       destinationAddress: payload.destinationAddress,
@@ -407,7 +409,7 @@ export async function POST(request: Request) {
         JSON.stringify(result),
       ],
     );
-    const shipmentId = Number((shipmentResult as any)?.insertId || 0);
+    const shipmentId = Number((shipmentResult as { insertId?: number })?.insertId || 0);
 
     const manifestReady = getMissingBrtManifestConfig().length === 0;
     let manifestCreated = false;
@@ -551,6 +553,7 @@ export async function POST(request: Request) {
           : ormCreated
             ? "Spedizione BRT creata e ritiro automatico prenotato."
             : "Spedizione BRT creata correttamente.",
+        provider: "brt",
         trackingCode: result.trackingCode,
         parcelId: result.parcelId,
         shipmentNumberFrom: result.shipmentNumberFrom,

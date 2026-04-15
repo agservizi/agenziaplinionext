@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { AdminStatusBadge } from "@/components/admin-area/AdminUi";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   createAdminClientAreaTicket,
   fetchAdminClientAreaTickets,
@@ -209,51 +214,53 @@ export default function AdminTicketsDashboard() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={onCreateTicket} className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      <Card className="rounded-xl">
+        <CardContent className="p-6">
+        <form onSubmit={onCreateTicket}>
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Apri ticket per conto cliente
         </p>
-        <p className="mt-2 text-sm text-slate-300">
+        <p className="mt-2 text-sm text-slate-600">
           Creo un nuovo ticket direttamente da admin quando il cliente contatta via telefono/email.
         </p>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <input
+        <div className="admin-adaptive-modules-grid mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <Input
             value={createForm.customerName}
             onChange={(event) =>
               setCreateForm((current) => ({ ...current, customerName: event.target.value }))
             }
             placeholder="Nome cliente"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full"
             required
           />
-          <input
+          <Input
             value={createForm.email}
             onChange={(event) => setCreateForm((current) => ({ ...current, email: event.target.value }))}
             placeholder="Email cliente"
             type="email"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full"
             required
           />
-          <input
+          <Input
             value={createForm.phone}
             onChange={(event) => setCreateForm((current) => ({ ...current, phone: event.target.value }))}
             placeholder="Telefono"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full"
           />
-          <input
+          <Input
             value={createForm.requestId}
             onChange={(event) =>
               setCreateForm((current) => ({ ...current, requestId: event.target.value }))
             }
             placeholder="ID pratica (opzionale)"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full"
           />
           <select
             value={createForm.ticketArea}
             onChange={(event) =>
               setCreateForm((current) => ({ ...current, ticketArea: event.target.value }))
             }
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
           >
             <option value="visure">Visure</option>
             <option value="spedizioni">Spedizioni</option>
@@ -266,26 +273,26 @@ export default function AdminTicketsDashboard() {
             onChange={(event) =>
               setCreateForm((current) => ({ ...current, priority: event.target.value }))
             }
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
           >
             <option value="normale">Priorità normale</option>
             <option value="alta">Priorità alta</option>
             <option value="urgente">Priorità urgente</option>
           </select>
-          <input
+          <Input
             value={createForm.subject}
             onChange={(event) =>
               setCreateForm((current) => ({ ...current, subject: event.target.value }))
             }
             placeholder="Oggetto ticket"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none md:col-span-2"
+            className="rounded-full md:col-span-2"
             required
           />
           <input
             type="file"
             multiple
             onChange={(event) => setCreateFiles(Array.from(event.target.files || []))}
-            className="rounded-full border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-slate-200 xl:col-span-2"
+            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 xl:col-span-2"
           />
         </div>
         <textarea
@@ -293,30 +300,29 @@ export default function AdminTicketsDashboard() {
           onChange={(event) => setCreateForm((current) => ({ ...current, message: event.target.value }))}
           rows={3}
           placeholder="Dettaglio richiesta cliente..."
-          className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none"
           required
         />
-        <button
-          type="submit"
-          disabled={creatingTicket}
-          className="mt-3 rounded-full bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:opacity-70"
-        >
+        <Button type="submit" disabled={creatingTicket} variant="secondary" className="mt-3 rounded-full">
           {creatingTicket ? "Apertura ticket..." : "Apri ticket da admin"}
-        </button>
-      </form>
+        </Button>
+        </form>
+        </CardContent>
+      </Card>
 
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      <Card className="rounded-xl">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Ticket Pratiche & Documenti
         </p>
-        <p className="mt-3 text-sm text-slate-300">
+        <p className="mt-3 text-sm text-slate-600">
           Qui gestisco i ticket clienti, cambio stato e invio contro-risposte operative.
         </p>
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           <select
             value={areaFilter}
             onChange={(event) => setAreaFilter(event.target.value)}
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
           >
             <option value="all">Tutte le aree</option>
             <option value="visure">Visure</option>
@@ -328,7 +334,7 @@ export default function AdminTicketsDashboard() {
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
           >
             <option value="all">Tutti gli stati</option>
             {STATUS_OPTIONS.map((status) => (
@@ -337,30 +343,28 @@ export default function AdminTicketsDashboard() {
               </option>
             ))}
           </select>
-          <input
+          <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Cerca nome, email o oggetto"
-            className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+            className="rounded-full"
           />
-          <button
-            type="button"
-            onClick={() => void loadTickets()}
-            className="rounded-full bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500"
-          >
+          <Button type="button" onClick={() => void loadTickets()} variant="secondary" className="rounded-full">
             Aggiorna elenco
-          </button>
+          </Button>
         </div>
-        {feedback ? <p className="mt-4 text-sm text-emerald-300">{feedback}</p> : null}
-        {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
-      </div>
+        {feedback ? <p className="mt-4 text-sm text-emerald-600">{feedback}</p> : null}
+        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+        </CardContent>
+      </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="glass-card rounded-4xl p-4">
+      <div className="admin-adaptive-split-grid grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <Card className="rounded-xl">
+          <CardContent className="p-4">
           {loading ? (
-            <p className="p-4 text-sm text-slate-300">Sto caricando i ticket...</p>
+            <p className="p-4 text-sm text-slate-500">Sto caricando i ticket...</p>
           ) : tickets.length === 0 ? (
-            <p className="p-4 text-sm text-slate-300">Nessun ticket trovato con i filtri attuali.</p>
+            <p className="p-4 text-sm text-slate-500">Nessun ticket trovato con i filtri attuali.</p>
           ) : (
             <div className="space-y-3">
               {tickets.map((ticket) => {
@@ -372,40 +376,42 @@ export default function AdminTicketsDashboard() {
                     onClick={() => setActiveId(ticket.id)}
                     className={`w-full rounded-2xl border p-4 text-left transition ${
                       active
-                        ? "border-cyan-400/60 bg-cyan-500/10"
-                        : "border-white/10 bg-slate-950/50 hover:border-cyan-300/40"
+                        ? "border-cyan-300 bg-cyan-50"
+                        : "border-slate-200 bg-white hover:border-cyan-200 hover:bg-slate-50"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-white">
+                    <p className="text-sm font-semibold text-slate-950">
                       #{ticket.id} • {ticket.subject}
                     </p>
-                    <p className="mt-1 text-xs text-slate-300">
+                    <p className="mt-1 text-xs text-slate-500">
                       {ticket.customerName} • {ticket.ticketArea} • {ticket.status}
                     </p>
-                    <p className="mt-2 line-clamp-2 text-xs text-slate-400">{ticket.message}</p>
+                    <p className="mt-2 line-clamp-2 text-xs text-slate-500">{ticket.message}</p>
                   </button>
                 );
               })}
             </div>
           )}
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-card rounded-4xl p-6">
+        <Card className="rounded-xl">
+          <CardContent className="p-6">
           {!activeTicket ? (
-            <p className="text-sm text-slate-300">Seleziona un ticket per vedere il dettaglio.</p>
+            <p className="text-sm text-slate-500">Seleziona un ticket per vedere il dettaglio.</p>
           ) : (
             <div className="space-y-5">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
                     Ticket #{activeTicket.id}
                   </p>
-                  <h3 className="mt-2 text-2xl font-semibold text-white">{activeTicket.subject}</h3>
-                  <p className="mt-2 text-sm text-slate-300">
+                  <h3 className="mt-2 text-2xl font-semibold text-slate-950">{activeTicket.subject}</h3>
+                  <p className="mt-2 text-sm text-slate-600">
                     {activeTicket.customerName} • {activeTicket.email}
                     {activeTicket.phone ? ` • ${activeTicket.phone}` : ""}
                   </p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-slate-500">
                     Creato {formatDateTime(activeTicket.createdAt)} • aggiornato{" "}
                     {formatDateTime(activeTicket.updatedAt)}
                   </p>
@@ -414,7 +420,7 @@ export default function AdminTicketsDashboard() {
                   value={activeTicket.status}
                   onChange={(event) => void onUpdateStatus(activeTicket.id, event.target.value)}
                   disabled={savingStatusId === activeTicket.id}
-                  className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+                  className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
                 >
                   {STATUS_OPTIONS.map((status) => (
                     <option key={status} value={status}>
@@ -424,25 +430,25 @@ export default function AdminTicketsDashboard() {
                 </select>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Conversazione
                 </p>
                 <div className="mt-4 space-y-3">
                   {activeTicket.messages.map((entry, index) => (
                     <div
-                      key={`${entry.ticketId}-${entry.id || index}-${entry.createdAt}`}
-                      className={`rounded-2xl border p-3 ${
-                        entry.authorRole === "admin"
-                          ? "border-cyan-500/30 bg-cyan-500/10"
-                          : "border-white/10 bg-slate-900/60"
+                        key={`${entry.ticketId}-${entry.id || index}-${entry.createdAt}`}
+                        className={`rounded-2xl border p-3 ${
+                          entry.authorRole === "admin"
+                          ? "border-cyan-200 bg-cyan-50"
+                          : "border-slate-200 bg-white"
                       }`}
                     >
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                         {entry.authorRole === "admin" ? "Backoffice" : "Cliente"} •{" "}
                         {entry.authorName || "N/D"}
                       </p>
-                      <p className="mt-2 whitespace-pre-wrap text-sm text-white">{entry.message}</p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-slate-950">{entry.message}</p>
                       {entry.attachments.length > 0 ? (
                         <div className="mt-3 flex flex-wrap gap-3">
                           {entry.attachments.map((url, fileIndex) => (
@@ -451,21 +457,21 @@ export default function AdminTicketsDashboard() {
                               href={url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs font-semibold text-cyan-200 underline"
+                              className="text-xs font-semibold text-cyan-700 underline"
                             >
                               Allegato {fileIndex + 1}
                             </a>
                           ))}
                         </div>
                       ) : null}
-                      <p className="mt-2 text-[11px] text-slate-400">{formatDateTime(entry.createdAt)}</p>
+                      <p className="mt-2 text-[11px] text-slate-500">{formatDateTime(entry.createdAt)}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <form onSubmit={onSendReply} className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">
+              <form onSubmit={onSendReply} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
                   Invia contro-risposta
                 </p>
                 <textarea
@@ -473,7 +479,7 @@ export default function AdminTicketsDashboard() {
                   onChange={(event) => setReplyText(event.target.value)}
                   rows={4}
                   placeholder="Scrivi aggiornamento operativo per il cliente..."
-                  className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                  className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none"
                   required
                 />
                 <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
@@ -481,12 +487,12 @@ export default function AdminTicketsDashboard() {
                     type="file"
                     multiple
                     onChange={(event) => setReplyFiles(Array.from(event.target.files || []))}
-                    className="rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-slate-200"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                   />
                   <select
                     value={replyStatus}
                     onChange={(event) => setReplyStatus(event.target.value)}
-                    className="rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+                    className="h-10 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
                   >
                     {STATUS_OPTIONS.map((status) => (
                       <option key={status} value={status}>
@@ -495,17 +501,17 @@ export default function AdminTicketsDashboard() {
                     ))}
                   </select>
                 </div>
-                <button
-                  type="submit"
-                  disabled={sendingReply}
-                  className="mt-4 rounded-full bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:opacity-70"
-                >
+                <div className="mt-4 flex items-center gap-3">
+                <Button type="submit" disabled={sendingReply} variant="secondary" className="rounded-full">
                   {sendingReply ? "Invio in corso..." : "Invia risposta al cliente"}
-                </button>
+                </Button>
+                <AdminStatusBadge value={replyStatus} />
+                </div>
               </form>
             </div>
           )}
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -3,6 +3,8 @@ export const ADMIN_PORTAL_TOKEN_KEY = "ag:admin-portal-token";
 export type ShippingPricingRule = {
   id: number;
   label: string;
+  carrierProvider: "brt" | "inpost";
+  packageSize: "" | "small" | "medium" | "large";
   serviceScope: "national" | "international" | "all";
   countryCode: string;
   minWeightKG: number;
@@ -57,6 +59,9 @@ export type AdminVisuraRecord = {
   id: number;
   customerName: string;
   email: string;
+  phone: string;
+  clientUsername: string;
+  clientCompanyName: string;
   serviceType: string;
   status: string;
   createdAt: string;
@@ -149,6 +154,41 @@ export type AdminConsultingLead = {
   };
 };
 
+export type AdminWebAgencyProject = {
+  requestId: number;
+  projectType: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  clientUsername: string;
+  clientCompanyName: string;
+  clientSource: string;
+  notes: string;
+  requestStatus: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+  projectGoal: string;
+  budgetRange: string;
+  timeline: string;
+  businessSector: string;
+  existingSiteUrl: string;
+  contactPreference: string;
+  materialsReady: string;
+  hasExistingSite: boolean;
+  needsBranding: boolean;
+  needsSeo: boolean;
+  needsAdvertising: boolean;
+  marketingConsent: boolean;
+  projectStatus: string;
+  operatorNotes: string;
+  quote: {
+    fileName: string;
+    url: string;
+    sentAt: string;
+    note: string;
+  };
+};
+
 export type AdminEmailNotificationRecord = {
   id: number;
   area: string;
@@ -210,7 +250,8 @@ function resolveAdminPortalApiBase() {
     adminPortalApiBase === "https://www.agenziaplinio.it";
 
   if (isLocalhost && (!adminPortalApiBase || pointsToProduction)) {
-    return "http://localhost:3001";
+    // In locale usiamo same-origin per non bypassare le rewrites di Next.
+    return "";
   }
 
   return adminPortalApiBase;
@@ -219,6 +260,25 @@ function resolveAdminPortalApiBase() {
 function buildApiUrl(path: string) {
   const apiBase = resolveAdminPortalApiBase();
   return apiBase ? `${apiBase}${path}` : path;
+}
+
+function stripHtml(input: string) {
+  return input.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+async function parseApiJson<T>(response: Response, fallbackMessage: string): Promise<T> {
+  const raw = await response.text();
+  let payload: T | null = null;
+
+  try {
+    payload = JSON.parse(raw) as T;
+  } catch {
+    const snippet = stripHtml(raw).slice(0, 180);
+    const detail = snippet ? ` ${snippet}` : "";
+    throw new Error(`${fallbackMessage}${detail}`);
+  }
+
+  return payload;
 }
 
 export function getAdminPortalToken() {
@@ -243,7 +303,10 @@ export async function loginAdminPortal(username: string, password: string) {
     body: JSON.stringify({ username, password }),
   });
 
-  const payload = (await response.json()) as { token?: string; message?: string };
+  const payload = await parseApiJson<{ token?: string; message?: string }>(
+    response,
+    "Login admin non riuscito.",
+  );
   if (!response.ok || !payload.token) {
     throw new Error(payload.message || "Login admin non riuscito");
   }
@@ -275,7 +338,10 @@ export async function fetchAdminClientAreaRequests(token: string) {
     cache: "no-store",
   });
 
-  const payload = (await response.json()) as { requests?: any[]; message?: string };
+  const payload = await parseApiJson<{ requests?: unknown[]; message?: string }>(
+    response,
+    "Caricamento richieste non riuscito.",
+  );
   if (!response.ok) {
     throw new Error(payload.message || "Caricamento richieste non riuscito");
   }
@@ -313,7 +379,10 @@ export async function fetchAdminShippingPricing(token: string) {
     cache: "no-store",
   });
 
-  const payload = (await response.json()) as { rules?: ShippingPricingRule[]; message?: string };
+  const payload = await parseApiJson<{ rules?: ShippingPricingRule[]; message?: string }>(
+    response,
+    "Caricamento listino non riuscito.",
+  );
   if (!response.ok) {
     throw new Error(payload.message || "Caricamento listino non riuscito");
   }
@@ -402,6 +471,37 @@ export async function fetchAdminClientAreaVisure(token: string) {
   return payload.visure || [];
 }
 
+export async function uploadAdminClientAreaVisuraDocument(
+  token: string,
+  requestId: number,
+  file: File,
+  operatorNotes = "",
+) {
+  const formData = new FormData();
+  formData.set("requestId", String(requestId));
+  formData.set("status", "completed");
+  formData.set("operatorNotes", operatorNotes);
+  formData.append("files", file);
+
+  const response = await fetch(buildApiUrl("/api/admin/client-area/visure-upload"), {
+    method: "POST",
+    headers: {
+      "x-admin-token": token,
+    },
+    body: formData,
+  });
+
+  const payload = (await response.json()) as { message?: string; documentUrl?: string };
+  if (!response.ok) {
+    throw new Error(payload.message || "Caricamento visura non riuscito");
+  }
+
+  return {
+    message: payload.message || "Visura caricata correttamente",
+    documentUrl: payload.documentUrl || "",
+  };
+}
+
 export async function fetchAdminVisurePricing(token: string) {
   const response = await fetch(buildApiUrl("/api/admin/visure-pricing"), {
     headers: {
@@ -458,19 +558,33 @@ export async function deleteAdminVisurePricing(token: string, id: number) {
 }
 
 export async function fetchAdminCafPatronatoRequests(token: string) {
-  const response = await fetch("/api/admin/caf-patronato/requests", {
+  if (!token.trim()) {
+    clearAdminPortalToken();
+    throw new Error("Sessione admin scaduta. Esegui di nuovo il login.");
+  }
+
+  const response = await fetch(buildApiUrl("/api/admin/caf-patronato/requests"), {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       "x-admin-token": token,
     },
+    body: JSON.stringify({ token }),
     cache: "no-store",
   });
 
-  const payload = (await response.json()) as {
+  const payload = await parseApiJson<{
     requests?: AdminCafPatronatoRecord[];
     message?: string;
-  };
+  }>(
+    response,
+    "Caricamento pratiche CAF e Patronato non riuscito.",
+  );
   if (!response.ok) {
+    if (response.status === 401) {
+      clearAdminPortalToken();
+      throw new Error("Sessione admin scaduta. Esegui di nuovo il login.");
+    }
     throw new Error(payload.message || "Caricamento pratiche CAF e Patronato non riuscito");
   }
 
@@ -483,7 +597,7 @@ export async function updateAdminCafPatronatoStatus(
   status: string,
   operatorNotes: string,
 ) {
-  const response = await fetch("/api/admin/caf-patronato/requests/status", {
+  const response = await fetch(buildApiUrl("/api/admin/caf-patronato/requests/status"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -501,19 +615,33 @@ export async function updateAdminCafPatronatoStatus(
 }
 
 export async function fetchAdminCafPatronatoPricing(token: string) {
-  const response = await fetch("/api/admin/caf-patronato/pricing", {
+  if (!token.trim()) {
+    clearAdminPortalToken();
+    throw new Error("Sessione admin scaduta. Esegui di nuovo il login.");
+  }
+
+  const response = await fetch(buildApiUrl("/api/admin/caf-patronato/pricing"), {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       "x-admin-token": token,
     },
+    body: JSON.stringify({ token }),
     cache: "no-store",
   });
 
-  const payload = (await response.json()) as {
+  const payload = await parseApiJson<{
     rules?: CafPatronatoPricingRule[];
     message?: string;
-  };
+  }>(
+    response,
+    "Caricamento listino CAF e Patronato non riuscito.",
+  );
   if (!response.ok) {
+    if (response.status === 401) {
+      clearAdminPortalToken();
+      throw new Error("Sessione admin scaduta. Esegui di nuovo il login.");
+    }
     throw new Error(payload.message || "Caricamento listino CAF e Patronato non riuscito");
   }
 
@@ -524,7 +652,7 @@ export async function upsertAdminCafPatronatoPricing(
   token: string,
   rule: Omit<CafPatronatoPricingRule, "id"> & { id?: number },
 ) {
-  const response = await fetch("/api/admin/caf-patronato/pricing/upsert", {
+  const response = await fetch(buildApiUrl("/api/admin/caf-patronato/pricing/upsert"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -542,7 +670,7 @@ export async function upsertAdminCafPatronatoPricing(
 }
 
 export async function deleteAdminCafPatronatoPricing(token: string, id: number) {
-  const response = await fetch("/api/admin/caf-patronato/pricing/delete", {
+  const response = await fetch(buildApiUrl("/api/admin/caf-patronato/pricing/delete"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -560,7 +688,7 @@ export async function deleteAdminCafPatronatoPricing(token: string, id: number) 
 }
 
 export async function fetchAdminConsultingLeads(token: string) {
-  const response = await fetch("/api/admin/client-area/consulting-leads", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/consulting-leads"), {
     headers: {
       "x-admin-token": token,
     },
@@ -585,7 +713,7 @@ export async function updateAdminConsultingLeadStatus(
   leadStatus: string,
   operatorNotes: string,
 ) {
-  const response = await fetch("/api/admin/client-area/consulting-leads/status", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/consulting-leads/status"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -613,7 +741,7 @@ export async function uploadAdminConsultingQuote(
   formData.set("note", note);
   formData.append("quoteFile", file);
 
-  const response = await fetch("/api/admin/client-area/consulting-leads/quote", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/consulting-leads/quote"), {
     method: "POST",
     headers: {
       "x-admin-token": token,
@@ -636,6 +764,83 @@ export async function uploadAdminConsultingQuote(
   };
 }
 
+export async function fetchAdminWebAgencyProjects(token: string) {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/web-agency"), {
+    headers: {
+      "x-admin-token": token,
+    },
+    cache: "no-store",
+  });
+
+  const payload = (await response.json()) as {
+    projects?: AdminWebAgencyProject[];
+    message?: string;
+  };
+
+  if (!response.ok) {
+    throw new Error(payload.message || "Caricamento progetti web agency non riuscito");
+  }
+
+  return payload.projects || [];
+}
+
+export async function updateAdminWebAgencyProjectStatus(
+  token: string,
+  requestId: number,
+  projectStatus: string,
+  operatorNotes: string,
+) {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/web-agency/status"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-token": token,
+    },
+    body: JSON.stringify({ requestId, projectStatus, operatorNotes }),
+  });
+
+  const payload = (await response.json()) as { message?: string };
+  if (!response.ok) {
+    throw new Error(payload.message || "Aggiornamento progetto web agency non riuscito");
+  }
+
+  return payload.message || "Progetto aggiornato";
+}
+
+export async function uploadAdminWebAgencyQuote(
+  token: string,
+  requestId: number,
+  file: File,
+  note: string,
+) {
+  const formData = new FormData();
+  formData.set("requestId", String(requestId));
+  formData.set("note", note);
+  formData.append("quoteFile", file);
+
+  const response = await fetch(buildApiUrl("/api/admin/client-area/web-agency/quote"), {
+    method: "POST",
+    headers: {
+      "x-admin-token": token,
+    },
+    body: formData,
+  });
+
+  const payload = (await response.json()) as {
+    message?: string;
+    quote?: AdminWebAgencyProject["quote"];
+  };
+
+  if (!response.ok) {
+    throw new Error(payload.message || "Upload proposta non riuscito");
+  }
+
+  return {
+    message: payload.message || "Proposta inviata",
+    quote: payload.quote || { fileName: "", url: "", sentAt: "", note: "" },
+  };
+}
+
 export async function fetchAdminEmailNotifications(
   token: string,
   filters?: { area?: string; status?: string },
@@ -649,7 +854,7 @@ export async function fetchAdminEmailNotifications(
   }
 
   const query = params.toString();
-  const url = `/api/admin/client-area/email-notifications${query ? `?${query}` : ""}`;
+  const url = buildApiUrl(`/api/admin/client-area/email-notifications${query ? `?${query}` : ""}`);
   const response = await fetch(url, {
     headers: {
       "x-admin-token": token,
@@ -673,7 +878,7 @@ export async function fetchAdminClientAreaTickets(
   token: string,
   filters?: { area?: string; status?: string; search?: string },
 ) {
-  const response = await fetch("/api/admin/client-area/ticket", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/ticket"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -701,7 +906,7 @@ export async function updateAdminClientAreaTicketStatus(
   ticketId: number,
   status: string,
 ) {
-  const response = await fetch("/api/admin/client-area/ticket", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/ticket"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -737,7 +942,7 @@ export async function replyAdminClientAreaTicket(
     formData.append("files", file);
   }
 
-  const response = await fetch("/api/admin/client-area/ticket", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/ticket"), {
     method: "POST",
     headers: {
       "x-admin-token": token,
@@ -787,7 +992,7 @@ export async function createAdminClientAreaTicket(
     formData.append("files", file);
   }
 
-  const response = await fetch("/api/admin/client-area/ticket", {
+  const response = await fetch(buildApiUrl("/api/admin/client-area/ticket"), {
     method: "POST",
     headers: {
       "x-admin-token": token,

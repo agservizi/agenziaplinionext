@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
 import {
   CAF_PATRONATO_CATALOG,
   getCafPatronatoScopeLabel,
@@ -66,6 +67,7 @@ export default function CafPatronatoRequestForm({
   const [message, setMessage] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [pricingRules, setPricingRules] = useState<CafPatronatoPricingRule[]>([]);
+  const [profileStatus, setProfileStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   const availableCategories = useMemo(
     () => CAF_PATRONATO_CATALOG.filter((category) => category.scope === form.scope),
@@ -84,6 +86,37 @@ export default function CafPatronatoRequestForm({
   const selectedPriceLabel =
     selectedPricingRule?.label ||
     (selectedService ? `${selectedService.label} CAF/Patronato` : "Prezzo in attesa");
+
+  useEffect(() => {
+    let active = true;
+    const token = getClientPortalToken();
+    if (!token) {
+      return () => {
+        active = false;
+      };
+    }
+
+    setProfileStatus("loading");
+    fetchClientPortalProfile(token)
+      .then(({ profile }) => {
+        if (!active) return;
+        setForm((current) => ({
+          ...current,
+          customerName: current.customerName || profile.fullName || "",
+          email: current.email || profile.email || profile.username || "",
+          phone: current.phone || profile.phone || "",
+        }));
+        setProfileStatus("ready");
+      })
+      .catch(() => {
+        if (!active) return;
+        setProfileStatus("error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedService) {
@@ -195,6 +228,7 @@ export default function CafPatronatoRequestForm({
       body.set("preferredContactDate", form.preferredContactDate);
       body.set("documentSummary", form.documentSummary);
       body.set("notes", form.notes);
+      body.set("token", getClientPortalToken());
       for (const file of files) {
         body.append("files", file);
       }
@@ -235,6 +269,11 @@ export default function CafPatronatoRequestForm({
           Compila i dati principali, allega i documenti che hai già pronti e il team riceve subito
           una mail operativa per iniziare la lavorazione.
         </p>
+        {profileStatus === "ready" ? (
+          <p className="text-xs font-medium text-cyan-700">
+            Ho precaricato nome, email e telefono dal tuo profilo cliente.
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">

@@ -11,6 +11,7 @@ import {
   fetchClientPortalProfile,
   getClientPortalToken,
 } from "@/lib/client-portal-auth";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Header() {
   const pathname = usePathname();
@@ -159,23 +160,32 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2.5 md:flex">
           <button
             type="button"
             onClick={() => setBookingOpen(true)}
             className={
               scrolled
-                ? "rounded-full border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-slate-950"
-                : "rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/50 hover:bg-white/15"
+                ? "group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-[13px] font-semibold text-slate-700 shadow-sm transition hover:border-cyan-400 hover:text-slate-900 hover:shadow-md"
+                : "group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/8 px-5 py-2.5 text-[13px] font-semibold text-white/90 backdrop-blur-sm transition hover:border-white/40 hover:bg-white/14 hover:text-white"
             }
           >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 transition-colors" fill="none" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             Prenota un appuntamento
           </button>
           <Link
             href={clientAreaCta.href}
             onClick={(event) => navigateWithTransition(event, clientAreaCta.href)}
-            className="inline-flex items-center justify-center rounded-full !bg-cyan-500 px-5 py-2 text-sm font-semibold !text-slate-950 transition hover:!bg-cyan-400"
+            className="group inline-flex items-center gap-2 rounded-full bg-linear-to-r from-cyan-500 to-cyan-400 px-5 py-2.5 text-[13px] font-bold text-slate-950 shadow-[0_2px_12px_rgba(6,182,212,0.35)] transition hover:from-cyan-400 hover:to-cyan-300 hover:shadow-[0_4px_20px_rgba(6,182,212,0.45)]"
           >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M15 12H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             {clientAreaCta.label}
           </Link>
         </div>
@@ -214,22 +224,30 @@ export default function Header() {
           </span>
         </button>
       </Container>
-      <div
-        className={
-          mobileOpen
-            ? "fixed inset-0 z-40 bg-black/40 opacity-100 transition-opacity md:hidden"
-            : "pointer-events-none fixed inset-0 z-40 bg-black/40 opacity-0 transition-opacity md:hidden"
-        }
-        onClick={() => setMobileOpen(false)}
-      />
-      <aside
-        className={
-          mobileOpen
-            ? "fixed right-0 top-0 z-50 h-[100svh] w-[80%] max-w-xs translate-x-0 overflow-y-auto overscroll-contain bg-white p-6 text-slate-900 shadow-2xl transition-transform md:hidden"
-            : "fixed right-0 top-0 z-50 h-[100svh] w-[80%] max-w-xs translate-x-full overflow-y-auto overscroll-contain bg-white p-6 text-slate-900 shadow-2xl transition-transform md:hidden"
-        }
-        aria-hidden={!mobileOpen}
-      >
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            key="mobile-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.aside
+            key="mobile-menu"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] as const }}
+            className="fixed right-0 top-0 z-50 h-[100svh] w-[80%] max-w-xs overflow-y-auto overscroll-contain bg-white p-6 text-slate-900 shadow-2xl md:hidden"
+            aria-hidden={!mobileOpen}
+          >
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
             Menu
@@ -257,15 +275,19 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <div className="mt-8 flex items-center gap-3">
+        <div className="mt-8 flex flex-col gap-3">
           <button
             type="button"
             onClick={() => {
               setMobileOpen(false);
               setBookingOpen(true);
             }}
-            className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-cyan-400 hover:shadow-md"
           >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             Prenota un appuntamento
           </button>
           <Link
@@ -273,12 +295,19 @@ export default function Header() {
             onClick={(event) =>
               navigateWithTransition(event, clientAreaCta.href, () => setMobileOpen(false))
             }
-            className="inline-flex w-full items-center justify-center rounded-full !bg-cyan-500 px-5 py-3 text-sm font-semibold !text-slate-950"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-cyan-500 to-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 shadow-[0_2px_12px_rgba(6,182,212,0.35)]"
           >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M15 12H3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
             {clientAreaCta.label}
           </Link>
         </div>
-      </aside>
+          </motion.aside>
+        )}
+      </AnimatePresence>
       <PublicBookingDrawer open={bookingOpen} onClose={() => setBookingOpen(false)} />
     </header>
   );

@@ -144,6 +144,7 @@
       "keywords": [
         "spedizione",
         "spedizioni",
+        "spedire",
         "tracking",
         "traccia",
         "corriere",
@@ -154,7 +155,12 @@
         "poste",
         "sda",
         "fedex",
-        "tnt"
+        "tnt",
+        "vinted",
+        "inpost",
+        "in post",
+        "locker",
+        "fermopoint"
       ],
       "intents": [
         "spedizione_pacco",

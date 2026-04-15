@@ -40,7 +40,7 @@ function semanticScopeScores(text) {
     spid: ["spid", "identita", "digitale"],
     pec: ["pec", "posta", "certificata"],
     "firma-digitale": ["firma", "digitale", "firma elettronica"],
-    spedizioni: ["spedizione", "spedizioni", "tracking", "corriere", "pacco", "nazionale", "internazionale"],
+    spedizioni: ["spedizione", "spedizioni", "spedire", "tracking", "corriere", "pacco", "nazionale", "internazionale", "vinted", "inpost", "in post", "locker", "fermopoint"],
   };
 
   const scores = {};
@@ -97,11 +97,18 @@ export function detectServiceScope(text) {
   if (includesAny(q, ["spid", "identita digitale"])) return "spid";
   if (includesAny(q, ["pec", "posta certificata"])) return "pec";
   if (includesAny(q, ["firma digitale", "firma elettronica"])) return "firma-digitale";
-  if (includesAny(q, ["tracking", "traccia", "spedizion", "corriere", "pacco"])) return "spedizioni";
+  if (includesAny(q, ["tracking", "traccia", "spedizion", "spedire", "corriere", "pacco", "vinted", "inpost", "in post", "locker", "fermopoint"])) return "spedizioni";
   const sem = semanticScopeScores(q);
   const [bestScope, bestScore] = Object.entries(sem).sort((a, b) => b[1] - a[1])[0] || [];
   if (bestScope && bestScore >= 2) return bestScope;
   return null;
+}
+
+function hasExplicitScopeSwitch(question, currentScope) {
+  const detected = detectServiceScope(question);
+  if (!detected) return false;
+  if (!currentScope) return true;
+  return detected !== currentScope;
 }
 
 export function detectConversationScope(history = [], latestQuestion = "") {
@@ -267,7 +274,8 @@ export function clientFallbackReply(question, history = []) {
               : includesAny(lastAssistant, ["spedizioni", "spedizione", "corriere", "tracking"])
                 ? "spedizioni"
         : null;
-  const effectiveScope = scope || inferredScopeFromAssistant;
+  const explicitScopeSwitch = hasExplicitScopeSwitch(question, inferredScopeFromAssistant);
+  const effectiveScope = scope || (explicitScopeSwitch ? null : inferredScopeFromAssistant);
   const hasTrackingIntent = includesAny(q, ["tracking", "traccia", "tracci", "stato spedizione", "pacco"]);
   const isGreeting = includesAny(q, ["ciao", "salve", "buongiorno", "buonasera", "hey", "hello"]);
   const isPresenceReply = includesAny(q, [
@@ -359,7 +367,7 @@ export function clientFallbackReply(question, history = []) {
     return "Al momento non ho una conferma certa di pagabilita. Inviami la denominazione completa del beneficiario (come da bollettino) e ricontrollo subito.";
   }
 
-  if (assistantAskedBeneficiaryName && String(question).trim() !== "" && String(question).trim().split(/\s+/).length <= 6) {
+  if (!explicitScopeSwitch && assistantAskedBeneficiaryName && String(question).trim() !== "" && String(question).trim().split(/\s+/).length <= 6) {
     return `Ricevuto: "${String(question).trim()}". Lo considero come denominazione beneficiario per la verifica di pagabilita in agenzia. Se vuoi maggiore precisione, invialo esattamente come riportato sul bollettino.`;
   }
 
@@ -537,6 +545,9 @@ export function clientFallbackReply(question, history = []) {
       return "Certo. Posso fare un preventivo indicativo rapido: inserisci nel pannello preventivo servizio (nazionale/internazionale), paese di destinazione, peso e misure del pacco.";
     }
     return "Gestiamo spedizioni nazionali e internazionali. In genere servono dati mittente/destinatario, peso del collo e contenuto dichiarato.";
+  }
+  if (includesAny(q, ["vinted", "inpost", "in post", "locker", "fermopoint", "spedire"])) {
+    return "Si, possiamo aiutarti su spedizioni collegate a Vinted e consegna tramite punti locker/corriere. Dimmi se devi spedire un pacco oppure tracciare una spedizione, e ti guido nel passo giusto.";
   }
   if (includesAny(q, ["dove", "sede", "indirizzo"])) {
     return "Ci trovi in Via Plinio il Vecchio 72, 80053 Castellammare di Stabia (NA).";

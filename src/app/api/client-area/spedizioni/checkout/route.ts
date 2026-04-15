@@ -23,6 +23,13 @@ function getServiceCountryValidationMessage(serviceCode: string, destinationCoun
   return "";
 }
 
+function getCarrierValidationMessage(carrierProvider: string, destinationCountry: string) {
+  if (carrierProvider === "inpost" && destinationCountry !== "IT") {
+    return "InPost e disponibile in questo flusso solo per destinazioni italiane (IT).";
+  }
+  return "";
+}
+
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
     return NextResponse.json({ message: "Stripe non configurato." }, { status: 503 });
@@ -30,6 +37,8 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const payload = {
+    carrierProvider: requireString(body?.carrierProvider || "brt").toLowerCase(),
+    inpostPackageSize: requireString(body?.inpostPackageSize).toLowerCase(),
     customerName: requireString(body?.customerName),
     email: requireString(body?.email).toLowerCase(),
     billingType: requireString(body?.billingType || "privato"),
@@ -76,6 +85,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: serviceCountryError }, { status: 400 });
   }
 
+  const carrierValidationError = getCarrierValidationMessage(
+    payload.carrierProvider,
+    payload.destinationCountry,
+  );
+  if (carrierValidationError) {
+    return NextResponse.json({ message: carrierValidationError }, { status: 400 });
+  }
+
   try {
     const volumeCM3 =
       payload.parcelCount *
@@ -89,7 +106,11 @@ export async function POST(request: Request) {
       taxableWeightKG,
       volumeM3,
       payload.destinationCountry,
-      { strict: true },
+      {
+        strict: true,
+        carrierProvider: payload.carrierProvider,
+        packageSize: payload.carrierProvider === "inpost" ? payload.inpostPackageSize : "",
+      },
     );
     const origin = new URL(request.url).origin;
     const checkout = await createStripeCheckoutSession({
@@ -100,6 +121,7 @@ export async function POST(request: Request) {
       cancelUrl: `${origin}/area-clienti/spedizioni?shipment_checkout=cancel`,
       invoiceDescription: `Spedizione ${payload.serviceCode} per ${payload.customerName}`,
       metadata: {
+        carrier_provider: payload.carrierProvider,
         service_code: payload.serviceCode,
         destination_country: payload.destinationCountry,
         price_label: price.label,

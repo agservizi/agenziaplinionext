@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { verifyAdminPortalToken } from "@/lib/admin-portal-server";
+import { verifyAdminPortalSession } from "@/lib/admin-portal-server";
 import {
   isCafPatronatoDatabaseConfigured,
   listAdminCafPatronatoRequests,
@@ -9,8 +9,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-static";
 
 export async function POST(request: Request) {
-  const token = String(request.headers.get("x-admin-token") || "").trim();
-  if (!verifyAdminPortalToken(token)) {
+  let bodyToken = "";
+  try {
+    const body = (await request.json()) as { token?: string };
+    bodyToken = String(body?.token || "").trim();
+  } catch {}
+
+  const token = String(request.headers.get("x-admin-token") || "").trim() || bodyToken;
+  if (!(await verifyAdminPortalSession(token))) {
     return NextResponse.json({ message: "Sessione admin non valida" }, { status: 401 });
   }
 

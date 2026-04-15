@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { getClientPortalToken } from "@/lib/client-portal-auth";
 import { CAF_PATRONATO_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/caf-patronato-payment";
 
 type FinalizeResult = {
@@ -49,7 +50,11 @@ export default function CafPatronatoPaymentConfirmationClient() {
         const response = await fetch("/api/client-area/caf-patronato/finalize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ draftToken, stripeSessionId: sessionId }),
+          body: JSON.stringify({
+            draftToken,
+            stripeSessionId: sessionId,
+            token: getClientPortalToken(),
+          }),
         });
         const payload = (await response.json()) as FinalizeResult;
         if (!response.ok) {

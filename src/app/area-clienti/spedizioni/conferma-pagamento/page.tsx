@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Container from "@/components/Container";
 import ShipmentPaymentConfirmationClient from "@/components/client-area/ShipmentPaymentConfirmationClient";
 import { buildMetadata } from "@/lib/seo";
@@ -5,7 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 export function generateMetadata() {
   return buildMetadata({
     title: "Conferma Pagamento Spedizione",
-    description: "Pagina di conferma pagamento e finalizzazione spedizione BRT.",
+    description: "Pagina di conferma pagamento e finalizzazione spedizione BRT o InPost.",
     path: "/area-clienti/spedizioni/conferma-pagamento",
   });
 }
@@ -23,7 +24,7 @@ export default function AreaClientiSpedizioniConfermaPagamentoPage() {
           </h1>
           <p className="max-w-3xl text-base text-slate-300 md:text-lg">
             Dopo il checkout Stripe verifico il pagamento e completo la creazione della spedizione
-            BRT in un passaggio unico, con una schermata dedicata e più chiara.
+            in un passaggio unico, con una schermata dedicata e più chiara.
           </p>
         </Container>
       </section>
@@ -31,7 +32,9 @@ export default function AreaClientiSpedizioniConfermaPagamentoPage() {
       <div className="lux-surface pt-10 text-slate-900">
         <section className="py-10">
           <Container>
-            <ShipmentPaymentConfirmationClient />
+            <Suspense fallback={<p className="text-sm text-slate-500">Caricamento...</p>}>
+              <ShipmentPaymentConfirmationClient />
+            </Suspense>
           </Container>
         </section>
       </div>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getClientPortalToken } from "@/lib/client-portal-auth";
 
 type BrtShipmentHistoryItem = {
   id: number;
   requestId: number;
+  carrierProvider: string;
   trackingCode: string;
   parcelId: string;
   shipmentNumberFrom: string;
@@ -49,9 +51,12 @@ export default function BrtShipmentHistory({ refreshToken }: BrtShipmentHistoryP
       setMessage("");
 
       try {
+        const token = getClientPortalToken();
         const response = await fetch("/api/client-area/spedizioni/history", {
           method: "POST",
           cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
         });
         const payload = (await response.json()) as {
           shipments?: BrtShipmentHistoryItem[];
@@ -87,7 +92,7 @@ export default function BrtShipmentHistory({ refreshToken }: BrtShipmentHistoryP
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-900">Le spedizioni gia registrate</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Qui trovi le ultime spedizioni create dal portale, con tracking, peso e stato pratica.
+            Qui trovi le tue ultime spedizioni create dal portale, con tracking, peso e stato pratica.
           </p>
         </div>
         {status === "ready" ? (
@@ -113,6 +118,7 @@ export default function BrtShipmentHistory({ refreshToken }: BrtShipmentHistoryP
               <tr>
                 <th className="px-4 py-3 font-semibold">#</th>
                 <th className="px-4 py-3 font-semibold">Data</th>
+                <th className="px-4 py-3 font-semibold">Corriere</th>
                 <th className="px-4 py-3 font-semibold">Servizio</th>
                 <th className="px-4 py-3 font-semibold">Cliente</th>
                 <th className="px-4 py-3 font-semibold">Stato</th>
@@ -136,6 +142,9 @@ export default function BrtShipmentHistory({ refreshToken }: BrtShipmentHistoryP
                     {shipment.createdAt
                       ? new Date(shipment.createdAt).toLocaleString("it-IT")
                       : "n/d"}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {shipment.carrierProvider === "inpost" ? "InPost" : "BRT"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{shipment.serviceType || "n/d"}</td>
                   <td className="px-4 py-3">
@@ -175,10 +184,16 @@ export default function BrtShipmentHistory({ refreshToken }: BrtShipmentHistoryP
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-semibold text-slate-900">
-                      {shipment.manifestCreated ? "Generato" : "Da verificare"}
+                      {shipment.carrierProvider === "inpost"
+                        ? "Non previsto"
+                        : shipment.manifestCreated
+                          ? "Generato"
+                          : "Da verificare"}
                     </p>
                     <p className="mt-1 text-xs text-slate-500 max-w-55">
-                      {shipment.manifestMessage || "Nessun dettaglio disponibile."}
+                      {shipment.carrierProvider === "inpost"
+                        ? "Per le spedizioni InPost questo campo non viene utilizzato."
+                        : shipment.manifestMessage || "Nessun dettaglio disponibile."}
                     </p>
                   </td>
                 </tr>

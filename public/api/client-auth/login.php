@@ -21,7 +21,7 @@ if ($db) {
     client_auth_ensure_users_table();
     $identifier = strtolower($username);
     $stmt = $db->prepare('
-        SELECT id, username, email, password_hash, status
+        SELECT id, username, email, full_name, password_hash, status
         FROM client_portal_users
         WHERE LOWER(username) = ? OR LOWER(email) = ?
         LIMIT 1
@@ -41,11 +41,13 @@ if ($db) {
             }
 
             $resolvedUsername = (string) ($user['username'] ?: $user['email'] ?: $username);
+            $fullName = trim((string) ($user['full_name'] ?? ''));
             client_auth_json([
                 'ok' => true,
-                'token' => client_auth_create_token($resolvedUsername, (int) ($user['id'] ?? 0) ?: null, 'db'),
+                'token' => client_auth_create_token($resolvedUsername, (int) ($user['id'] ?? 0) ?: null, 'db', $fullName),
                 'user' => [
                     'username' => $resolvedUsername,
+                    'fullName' => $fullName,
                     'role' => 'client',
                     'source' => 'database',
                 ],

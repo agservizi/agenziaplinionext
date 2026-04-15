@@ -81,7 +81,7 @@ export default function ContactInteractiveSection() {
   const whatsappLink = `${whatsappBase}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-slate-900">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Scegli la tua esigenza</p>
         <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -131,19 +131,19 @@ export default function ContactInteractiveSection() {
                 href={whatsappLink}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                className="rounded-2xl border border-emerald-400 bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-200"
               >
                 Apri WhatsApp con messaggio precompilato
               </a>
               <a
                 href="tel:+393773798570"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-cyan-300 hover:bg-cyan-50"
+                className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:border-cyan-400 hover:bg-cyan-50"
               >
                 Chiama ora: +39 377 379 8570
               </a>
               <Link
                 href="/prenota"
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-cyan-300 hover:bg-cyan-50"
+                className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:border-cyan-400 hover:bg-cyan-50"
               >
                 Prenota appuntamento in sede
               </Link>

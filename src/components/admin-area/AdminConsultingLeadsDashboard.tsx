@@ -8,6 +8,10 @@ import {
   updateAdminConsultingLeadStatus,
   uploadAdminConsultingQuote,
 } from "@/lib/admin-portal-auth";
+import { AdminEmptyState, AdminStatusBadge } from "@/components/admin-area/AdminUi";
+import { AdminMetricCard } from "@/components/admin-area/AdminUi";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const LEAD_STATUS_OPTIONS = ["nuova", "contattata", "qualificata", "offerta", "chiusa"];
 
@@ -59,9 +63,11 @@ export default function AdminConsultingLeadsDashboard() {
   const [leads, setLeads] = useState<AdminConsultingLead[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [serviceFilter, setServiceFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [savingId, setSavingId] = useState<number | null>(null);
   const [uploadingId, setUploadingId] = useState<number | null>(null);
   const [quoteNotes, setQuoteNotes] = useState<Record<number, string>>({});
+  const [operatorNotesDrafts, setOperatorNotesDrafts] = useState<Record<number, string>>({});
 
   useEffect(() => {
     let active = true;
@@ -91,10 +97,30 @@ export default function AdminConsultingLeadsDashboard() {
       leads.filter((lead) => {
         const byStatus = statusFilter === "all" || lead.leadStatus === statusFilter;
         const byService = serviceFilter === "all" || lead.serviceType === serviceFilter;
-        return byStatus && byService;
+        const haystack = [
+          lead.customerName,
+          lead.email,
+          lead.phone,
+          lead.businessName,
+          lead.currentProvider,
+          lead.city,
+        ]
+          .join(" ")
+          .toLowerCase();
+        const bySearch = searchTerm.trim() === "" || haystack.includes(searchTerm.trim().toLowerCase());
+        return byStatus && byService && bySearch;
       }),
-    [leads, serviceFilter, statusFilter],
+    [leads, searchTerm, serviceFilter, statusFilter],
   );
+
+  const metrics = useMemo(() => {
+    return {
+      total: leads.length,
+      nuove: leads.filter((lead) => lead.leadStatus === "nuova").length,
+      offerte: leads.filter((lead) => lead.leadStatus === "offerta").length,
+      chiuse: leads.filter((lead) => lead.leadStatus === "chiusa").length,
+    };
+  }, [leads]);
 
   const onLeadStatusChange = async (requestId: number, nextStatus: string) => {
     setSavingId(requestId);
@@ -102,11 +128,13 @@ export default function AdminConsultingLeadsDashboard() {
 
     try {
       const token = getAdminPortalToken();
-      const note = quoteNotes[requestId] || "";
+      const note = operatorNotesDrafts[requestId] ?? leads.find((item) => item.requestId === requestId)?.operatorNotes ?? "";
       await updateAdminConsultingLeadStatus(token, requestId, nextStatus, note);
       setLeads((current) =>
         current.map((lead) =>
-          lead.requestId === requestId ? { ...lead, leadStatus: nextStatus } : lead,
+          lead.requestId === requestId
+            ? { ...lead, leadStatus: nextStatus, operatorNotes: note }
+            : lead,
         ),
       );
       setMessage(`Lead #${requestId} aggiornata a ${nextStatus}.`);
@@ -147,27 +175,70 @@ export default function AdminConsultingLeadsDashboard() {
     }
   };
 
+  const onSaveOperatorNotes = async (requestId: number) => {
+    const lead = leads.find((item) => item.requestId === requestId);
+    if (!lead) return;
+
+    setSavingId(requestId);
+    setMessage("");
+
+    try {
+      const token = getAdminPortalToken();
+      const note = operatorNotesDrafts[requestId] ?? lead.operatorNotes ?? "";
+      await updateAdminConsultingLeadStatus(token, requestId, lead.leadStatus, note);
+      setLeads((current) =>
+        current.map((item) =>
+          item.requestId === requestId ? { ...item, operatorNotes: note } : item,
+        ),
+      );
+      setMessage(`Note operatore salvate per lead #${requestId}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Errore salvataggio note operatore");
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   if (status === "loading") {
-    return <p className="text-sm text-slate-300">Sto caricando le lead consulenze...</p>;
+    return <p className="text-sm text-slate-500">Sto caricando le lead consulenze...</p>;
   }
 
   if (status === "error") {
-    return <p className="text-sm font-medium text-red-400">{message}</p>;
+    return <p className="text-sm font-medium text-red-600">{message}</p>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="glass-card rounded-4xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
+      <Card className="rounded-2xl">
+        <CardContent className="p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
           Lead Consulenze
         </p>
-        <p className="mt-3 text-sm text-slate-300">
-          Lead visibili: <strong className="text-white">{filteredLeads.length}</strong> su{" "}
-          <strong className="text-white">{leads.length}</strong> totali.
+        <p className="mt-3 text-sm text-slate-600">
+          Lead visibili: <strong className="text-slate-950">{filteredLeads.length}</strong> su{" "}
+          <strong className="text-slate-950">{leads.length}</strong> totali.
         </p>
-        {message ? <p className="mt-3 text-sm font-medium text-cyan-200">{message}</p> : null}
+        {message ? <p className="mt-3 text-sm font-medium text-cyan-700">{message}</p> : null}
+
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <AdminMetricCard eyebrow="Totali" value={metrics.total} />
+          <AdminMetricCard eyebrow="Nuove" value={metrics.nuove} />
+          <AdminMetricCard eyebrow="Offerte" value={metrics.offerte} />
+          <AdminMetricCard eyebrow="Chiuse" value={metrics.chiuse} />
+        </div>
 
         <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <label className="block md:col-span-2">
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Cerca
+            </span>
+            <Input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Cliente, email, telefono, azienda, fornitore..."
+              className="rounded-full"
+            />
+          </label>
           <label className="block">
             <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
               Filtro servizio
@@ -175,7 +246,7 @@ export default function AdminConsultingLeadsDashboard() {
             <select
               value={serviceFilter}
               onChange={(event) => setServiceFilter(event.target.value)}
-              className="w-full rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
             >
               <option value="all">Tutti i servizi</option>
               <option value="telefonia">Telefonia</option>
@@ -191,7 +262,7 @@ export default function AdminConsultingLeadsDashboard() {
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="w-full rounded-full border border-white/10 bg-slate-900/60 px-4 py-2 text-sm text-white outline-none"
+              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-950 outline-none"
             >
               <option value="all">Tutti gli stati</option>
               {LEAD_STATUS_OPTIONS.map((statusOption) => (
@@ -202,9 +273,17 @@ export default function AdminConsultingLeadsDashboard() {
             </select>
           </label>
         </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
+        {filteredLeads.length === 0 ? (
+          <AdminEmptyState
+            title="Nessun lead trovato"
+            description="Con i filtri attuali non risultano lead consulenze visibili. Prova a cambiare servizio, stato o ricerca."
+          />
+        ) : null}
+
         {filteredLeads.map((lead) => (
           <div key={lead.requestId} className="glass-card rounded-4xl p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -218,6 +297,26 @@ export default function AdminConsultingLeadsDashboard() {
                   {lead.phone ? ` • ${lead.phone}` : ""}
                   {lead.city ? ` • ${lead.city}` : ""}
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  {lead.email ? (
+                    <a
+                      href={`mailto:${lead.email}`}
+                      className="rounded-full border border-white/10 bg-slate-900/60 px-3 py-1 text-xs font-semibold text-slate-200"
+                    >
+                      Email
+                    </a>
+                  ) : null}
+                  {lead.phone ? (
+                    <a
+                      href={`https://wa.me/${lead.phone.replace(/\D+/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200"
+                    >
+                      WhatsApp
+                    </a>
+                  ) : null}
+                </div>
                 <p className="text-sm text-slate-400">Creata: {formatDate(lead.createdAt)}</p>
               </div>
 
@@ -234,9 +333,7 @@ export default function AdminConsultingLeadsDashboard() {
                     </option>
                   ))}
                 </select>
-                <span className="text-xs text-slate-300">
-                  Stato: <strong>{formatLeadStatus(lead.leadStatus)}</strong>
-                </span>
+                <AdminStatusBadge value={lead.leadStatus} className="border-white/10 bg-white/5 text-slate-100" />
               </div>
             </div>
 
@@ -262,6 +359,41 @@ export default function AdminConsultingLeadsDashboard() {
                 <p className="mt-2 text-sm text-slate-200">
                   {lead.marketingConsent ? "Consenso" : "No consenso"}
                 </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Stato richiesta
+                </p>
+                <p className="mt-2 text-sm text-slate-200">{lead.requestStatus || "n/d"}</p>
+                <p className="mt-1 text-xs text-slate-400">Aggiornata: {formatDate(lead.updatedAt)}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950/50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Nota operatore
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-[1fr_auto]">
+                <textarea
+                  value={operatorNotesDrafts[lead.requestId] ?? lead.operatorNotes ?? ""}
+                  onChange={(event) =>
+                    setOperatorNotesDrafts((current) => ({
+                      ...current,
+                      [lead.requestId]: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  placeholder="Esito chiamata, prossimi passi, offerta consigliata..."
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void onSaveOperatorNotes(lead.requestId)}
+                  disabled={savingId === lead.requestId}
+                  className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-950 disabled:opacity-60"
+                >
+                  {savingId === lead.requestId ? "Salvataggio..." : "Salva note"}
+                </button>
               </div>
             </div>
 

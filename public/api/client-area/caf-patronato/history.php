@@ -27,6 +27,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     client_area_json(['message' => 'Metodo non consentito.'], 405);
 }
 
+$body = client_area_parse_json_body();
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
+
 if (!client_area_has_database_config()) {
     client_area_json(['requests' => [], 'message' => 'Database non configurato'], 503);
 }
@@ -46,6 +50,7 @@ try {
        r.notes,
        r.service_type,
        r.status,
+       r.details_json,
        r.created_at,
        r.updated_at,
        c.service_scope,
@@ -106,6 +111,24 @@ try {
     while ($row = $result->fetch_assoc()) {
         $requestId = (int) ($row['request_id'] ?? 0);
         if ($requestId <= 0) continue;
+        $requestDetails = client_area_decode_json_value($row['details_json'] ?? null);
+        $payloadUserId = (int) ($requestDetails['clientUserId'] ?? 0);
+        $payloadUsername = strtolower(trim((string) ($requestDetails['clientUsername'] ?? '')));
+        $payloadEmail = strtolower(trim((string) ($requestDetails['clientEmail'] ?? ($row['email'] ?? ''))));
+        $currentUsername = strtolower(trim((string) ($clientProfile['username'] ?? '')));
+        $currentEmail = strtolower(trim((string) ($clientProfile['email'] ?? '')));
+        $currentUserId = (int) ($clientProfile['userId'] ?? 0);
+
+        $ownedByClient = false;
+        if ($currentUserId > 0 && $payloadUserId > 0 && $currentUserId === $payloadUserId) {
+            $ownedByClient = true;
+        } elseif ($currentEmail !== '' && $payloadEmail !== '' && $currentEmail === $payloadEmail) {
+            $ownedByClient = true;
+        } elseif ($currentUsername !== '' && $payloadUsername !== '' && $currentUsername === $payloadUsername) {
+            $ownedByClient = true;
+        }
+
+        if (!$ownedByClient) continue;
         $requestIds[] = $requestId;
         $requests[$requestId] = [
             'requestId' => $requestId,

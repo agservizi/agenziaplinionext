@@ -5,6 +5,8 @@ export const company = {
   vat: "08442881218",
   sdi: "KRRH6B9",
   openedYear: 2016,
+  phone: "+39 377 379 8570",
+  whatsapp: "393773798570",
   googleBusinessUrl:
     "https://maps.app.goo.gl/FDVRXDWNp7J5dRrk8",
 };

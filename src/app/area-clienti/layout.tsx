@@ -1,9 +1,9 @@
-import ClientPortalGuard from "@/components/client-area/ClientPortalGuard";
+import ClientAreaShell from "@/components/client-area/ClientAreaShell";
 
 export default function AreaClientiLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <ClientPortalGuard>{children}</ClientPortalGuard>;
+  return <ClientAreaShell>{children}</ClientAreaShell>;
 }

@@ -25,7 +25,7 @@ function resolveVisurePricingApiBase() {
     visurePricingApiBase === "https://www.agenziaplinio.it";
 
   if (isLocalhost && (!visurePricingApiBase || pointsToProduction)) {
-    return "http://localhost:3001";
+    return window.location.origin;
   }
 
   return visurePricingApiBase;

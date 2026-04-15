@@ -61,6 +61,145 @@ function client_area_decode_json_value(mixed $value): array
     return is_array($decoded) ? $decoded : [];
 }
 
+function client_area_client_portal_secret(): string
+{
+    return trim((string) public_api_env('CLIENT_PORTAL_SESSION_SECRET', 'ag-client-portal-dev-secret'));
+}
+
+function client_area_base64url_decode(string $value): string|false
+{
+    $padding = 4 - (strlen($value) % 4);
+    if ($padding < 4) {
+        $value .= str_repeat('=', $padding);
+    }
+
+    return base64_decode(strtr($value, '-_', '+/'), true);
+}
+
+function client_area_verify_client_portal_token(string $token): ?array
+{
+    $parts = explode('.', $token, 2);
+    if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+        return null;
+    }
+
+    [$payload, $signature] = $parts;
+    $expected = rtrim(strtr(base64_encode(hash_hmac('sha256', $payload, client_area_client_portal_secret(), true)), '+/', '-_'), '=');
+    if (!hash_equals($expected, $signature)) {
+        return null;
+    }
+
+    $decoded = client_area_base64url_decode($payload);
+    if ($decoded === false) {
+        return null;
+    }
+
+    $parsed = json_decode($decoded, true);
+    if (!is_array($parsed) || empty($parsed['username']) || empty($parsed['exp'])) {
+        return null;
+    }
+
+    if ((int) $parsed['exp'] < (int) round(microtime(true) * 1000)) {
+        return null;
+    }
+
+    return $parsed;
+}
+
+function client_area_find_client_portal_user(array $session): ?array
+{
+    if (($session['source'] ?? '') !== 'db') {
+        return null;
+    }
+
+    $db = client_area_db();
+    if (!$db) {
+        return null;
+    }
+
+    $userId = (int) ($session['userId'] ?? 0);
+    if ($userId > 0) {
+        $stmt = $db->prepare(
+            'SELECT id, full_name, username, email, phone, company_name, status
+             FROM client_portal_users
+             WHERE id = ?
+             LIMIT 1'
+        );
+        if ($stmt) {
+            $stmt->bind_param('i', $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result ? $result->fetch_assoc() : null;
+            $stmt->close();
+            if (is_array($row) && (($row['status'] ?? 'active') === 'active')) {
+                return $row;
+            }
+        }
+    }
+
+    $username = trim((string) ($session['username'] ?? ''));
+    if ($username === '') {
+        return null;
+    }
+
+    $stmt = $db->prepare(
+        'SELECT id, full_name, username, email, phone, company_name, status
+         FROM client_portal_users
+         WHERE username = ? OR email = ?
+         LIMIT 1'
+    );
+    if (!$stmt) {
+        return null;
+    }
+
+    $stmt->bind_param('ss', $username, $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+
+    if (!is_array($row) || (($row['status'] ?? 'active') !== 'active')) {
+        return null;
+    }
+
+    return $row;
+}
+
+function client_area_require_authenticated_client(string $token): array
+{
+    $session = client_area_verify_client_portal_token($token);
+    if (!$session) {
+        client_area_json(['message' => 'Sessione cliente non valida.'], 401);
+    }
+
+    if (($session['source'] ?? '') === 'env') {
+        return [
+            'username' => (string) ($session['username'] ?? ''),
+            'userId' => null,
+            'source' => 'env',
+            'fullName' => '',
+            'email' => '',
+            'phone' => '',
+            'companyName' => '',
+        ];
+    }
+
+    $user = client_area_find_client_portal_user($session);
+    if (!$user) {
+        client_area_json(['message' => 'Profilo cliente non disponibile.'], 401);
+    }
+
+    return [
+        'username' => (string) ($user['username'] ?? ''),
+        'userId' => (int) ($user['id'] ?? 0),
+        'source' => 'db',
+        'fullName' => (string) ($user['full_name'] ?? ''),
+        'email' => strtolower(trim((string) ($user['email'] ?? ''))),
+        'phone' => trim((string) ($user['phone'] ?? '')),
+        'companyName' => trim((string) ($user['company_name'] ?? '')),
+    ];
+}
+
 function client_area_supported_visura_services(): array
 {
     return [
@@ -106,6 +245,12 @@ function client_area_ensure_client_area_consulting_leads_table(): void
 {
     $db = client_area_require_db();
     $db->query("\n        CREATE TABLE IF NOT EXISTS client_area_consulting_leads (\n          id INT AUTO_INCREMENT PRIMARY KEY,\n          request_id INT NOT NULL,\n          service_type VARCHAR(40) NOT NULL,\n          customer_type VARCHAR(40) NOT NULL DEFAULT 'privato',\n          business_name VARCHAR(191) NOT NULL DEFAULT '',\n          vat_number VARCHAR(40) NOT NULL DEFAULT '',\n          current_provider VARCHAR(191) NOT NULL DEFAULT '',\n          monthly_spend_eur DECIMAL(10,2) NOT NULL DEFAULT 0,\n          city VARCHAR(120) NOT NULL DEFAULT '',\n          best_contact_time VARCHAR(120) NOT NULL DEFAULT '',\n          privacy_consent TINYINT(1) NOT NULL DEFAULT 0,\n          marketing_consent TINYINT(1) NOT NULL DEFAULT 0,\n          lead_status VARCHAR(40) NOT NULL DEFAULT 'nuova',\n          intake_payload_json JSON NULL,\n          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n          UNIQUE KEY uq_client_area_consulting_request (request_id),\n          KEY idx_client_area_consulting_status (lead_status),\n          KEY idx_client_area_consulting_service (service_type)\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4\n    ");
+}
+
+function client_area_ensure_client_area_web_agency_projects_table(): void
+{
+    $db = client_area_require_db();
+    $db->query("\n        CREATE TABLE IF NOT EXISTS client_area_web_agency_projects (\n          id INT AUTO_INCREMENT PRIMARY KEY,\n          request_id INT NOT NULL,\n          project_type VARCHAR(60) NOT NULL,\n          project_goal VARCHAR(191) NOT NULL DEFAULT '',\n          budget_range VARCHAR(80) NOT NULL DEFAULT '',\n          timeline VARCHAR(80) NOT NULL DEFAULT '',\n          business_sector VARCHAR(191) NOT NULL DEFAULT '',\n          existing_site_url VARCHAR(255) NOT NULL DEFAULT '',\n          contact_preference VARCHAR(80) NOT NULL DEFAULT '',\n          materials_ready VARCHAR(80) NOT NULL DEFAULT '',\n          has_existing_site TINYINT(1) NOT NULL DEFAULT 0,\n          needs_branding TINYINT(1) NOT NULL DEFAULT 0,\n          needs_seo TINYINT(1) NOT NULL DEFAULT 0,\n          needs_advertising TINYINT(1) NOT NULL DEFAULT 0,\n          privacy_consent TINYINT(1) NOT NULL DEFAULT 0,\n          marketing_consent TINYINT(1) NOT NULL DEFAULT 0,\n          project_status VARCHAR(40) NOT NULL DEFAULT 'nuova',\n          intake_payload_json JSON NULL,\n          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,\n          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n          UNIQUE KEY uq_client_area_web_agency_request (request_id),\n          KEY idx_client_area_web_agency_status (project_status),\n          KEY idx_client_area_web_agency_type (project_type)\n        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4\n    ");
 }
 
 function client_area_resolve_visura_price(string $serviceType): array

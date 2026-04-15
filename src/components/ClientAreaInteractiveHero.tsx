@@ -36,6 +36,11 @@ const heroMetrics: Record<string, { value: number; label: string }[]> = {
     { value: 3, label: "Confronti offerta" },
     { value: 95, label: "Lead qualificate %" },
   ],
+  "web-agency": [
+    { value: 9, label: "Brief/sett." },
+    { value: 4, label: "Step progetto" },
+    { value: 92, label: "Lead qualificate %" },
+  ],
 };
 
 function useCountUp(target: number, resetKey: string) {

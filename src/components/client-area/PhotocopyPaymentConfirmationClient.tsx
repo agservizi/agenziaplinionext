@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { getClientPortalToken } from "@/lib/client-portal-auth";
 
 type VerifyResult = {
   message?: string;
@@ -41,7 +42,7 @@ export default function PhotocopyPaymentConfirmationClient() {
         const response = await fetch("/api/client-area/fotocopie/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, orderToken }),
+          body: JSON.stringify({ sessionId, orderToken, token: getClientPortalToken() }),
         });
 
         const payload = (await response.json()) as VerifyResult;
@@ -145,6 +146,12 @@ export default function PhotocopyPaymentConfirmationClient() {
           className="rounded-full bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500"
         >
           Nuovo ordine fotocopie
+        </Link>
+        <Link
+          href="/area-clienti/fotocopie/storico"
+          className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+        >
+          Vai allo storico
         </Link>
       </div>
     </div>

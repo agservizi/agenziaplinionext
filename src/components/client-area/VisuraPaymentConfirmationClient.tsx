@@ -11,6 +11,7 @@ type VisuraDraft = {
   email: string;
   phone: string;
   notes: string;
+  token?: string;
   resolvedServiceHash: string;
   resolvedServiceLabel: string;
   formData: Record<string, unknown>;

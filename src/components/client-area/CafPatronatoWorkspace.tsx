@@ -77,7 +77,7 @@ export default function CafPatronatoWorkspace() {
   return (
     <section className="py-10">
       <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr]">
-        <div className="space-y-6">
+        <div className="space-y-6 xl:sticky xl:top-28 xl:self-start">
           <div className="lux-card rounded-3xl p-4 md:p-5">
             <div className="rounded-3xl border border-slate-200 bg-white p-3">
               <div className="grid grid-cols-2 gap-2 rounded-3xl border border-slate-200 bg-slate-100 p-2">

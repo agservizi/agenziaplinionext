@@ -8,6 +8,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     client_area_json(['message' => 'Metodo non consentito.'], 405);
 }
 
+$body = client_area_parse_json_body();
+$token = trim((string) ($body['token'] ?? ''));
+$clientProfile = client_area_require_authenticated_client($token);
+
 if (!client_area_has_database_config()) {
     client_area_json([
         'visure' => [],
@@ -58,6 +62,25 @@ try {
     while ($row = $result->fetch_assoc()) {
         $details = client_area_decode_json_value($row['details_json'] ?? null);
         $providerSummary = is_array($details['providerSummary'] ?? null) ? $details['providerSummary'] : [];
+        $payloadUserId = (int) ($details['clientUserId'] ?? 0);
+        $payloadUsername = strtolower(trim((string) ($details['clientUsername'] ?? '')));
+        $payloadEmail = strtolower(trim((string) ($details['clientEmail'] ?? ($row['email'] ?? ''))));
+        $currentUsername = strtolower(trim((string) ($clientProfile['username'] ?? '')));
+        $currentEmail = strtolower(trim((string) ($clientProfile['email'] ?? '')));
+        $currentUserId = (int) ($clientProfile['userId'] ?? 0);
+
+        $ownedByClient = false;
+        if ($currentUserId > 0 && $payloadUserId > 0 && $currentUserId === $payloadUserId) {
+            $ownedByClient = true;
+        } elseif ($currentEmail !== '' && $payloadEmail !== '' && $currentEmail === $payloadEmail) {
+            $ownedByClient = true;
+        } elseif ($currentUsername !== '' && $payloadUsername !== '' && $currentUsername === $payloadUsername) {
+            $ownedByClient = true;
+        }
+
+        if (!$ownedByClient) {
+            continue;
+        }
 
         $visure[] = [
             'id' => (int) ($row['id'] ?? 0),

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Container from "@/components/Container";
 import VisuraPaymentConfirmationClient from "@/components/client-area/VisuraPaymentConfirmationClient";
 import { buildMetadata } from "@/lib/seo";
@@ -31,7 +32,9 @@ export default function AreaClientiVisureConfermaPagamentoPage() {
       <div className="lux-surface pt-10 text-slate-900">
         <section className="py-10">
           <Container>
-            <VisuraPaymentConfirmationClient />
+            <Suspense fallback={<p className="text-sm text-slate-500">Caricamento...</p>}>
+              <VisuraPaymentConfirmationClient />
+            </Suspense>
           </Container>
         </section>
       </div>

@@ -17,10 +17,10 @@ try {
     public_api_ensure_shipping_pricing_table();
 
     $result = $db->query("
-        SELECT id, label, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
+        SELECT id, label, carrier_provider, package_size, service_scope, country_code, min_weight_kg, max_weight_kg, min_volume_m3, max_volume_m3, price_eur, sort_order, active
         FROM shipping_pricing_rules
         WHERE active = 1
-        ORDER BY service_scope ASC, country_code ASC, sort_order ASC, id ASC
+        ORDER BY carrier_provider ASC, service_scope ASC, country_code ASC, sort_order ASC, id ASC
     ");
 
     if (!$result) {
@@ -46,6 +46,10 @@ try {
         $rules[] = [
             'id' => (int) ($row['id'] ?? 0),
             'label' => (string) ($row['label'] ?? ''),
+            'carrierProvider' => strtolower((string) ($row['carrier_provider'] ?? 'brt')) === 'inpost' ? 'inpost' : 'brt',
+            'packageSize' => in_array(strtolower((string) ($row['package_size'] ?? '')), ['small', 'medium', 'large'], true)
+                ? strtolower((string) ($row['package_size'] ?? ''))
+                : '',
             'serviceScope' => (string) ($row['service_scope'] ?? 'all'),
             'countryCode' => strtoupper((string) ($row['country_code'] ?? '')),
             'minWeightKG' => (float) ($row['min_weight_kg'] ?? 0),

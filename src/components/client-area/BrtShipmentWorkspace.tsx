@@ -15,9 +15,12 @@ type BrtShipmentWorkspaceProps = {
 
 function buildInitialSummary(area: ClientAreaConfig): BrtShipmentLiveSummary {
   return {
-    serviceLabel: area.serviceOptions[0]?.label || "Spedizione",
+    carrierProvider: "brt",
+    serviceLabel: `BRT • ${area.serviceOptions[0]?.label || "Spedizione"}`,
     destinationCountry: "IT",
     parcelCount: 1,
+    packageSize: "",
+    packageLabel: "",
     actualWeightKG: 1,
     volumetricWeightKG: 0.25,
     taxableWeightKG: 1,
@@ -57,6 +60,8 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
   }, []);
 
   const matchedRule = useMemo(() => {
+    const destinationCountry = String(summary.destinationCountry || "IT").trim().toUpperCase();
+    const serviceScope = destinationCountry === "IT" ? "national" : "international";
     const sortedRules = [...pricingRules].sort((left, right) => {
       if (left.sortOrder !== right.sortOrder) {
         return left.sortOrder - right.sortOrder;
@@ -67,6 +72,26 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
 
     return (
       sortedRules.find((rule) => {
+        if (rule.carrierProvider !== summary.carrierProvider) {
+          return false;
+        }
+        if (summary.carrierProvider === "inpost") {
+          return rule.packageSize === summary.packageSize;
+        }
+        const ruleScope = String(rule.serviceScope || "all").trim().toLowerCase();
+        if (ruleScope !== serviceScope && ruleScope !== "all") {
+          return false;
+        }
+        if (serviceScope === "international") {
+          const ruleCountry = String(rule.countryCode || "").trim().toUpperCase();
+          if (
+            ruleCountry !== destinationCountry &&
+            ruleCountry !== "ALL" &&
+            ruleCountry !== ""
+          ) {
+            return false;
+          }
+        }
         const weightMatches =
           summary.taxableWeightKG >= rule.minWeightKG &&
           (rule.maxWeightKG <= 0 || summary.taxableWeightKG <= rule.maxWeightKG);
@@ -77,15 +102,55 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
         return rule.active && weightMatches && volumeMatches;
       }) || null
     );
-  }, [pricingRules, summary.taxableWeightKG, summary.volumeM3]);
+  }, [
+    pricingRules,
+    summary.carrierProvider,
+    summary.destinationCountry,
+    summary.packageSize,
+    summary.taxableWeightKG,
+    summary.volumeM3,
+  ]);
 
   const resolvedCostLabel = matchedRule
     ? `${matchedRule.priceEUR.toFixed(2).replace(".", ",")} euro`
     : summary.estimatedCostLabel;
+  const carrierLabel = summary.carrierProvider === "inpost" ? "InPost" : "BRT";
+  const networkLabel = summary.carrierProvider === "inpost" ? "Punto InPost" : "Punto BRT PUDO";
+  const summaryIntro =
+    summary.carrierProvider === "inpost"
+      ? "Il pannello segue il form: formato selezionato, peso operativo e stima economica si aggiornano in tempo reale."
+      : "Il pannello segue il form: peso tassabile, volume e fascia costo si aggiornano in tempo reale.";
+  const calculationLabel =
+    summary.carrierProvider === "inpost" ? "Formato InPost configurato" : "Calcolo BRT ufficiale";
+  const costPanelLabel =
+    summary.carrierProvider === "inpost" ? "Stima live InPost" : "Costo indicativo live";
+  const matchedRuleMessage = matchedRule
+    ? summary.carrierProvider === "inpost"
+      ? `Sto applicando la tariffa configurata per InPost in area admin: ${matchedRule.label}.`
+      : `Sto applicando il listino impostato in area admin: ${matchedRule.label}.`
+    : "";
+  const pricingFallbackMessage =
+    summary.carrierProvider === "inpost"
+      ? "Nessuna fascia InPost attiva trovata nel listino admin per questo invio."
+      : "Nessuna fascia BRT attiva trovata nel listino admin per questo invio.";
+  const operationalOutput =
+    summary.carrierProvider === "inpost"
+      ? [
+          "• selezioni un punto InPost oppure usi la consegna standard",
+          "• il checkout Stripe resta identico, ma il corriere operativo diventa InPost",
+          "• dopo il pagamento trovi tracking, punto scelto ed etichetta PDF nel portale",
+          "• se il pagamento viene annullato, la spedizione non viene creata e puoi riprendere dal form",
+        ]
+      : [
+          "• compili i dati completi della spedizione e controlli subito pesi, volume e costo stimato",
+          "• al click su crea spedizione vieni reindirizzato al checkout Stripe per il pagamento",
+          "• dopo pagamento confermato, la spedizione viene creata con tracking, parcel ID ed etichetta PDF",
+          "• se il pagamento viene annullato, la spedizione non viene creata e puoi riprendere dal form",
+        ];
 
   return (
     <div className="grid gap-8 md:grid-cols-[0.85fr_1.15fr]">
-      <div className="lux-card rounded-3xl p-6">
+      <div className="lux-card rounded-3xl p-6 md:sticky md:top-28 md:self-start">
         <div className="space-y-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-600">
@@ -95,7 +160,7 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
               Spedizione aggiornata mentre compili
             </h2>
             <p className="mt-3 text-sm text-slate-600">
-              Il pannello segue il form: peso tassabile, volume e fascia costo si aggiornano in tempo reale.
+              {summaryIntro}
             </p>
           </div>
 
@@ -106,8 +171,18 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
                 Servizio: <strong>{summary.serviceLabel}</strong>
               </p>
               <p>
-                Dimensioni: <strong>{summary.dimensionsLabel}</strong>
+                {summary.carrierProvider === "inpost" ? "Formato InPost" : "Dimensioni"}:{" "}
+                <strong>
+                  {summary.carrierProvider === "inpost" && summary.packageLabel
+                    ? summary.packageLabel
+                    : summary.dimensionsLabel}
+                </strong>
               </p>
+              {summary.carrierProvider === "inpost" ? (
+                <p>
+                  Misure formato: <strong>{summary.dimensionsLabel}</strong>
+                </p>
+              ) : null}
               <p>
                 Colli: <strong>{summary.parcelCount}</strong>
               </p>
@@ -115,25 +190,36 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
                 Destinazione: <strong>{summary.destinationCountry}</strong>
               </p>
               <p>
-                Punto BRT PUDO: <strong>{summary.pudoSelected ? "selezionato" : "non selezionato"}</strong>
+                {networkLabel}: <strong>{summary.pudoSelected ? "selezionato" : "non selezionato"}</strong>
               </p>
             </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-sm font-semibold text-slate-900">Calcolo BRT ufficiale</p>
+            <p className="text-sm font-semibold text-slate-900">{calculationLabel}</p>
             <div className="mt-3 space-y-2 text-sm text-slate-600">
-              <p>
-                Formula: <strong className="text-slate-900">L x H x P / 4000</strong>
-              </p>
+              {summary.carrierProvider === "inpost" ? (
+                <p>
+                  Template selezionato:{" "}
+                  <strong className="text-slate-900">
+                    {summary.packageLabel || "Formato InPost"}
+                  </strong>
+                </p>
+              ) : (
+                <p>
+                  Formula: <strong className="text-slate-900">L x H x P / 4000</strong>
+                </p>
+              )}
               <p>
                 Peso reale: <strong className="text-slate-900">{summary.actualWeightKG} kg</strong>
               </p>
               <p>
-                Peso volumetrico: <strong className="text-slate-900">{summary.volumetricWeightKG} kg</strong>
+                {summary.carrierProvider === "inpost" ? "Peso stimato per template" : "Peso volumetrico"}:{" "}
+                <strong className="text-slate-900">{summary.volumetricWeightKG} kg</strong>
               </p>
               <p>
-                Peso tassabile: <strong className="text-slate-900">{summary.taxableWeightKG} kg</strong>
+                {summary.carrierProvider === "inpost" ? "Peso operativo" : "Peso tassabile"}:{" "}
+                <strong className="text-slate-900">{summary.taxableWeightKG} kg</strong>
               </p>
               <p>
                 Volume totale: <strong className="text-slate-900">{summary.volumeM3} m3</strong>
@@ -142,13 +228,14 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-950 p-4 text-white">
-            <p className="text-sm font-semibold">Costo indicativo live</p>
+            <p className="text-sm font-semibold">{costPanelLabel}</p>
             <p className="mt-3 text-2xl font-semibold">{resolvedCostLabel}</p>
-            {matchedRule ? (
-              <p className="mt-2 text-sm text-slate-300">
-                {`Sto applicando il listino impostato in area admin: ${matchedRule.label}.`}
-              </p>
-            ) : null}
+            <p className="mt-2 text-xs font-medium uppercase tracking-[0.16em] text-cyan-200">
+              Corriere attivo: {carrierLabel}
+            </p>
+            <p className="mt-2 text-sm text-slate-300">
+              {matchedRuleMessage || pricingFallbackMessage}
+            </p>
             {pricingMessage ? (
               <p className="mt-2 text-xs font-medium text-amber-200">{pricingMessage}</p>
             ) : null}
@@ -157,10 +244,9 @@ export default function BrtShipmentWorkspace({ area }: BrtShipmentWorkspaceProps
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             <p className="text-sm font-semibold text-slate-900">Output operativo</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li>• compili i dati completi della spedizione e controlli subito pesi, volume e costo stimato</li>
-              <li>• al click su crea spedizione vieni reindirizzato al checkout Stripe per il pagamento</li>
-              <li>• dopo pagamento confermato, la spedizione viene creata con tracking, parcel ID ed etichetta PDF</li>
-              <li>• se il pagamento viene annullato, la spedizione non viene creata e puoi riprendere dal form</li>
+              {operationalOutput.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </div>
 
