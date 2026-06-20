@@ -3,6 +3,9 @@ Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 Disallow: /login
 Disallow: /admin-login
 
@@ -11,47 +14,99 @@ Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
+
+User-Agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: Google-Extended
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: ChatGPT-User
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: anthropic-ai
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: ClaudeBot
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: PerplexityBot
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: Bytespider
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
 User-Agent: Applebot-Extended
 Allow: /
 Disallow: /api/
 Disallow: /area-admin/
 Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
 
+User-Agent: meta-externalagent
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
+
+User-Agent: DuckAssistBot
+Allow: /
+Disallow: /api/
+Disallow: /area-admin/
+Disallow: /area-clienti/
+Disallow: /evadi-pratica/
+Disallow: /scarica-pratica/
+Disallow: /checkout/
+
+Host: https://agenziaplinio.it
 Sitemap: https://agenziaplinio.it/sitemap.xml

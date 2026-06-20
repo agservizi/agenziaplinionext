@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 <url>
 <loc>https://agenziaplinio.it</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>weekly</changefreq>
 <priority>1</priority>
 </url>
@@ -12,23 +15,32 @@
 <loc>https://agenziaplinio.it/chi-siamo</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/chi-siamo" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/chi-siamo" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<priority>0.8</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/servizi</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/servizi/pagamenti</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -36,7 +48,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -44,7 +59,10 @@
 <loc>https://agenziaplinio.it/servizi/energia</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/energia" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/energia" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -52,7 +70,10 @@
 <loc>https://agenziaplinio.it/servizi/logistica</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/logistica" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/logistica" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -60,7 +81,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -68,7 +92,10 @@
 <loc>https://agenziaplinio.it/servizi/web-agency</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/web-agency" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/web-agency" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -76,7 +103,10 @@
 <loc>https://agenziaplinio.it/servizi/spid-pec-firma-digitale</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/spid-pec-firma-digitale" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/spid-pec-firma-digitale" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -84,39 +114,54 @@
 <loc>https://agenziaplinio.it/web-agency</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/web-agency" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/web-agency" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/consulenza</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/consulenza" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/consulenza" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/prenota</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/prenota" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/prenota" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/contatti</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/contatti" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/contatti" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
-<changefreq>monthly</changefreq>
-<priority>0.7</priority>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.9</priority>
 </url>
 <url>
 <loc>https://agenziaplinio.it/cookie-policy</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/cookie-policy" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/cookie-policy" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -124,7 +169,10 @@
 <loc>https://agenziaplinio.it/privacy-policy</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/privacy-policy" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/privacy-policy" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.7</priority>
 </url>
@@ -132,7 +180,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/bollettini-postali</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/bollettini-postali" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/bollettini-postali" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -140,7 +191,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/pagopa</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/pagopa" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/pagopa" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -148,7 +202,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/f24</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/f24" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/f24" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -156,7 +213,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/bollettini-bancari</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/bollettini-bancari" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/bollettini-bancari" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -164,7 +224,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/mav-rav</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/mav-rav" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/mav-rav" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -172,7 +235,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/bollo-auto</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/bollo-auto" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/bollo-auto" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -180,7 +246,10 @@
 <loc>https://agenziaplinio.it/servizi/pagamenti/bonifici</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/pagamenti/bonifici" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/pagamenti/bonifici" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -188,7 +257,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/iliad-space</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/iliad-space" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/iliad-space" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -196,7 +268,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/windtre</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/windtre" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/windtre" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -204,7 +279,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/fastweb</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/fastweb" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/fastweb" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -212,7 +290,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/very-mobile</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/very-mobile" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/very-mobile" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -220,7 +301,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/ho-mobile</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/ho-mobile" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/ho-mobile" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -228,7 +312,10 @@
 <loc>https://agenziaplinio.it/servizi/telefonia/digi-mobile</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/telefonia/digi-mobile" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/telefonia/digi-mobile" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -236,7 +323,10 @@
 <loc>https://agenziaplinio.it/servizi/energia/enel-energia</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/energia/enel-energia" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/energia/enel-energia" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -244,7 +334,10 @@
 <loc>https://agenziaplinio.it/servizi/energia/a2a-energia</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/energia/a2a-energia" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/energia/a2a-energia" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -252,7 +345,10 @@
 <loc>https://agenziaplinio.it/servizi/energia/windtre-luce-gas</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/energia/windtre-luce-gas" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/energia/windtre-luce-gas" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -260,7 +356,10 @@
 <loc>https://agenziaplinio.it/servizi/energia/fastweb-energia</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/energia/fastweb-energia" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/energia/fastweb-energia" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -268,7 +367,10 @@
 <loc>https://agenziaplinio.it/servizi/logistica/spedizioni-nazionali</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/logistica/spedizioni-nazionali" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/logistica/spedizioni-nazionali" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -276,7 +378,10 @@
 <loc>https://agenziaplinio.it/servizi/logistica/spedizioni-internazionali</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/logistica/spedizioni-internazionali" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/logistica/spedizioni-internazionali" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -284,7 +389,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/spid</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/spid" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/spid" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -292,7 +400,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/pec</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/pec" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/pec" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -300,7 +411,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/firma-digitale</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/firma-digitale" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/firma-digitale" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -308,7 +422,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/partner-ufficiale-namirial</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/partner-ufficiale-namirial" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/partner-ufficiale-namirial" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -316,7 +433,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/posta-telematica</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/posta-telematica" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/posta-telematica" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -324,7 +444,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/invio-pec</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/invio-pec" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/invio-pec" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -332,7 +455,10 @@
 <loc>https://agenziaplinio.it/servizi/digitali/invio-email</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/digitali/invio-email" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/digitali/invio-email" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -340,7 +466,10 @@
 <loc>https://agenziaplinio.it/servizi/web-agency/realizzazione-siti-web</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/web-agency/realizzazione-siti-web" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/web-agency/realizzazione-siti-web" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
@@ -348,7 +477,10 @@
 <loc>https://agenziaplinio.it/servizi/web-agency/gestionali-su-misura</loc>
 <xhtml:link rel="alternate" hreflang="it-IT" href="https://agenziaplinio.it/servizi/web-agency/gestionali-su-misura" />
 <xhtml:link rel="alternate" hreflang="x-default" href="https://agenziaplinio.it/servizi/web-agency/gestionali-su-misura" />
-<lastmod>2026-04-15T13:09:42.611Z</lastmod>
+<image:image>
+<image:loc>https://agenziaplinio.it/og-default.svg</image:loc>
+</image:image>
+<lastmod>2026-04-23T19:22:47.424Z</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>

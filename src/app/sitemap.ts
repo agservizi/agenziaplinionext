@@ -4,7 +4,7 @@ import { energyServiceDetails } from "@/lib/energy-services";
 import { logisticsServiceDetails } from "@/lib/logistics-services";
 import { paymentServiceDetails } from "@/lib/payment-services";
 import { phoneServiceDetails } from "@/lib/phone-services";
-import { SITE_URL, isIndexablePath } from "@/lib/seo";
+import { absoluteImageUrl, SITE_URL, isIndexablePath } from "@/lib/seo";
 import { webAgencyServiceDetails } from "@/lib/web-agency-services";
 
 export const dynamic = "force-static";
@@ -66,13 +66,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const url = `${SITE_URL}${path}`;
     const isHome = path === "";
     const isService = path.startsWith("/servizi/");
+    const isStrategicLeadPage =
+      path === "/servizi" ||
+      path === "/contatti" ||
+      path === "/prenota" ||
+      path === "/consulenza" ||
+      path === "/web-agency";
+    const isBrandPage = path === "/chi-siamo";
     const isTopLevel = !isService && path.split("/").length <= 2;
 
     return {
       url,
       lastModified: now,
-      changeFrequency: isHome ? "weekly" : isService ? "monthly" : "monthly",
-      priority: isHome ? 1.0 : isService ? 0.8 : isTopLevel ? 0.7 : 0.6,
+      changeFrequency: isHome ? "weekly" : isStrategicLeadPage ? "weekly" : isBrandPage ? "monthly" : "monthly",
+      priority: isHome
+        ? 1.0
+        : isStrategicLeadPage
+          ? 0.9
+          : isBrandPage
+            ? 0.8
+            : isService
+              ? 0.8
+              : isTopLevel
+                ? 0.7
+                : 0.6,
+      images: [absoluteImageUrl("/og-default.svg")],
       alternates: {
         languages: {
           "it-IT": url,

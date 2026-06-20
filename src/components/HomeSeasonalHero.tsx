@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Container from "@/components/Container";
 import SeasonalHeroObject from "@/components/SeasonalHeroObject";
 import TextCycle from "@/components/ui/TextCycle";
+import { googleReviewsCount } from "@/lib/google-reviews";
 import {
   getActiveSeasonalHero,
   getResolvedSeasonalHeroByKey,
@@ -268,7 +269,7 @@ export default function HomeSeasonalHero() {
                 <span className="text-sm leading-none text-amber-400">★★★★★</span>
                 <span className="text-xs font-semibold text-amber-300">5.0</span>
               </div>
-              <span className="text-sm text-slate-400">47 recensioni Google</span>
+              <span className="text-sm text-slate-400">{googleReviewsCount} recensioni Google</span>
               <span className="h-1 w-1 rounded-full bg-slate-600" aria-hidden="true" />
               <span className="text-sm text-slate-400">500+ clienti attivi</span>
               <span className="h-1 w-1 rounded-full bg-slate-600" aria-hidden="true" />
@@ -290,13 +291,13 @@ export default function HomeSeasonalHero() {
                   onClick={() => setAnniversaryPanelOpen((prev) => !prev)}
                   aria-expanded={anniversaryPanelOpen}
                   aria-controls="anniversary-panel"
-                  className="rounded-full bg-amber-400 px-7 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-400/30 transition hover:-translate-y-0.5 hover:bg-amber-300"
+                  className="cta-glass cta-glass-lg border-amber-300/35 bg-amber-300/18 text-white shadow-[0_14px_32px_rgba(251,191,36,0.18)] hover:border-amber-200/45 hover:bg-amber-300/24"
                 >
                   {anniversaryPanelOpen ? "Chiudi l'anniversario" : "Festeggia con noi"}
                 </button>
                 <Link
                   href="/chi-siamo"
-                  className="rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:border-amber-300 hover:text-amber-200"
+                  className="cta-glass cta-glass-lg cta-glass-secondary hover:border-amber-300/55 hover:text-amber-100"
                 >
                   Scopri i nostri 10 anni
                 </Link>
@@ -305,13 +306,13 @@ export default function HomeSeasonalHero() {
               <>
                 <Link
                   href={activeHero.primaryCtaHref}
-                  className={`rounded-full px-7 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 ${activeHero.theme.primaryButtonClass}`}
+                  className={`cta-glass cta-glass-lg ${activeHero.theme.primaryButtonClass}`}
                 >
                   {activeHero.primaryCtaLabel}
                 </Link>
                 <Link
                   href={activeHero.secondaryCtaHref}
-                  className={`rounded-full border px-7 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 ${activeHero.theme.secondaryButtonClass}`}
+                  className={`cta-glass cta-glass-lg ${activeHero.theme.secondaryButtonClass}`}
                 >
                   {activeHero.secondaryCtaLabel}
                 </Link>
@@ -320,13 +321,13 @@ export default function HomeSeasonalHero() {
               <>
                 <Link
                   href="/contatti"
-                  className="rounded-full bg-cyan-500 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/30 transition hover:-translate-y-0.5 hover:bg-cyan-400"
+                  className="cta-glass cta-glass-lg cta-glass-primary"
                 >
                   Parla con noi
                 </Link>
                 <Link
                   href="/servizi"
-                  className="rounded-full border border-white/20 px-7 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-cyan-400 hover:text-cyan-200"
+                  className="cta-glass cta-glass-lg cta-glass-secondary"
                 >
                   Scopri i servizi
                 </Link>
@@ -531,7 +532,7 @@ export default function HomeSeasonalHero() {
                 <span className="text-lg leading-none text-amber-400">★★★★★</span>
                 <div>
                   <p className="text-sm font-bold text-white">5.0 su Google</p>
-                  <p className="text-xs text-slate-400">10 recensioni verificate</p>
+                  <p className="text-xs text-slate-400">{googleReviewsCount} recensioni verificate</p>
                 </div>
               </div>
 

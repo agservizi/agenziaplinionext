@@ -46,8 +46,8 @@ export default async function LogisticsServiceDetailPage({ params }: LogisticsSe
           <h1 className="text-4xl font-semibold text-white md:text-5xl">{service.title}</h1>
           <p className="max-w-3xl text-base text-slate-300 md:text-lg">{service.heroDescription}</p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/consulenza?service=logistica" className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Richiedi supporto</Link>
-            <Link href="/servizi/logistica" className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200">Torna a logistica</Link>
+            <Link href="/consulenza?service=logistica" className="cta-glass cta-glass-md cta-glass-primary-light">Richiedi supporto</Link>
+            <Link href="/servizi/logistica" className="cta-glass cta-glass-md cta-glass-secondary">Torna a logistica</Link>
           </div>
         </Container>
       </section>

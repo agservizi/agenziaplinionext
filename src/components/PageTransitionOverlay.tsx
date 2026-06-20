@@ -15,72 +15,35 @@ export default function PageTransitionOverlay() {
 
   useEffect(() => {
     const clearTimers = () => {
-      if (hideTimerRef.current) {
-        window.clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-      if (progressTimerRef.current) {
-        window.clearInterval(progressTimerRef.current);
-        progressTimerRef.current = null;
-      }
+      if (hideTimerRef.current) { window.clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
+      if (progressTimerRef.current) { window.clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
     };
 
     const startOverlay = () => {
       clearTimers();
-      setProgress(8);
+      setProgress(15);
       setPhase("enter");
       progressTimerRef.current = window.setInterval(() => {
-        setProgress((current) => {
-          if (current >= 84) return current;
-          const next = current + Math.max(2, (90 - current) * 0.12);
-          return Math.min(next, 84);
-        });
-      }, 90);
+        setProgress((c) => c >= 90 ? c : Math.min(c + Math.max(2, (92 - c) * 0.12), 90));
+      }, 70);
     };
 
-    const onStart = () => {
-      startOverlay();
-    };
-
-    const onPopState = () => {
-      startOverlay();
-    };
+    const onStart = () => startOverlay();
+    const onPopState = () => startOverlay();
 
     const onDocumentClick = (event: MouseEvent) => {
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
-        return;
-      }
-
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = event.target;
       if (!(target instanceof Element)) return;
-
       const anchor = target.closest("a");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
-
       const href = anchor.getAttribute("href");
       if (!href || href.startsWith("#")) return;
-
       let destination: URL;
-      try {
-        destination = new URL(anchor.href, window.location.href);
-      } catch {
-        return;
-      }
-
+      try { destination = new URL(anchor.href, window.location.href); } catch { return; }
       if (destination.origin !== window.location.origin) return;
-
-      const currentPathWithQuery = `${window.location.pathname}${window.location.search}`;
-      const destinationPathWithQuery = `${destination.pathname}${destination.search}`;
-      if (destinationPathWithQuery === currentPathWithQuery) return;
-
+      if (`${destination.pathname}${destination.search}` === `${window.location.pathname}${window.location.search}`) return;
       startOverlay();
     };
 
@@ -98,11 +61,19 @@ export default function PageTransitionOverlay() {
   useEffect(() => {
     if (previousPathnameRef.current === pathname) return;
     previousPathnameRef.current = pathname;
-    if (phase === "hidden") return;
-
-    if (progressTimerRef.current) {
-      window.clearInterval(progressTimerRef.current);
-      progressTimerRef.current = null;
+    // Always trigger exit when pathname changes, even if phase got stuck
+    if (progressTimerRef.current) { window.clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+    if (hideTimerRef.current) { window.clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
+    if (phase === "hidden") {
+      // Pathname changed without enter — force a quick flash
+      setProgress(100);
+      setPhase("exit");
+      hideTimerRef.current = window.setTimeout(() => {
+        setPhase("hidden");
+        setProgress(0);
+        hideTimerRef.current = null;
+      }, 400);
+      return;
     }
     setProgress(100);
     setPhase("exit");
@@ -110,55 +81,104 @@ export default function PageTransitionOverlay() {
       setPhase("hidden");
       setProgress(0);
       hideTimerRef.current = null;
-    }, 420);
-
+    }, 1400);
     return () => {
-      if (hideTimerRef.current) {
-        window.clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-      if (progressTimerRef.current) {
-        window.clearInterval(progressTimerRef.current);
-        progressTimerRef.current = null;
-      }
+      if (hideTimerRef.current) { window.clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
+      if (progressTimerRef.current) { window.clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
     };
   }, [pathname, phase]);
 
-  if (phase === "hidden" && progress === 0) {
-    return null;
-  }
+  if (phase === "hidden" && progress === 0) return null;
+
+  const entering = phase === "enter";
+  const exiting = phase === "exit";
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[90] overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-90">
+
+      {/* ── Curtain wipe ── */}
       <div
-        className={
-          phase === "enter"
-            ? "absolute inset-y-0 left-0 w-[115%] translate-x-0 bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900/95 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-            : phase === "exit"
-              ? "absolute inset-y-0 left-0 w-[115%] translate-x-[110%] bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900/95 transition-transform duration-450 ease-[cubic-bezier(0.55,0,1,0.45)]"
-              : "absolute inset-y-0 left-0 w-[115%] -translate-x-[115%] bg-gradient-to-r from-slate-950 via-slate-950 to-slate-900/95 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-        }
-      />
-      <div
-        className={
-          phase === "enter"
-            ? "absolute left-1/2 top-1/2 w-[min(72vw,340px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/12 bg-slate-900/80 p-4 opacity-100 shadow-[0_24px_80px_rgba(2,6,23,0.55)] backdrop-blur-sm transition-opacity duration-200"
-            : phase === "exit"
-              ? "absolute left-1/2 top-1/2 w-[min(72vw,340px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/12 bg-slate-900/80 p-4 opacity-0 shadow-[0_24px_80px_rgba(2,6,23,0.55)] backdrop-blur-sm transition-opacity duration-300"
-              : "absolute left-1/2 top-1/2 w-[min(72vw,340px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/12 bg-slate-900/80 p-4 opacity-0"
-        }
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%)",
+          transform: entering ? "translateY(0%)" : exiting ? "translateY(-100%)" : "translateY(100%)",
+          transition: entering
+            ? "transform 600ms cubic-bezier(0.16, 1, 0.3, 1)"
+            : exiting
+              ? "transform 800ms cubic-bezier(0.55, 0, 1, 0.45)"
+              : "none",
+        }}
       >
-        <div className="space-y-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300">Caricamento pagina</p>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/8">
-            <div
-              className="h-full origin-left rounded-full bg-gradient-to-r from-cyan-300 via-cyan-500 to-white transition-transform duration-200 ease-out"
-              style={{ transform: `scaleX(${progress / 100})` }}
-            />
-          </div>
-          <p className="text-right text-xs font-medium text-white/70">{Math.round(progress)}%</p>
+        {/* Gradient orbs on curtain */}
+        <div style={{ position: "absolute", top: "20%", left: "10%", width: 300, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(94,14,215,0.3), transparent 70%)", filter: "blur(60px)" }} />
+        <div style={{ position: "absolute", bottom: "15%", right: "15%", width: 250, height: 250, borderRadius: "50%", background: "radial-gradient(circle, rgba(34,211,238,0.2), transparent 70%)", filter: "blur(50px)" }} />
+      </div>
+
+      {/* ── Center content on curtain ── */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 20,
+          opacity: entering ? 1 : 0,
+          transition: entering ? "opacity 400ms ease-out 300ms" : "opacity 350ms ease-out",
+          zIndex: 2,
+        }}
+      >
+        {/* Logo */}
+        <img
+          src="/logo.png"
+          alt=""
+          width={140}
+          height={36}
+          style={{
+            height: 32,
+            width: "auto",
+            animation: entering ? "transMonogramFloat 2s ease-in-out infinite" : "none",
+          }}
+        />
+
+        {/* Progress track */}
+        <div style={{ width: 120, height: 3, borderRadius: 4, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+          <div
+            style={{
+              height: "100%",
+              borderRadius: 4,
+              background: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee)",
+              width: `${progress}%`,
+              transition: "width 150ms ease-out",
+            }}
+          />
         </div>
       </div>
+
+      {/* ── Top accent line (always visible during transition) ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          height: 2,
+          width: `${progress}%`,
+          background: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee)",
+          transition: exiting ? "width 250ms ease-out, opacity 400ms ease-out" : "width 120ms ease-out",
+          opacity: exiting ? 0 : 1,
+          zIndex: 3,
+        }}
+      />
+
+      <style>{`
+        @keyframes transMonogramFloat {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-4px) scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 }

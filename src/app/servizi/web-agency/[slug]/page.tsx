@@ -74,13 +74,13 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/consulenza?service=web-agency"
-                className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                className="cta-glass cta-glass-md cta-glass-primary-light"
               >
                 {isWebsiteProject ? "Prenota analisi progetto" : "Richiedi consulenza"}
               </Link>
               <Link
                 href="/servizi/web-agency"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-300 hover:text-cyan-200"
+                className="cta-glass cta-glass-md cta-glass-secondary"
               >
                 Torna a web agency
               </Link>
@@ -263,7 +263,7 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
                 </p>
                 <Link
                   href="/consulenza?service=web-agency"
-                  className="mt-4 inline-flex rounded-full bg-cyan-400 px-5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300"
+                  className="cta-glass cta-glass-sm cta-glass-primary-light mt-4 inline-flex"
                 >
                   Prenota analisi progetto
                 </Link>

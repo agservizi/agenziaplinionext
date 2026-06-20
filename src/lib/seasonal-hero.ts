@@ -88,9 +88,9 @@ const goldTheme: SeasonalHeroTheme = {
   accentTextClass: "text-amber-300",
   ghostNumberClass: "text-white/6",
   primaryButtonClass:
-    "bg-amber-400 text-slate-950 shadow-[0_14px_32px_rgba(251,191,36,0.35)] hover:-translate-y-0.5 hover:bg-amber-300",
+    "border-amber-300/35 bg-amber-300/18 text-white shadow-[0_14px_32px_rgba(251,191,36,0.18)] hover:border-amber-200/45 hover:bg-amber-300/24",
   secondaryButtonClass:
-    "border-white/20 bg-white/5 text-white hover:-translate-y-0.5 hover:border-amber-300 hover:text-amber-200",
+    "border-white/20 bg-white/8 text-white hover:border-amber-300/55 hover:bg-white/12 hover:text-amber-100",
   chipClass: "border-white/12 bg-white/6 text-slate-100",
   cardClass:
     "border-amber-300/18 bg-[linear-gradient(180deg,rgba(30,41,59,0.76),rgba(15,23,42,0.92))] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(120,53,15,0.35)]",
@@ -109,9 +109,9 @@ const tricolorTheme: SeasonalHeroTheme = {
   accentTextClass: "text-emerald-300",
   ghostNumberClass: "text-white/5",
   primaryButtonClass:
-    "bg-emerald-400 text-slate-950 shadow-[0_14px_32px_rgba(52,211,153,0.32)] hover:-translate-y-0.5 hover:bg-emerald-300",
+    "border-emerald-300/35 bg-emerald-300/18 text-white shadow-[0_14px_32px_rgba(52,211,153,0.16)] hover:border-emerald-200/45 hover:bg-emerald-300/24",
   secondaryButtonClass:
-    "border-white/20 bg-white/5 text-white hover:-translate-y-0.5 hover:border-emerald-300 hover:text-emerald-200",
+    "border-white/20 bg-white/8 text-white hover:border-emerald-300/55 hover:bg-white/12 hover:text-emerald-100",
   chipClass: "border-white/12 bg-white/6 text-slate-100",
   cardClass:
     "border-emerald-300/16 bg-[linear-gradient(180deg,rgba(2,44,34,0.42),rgba(15,23,42,0.92))] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(6,95,70,0.32)]",
@@ -130,9 +130,9 @@ const blueTheme: SeasonalHeroTheme = {
   accentTextClass: "text-sky-300",
   ghostNumberClass: "text-white/6",
   primaryButtonClass:
-    "bg-sky-400 text-slate-950 shadow-[0_14px_32px_rgba(56,189,248,0.34)] hover:-translate-y-0.5 hover:bg-sky-300",
+    "border-sky-300/35 bg-sky-300/18 text-white shadow-[0_14px_32px_rgba(56,189,248,0.16)] hover:border-sky-200/45 hover:bg-sky-300/24",
   secondaryButtonClass:
-    "border-white/20 bg-white/5 text-white hover:-translate-y-0.5 hover:border-sky-300 hover:text-sky-200",
+    "border-white/20 bg-white/8 text-white hover:border-sky-300/55 hover:bg-white/12 hover:text-sky-100",
   chipClass: "border-white/12 bg-white/6 text-slate-100",
   cardClass:
     "border-sky-300/18 bg-[linear-gradient(180deg,rgba(8,47,73,0.42),rgba(15,23,42,0.92))] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(8,47,73,0.32)]",
@@ -151,9 +151,9 @@ const redTheme: SeasonalHeroTheme = {
   accentTextClass: "text-rose-300",
   ghostNumberClass: "text-white/6",
   primaryButtonClass:
-    "bg-rose-400 text-slate-950 shadow-[0_14px_32px_rgba(251,113,133,0.34)] hover:-translate-y-0.5 hover:bg-rose-300",
+    "border-rose-300/35 bg-rose-300/18 text-white shadow-[0_14px_32px_rgba(251,113,133,0.16)] hover:border-rose-200/45 hover:bg-rose-300/24",
   secondaryButtonClass:
-    "border-white/20 bg-white/5 text-white hover:-translate-y-0.5 hover:border-rose-300 hover:text-rose-200",
+    "border-white/20 bg-white/8 text-white hover:border-rose-300/55 hover:bg-white/12 hover:text-rose-100",
   chipClass: "border-white/12 bg-white/6 text-slate-100",
   cardClass:
     "border-rose-300/18 bg-[linear-gradient(180deg,rgba(127,29,29,0.34),rgba(15,23,42,0.92))] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(127,29,29,0.3)]",
@@ -172,9 +172,9 @@ const springTheme: SeasonalHeroTheme = {
   accentTextClass: "text-lime-300",
   ghostNumberClass: "text-white/6",
   primaryButtonClass:
-    "bg-lime-400 text-slate-950 shadow-[0_14px_32px_rgba(163,230,53,0.3)] hover:-translate-y-0.5 hover:bg-lime-300",
+    "border-lime-300/35 bg-lime-300/18 text-white shadow-[0_14px_32px_rgba(163,230,53,0.16)] hover:border-lime-200/45 hover:bg-lime-300/24",
   secondaryButtonClass:
-    "border-white/20 bg-white/5 text-white hover:-translate-y-0.5 hover:border-lime-300 hover:text-lime-200",
+    "border-white/20 bg-white/8 text-white hover:border-lime-300/55 hover:bg-white/12 hover:text-lime-100",
   chipClass: "border-white/12 bg-white/6 text-slate-100",
   cardClass:
     "border-lime-300/18 bg-[linear-gradient(180deg,rgba(63,98,18,0.28),rgba(15,23,42,0.92))] hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(77,124,15,0.28)]",

@@ -32,44 +32,6 @@ function subscribeAdminSidebarCollapsed(onStoreChange: () => void) {
   };
 }
 
-function humanizeSlug(slug: string) {
-  return slug
-    .replace(/-/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function contactContextFromPath(pathname: string) {
-  if (pathname === "/") return "Home";
-  if (pathname === "/contatti") return "Contatti";
-  if (pathname === "/consulenza") return "Consulenza";
-  if (pathname.startsWith("/servizi/")) {
-    const serviceSlug = pathname.replace("/servizi/", "").split("/")[0] || "Servizi";
-    return `Servizio: ${humanizeSlug(serviceSlug)}`;
-  }
-  if (pathname.startsWith("/area-clienti")) return "Area Clienti";
-  if (pathname.startsWith("/area-admin")) return "Area Admin";
-  return humanizeSlug(pathname.replace(/\//g, " ").trim()) || "Sito";
-}
-
-function isBusinessHoursInRome() {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Rome",
-    weekday: "short",
-    hour: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(new Date());
-
-  const weekday = parts.find((part) => part.type === "weekday")?.value ?? "Mon";
-  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
-  const isWeekday = ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(weekday);
-  const isSaturday = weekday === "Sat";
-
-  if (isWeekday) return hour >= 9 && hour < 19;
-  if (isSaturday) return hour >= 9 && hour < 13;
-  return false;
-}
 
 export default function AppShell({
   children,
@@ -89,16 +51,11 @@ export default function AppShell({
   const showPlinioAssistant = !isAdminRoute && !isOperatorRoute && !isClientRoute;
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [clientUserLabel, setClientUserLabel] = useState("");
-  const [isWhatsappOnline, setIsWhatsappOnline] = useState(false);
   const adminSidebarCollapsed = useSyncExternalStore(
     subscribeAdminSidebarCollapsed,
     readAdminSidebarCollapsedSnapshot,
     () => false,
   );
-  const contactContext = contactContextFromPath(pathname);
-  const whatsappMessage = `Ciao, ti contatto dal sito agenziaplinio.it (${contactContext}) per richiedere informazioni.`;
-  const whatsappLink = `https://wa.me/393773798570?text=${encodeURIComponent(whatsappMessage)}`;
-  const whatsappStatusLabel = isWhatsappOnline ? "Online ora" : "Offline";
 
   useEffect(() => {
     const toggleScrollTopButton = () => {
@@ -113,17 +70,6 @@ export default function AppShell({
     };
   }, []);
 
-  useEffect(() => {
-    const refreshWhatsappAvailability = () => {
-      setIsWhatsappOnline(isBusinessHoursInRome());
-    };
-
-    refreshWhatsappAvailability();
-    const interval = window.setInterval(refreshWhatsappAvailability, 60_000);
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     if (!isClientRoute || pathname === "/login") {
@@ -141,48 +87,21 @@ export default function AppShell({
         window.scrollTo({ top: 0, behavior: "smooth" });
       }}
       aria-label="Torna in cima"
-      className="fixed right-5 bottom-5 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-cyan-300/30 bg-slate-900/85 text-cyan-100 shadow-[0_16px_40px_rgba(8,47,73,0.45)] backdrop-blur transition hover:-translate-y-0.5 hover:border-cyan-200/60 hover:bg-slate-900 sm:right-6 sm:bottom-6"
+      className="fixed right-5 bottom-24 z-40 group sm:right-6 sm:bottom-28"
     >
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-        <path
-          d="M12 18V6M12 6l-5 5M12 6l5 5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/80 shadow-lg shadow-slate-900/10 backdrop-blur-xl transition-all duration-300 group-hover:-translate-y-1 group-hover:border-[#5E0ED7]/30 group-hover:shadow-xl group-hover:shadow-[#5E0ED7]/15">
+        <svg viewBox="0 0 24 24" className="h-4 w-4 text-slate-500 transition-colors duration-300 group-hover:text-[#5E0ED7]" fill="none" aria-hidden="true">
+          <path
+            d="M12 18V6M12 6l-5 5M12 6l5 5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
     </button>
   ) : null;
-
-  const whatsappNotch = (
-    <a
-      href={whatsappLink}
-      onClick={() => {
-        if (typeof window !== "undefined") {
-          const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
-          gtag?.("event", "whatsapp_notch_click", {
-            event_category: "engagement",
-            event_label: contactContext,
-            availability: isWhatsappOnline ? "online" : "offline",
-            page_path: pathname,
-          });
-        }
-      }}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Contatta AG SERVIZI su WhatsApp (${whatsappStatusLabel})`}
-      title={`${whatsappStatusLabel} • Apri chat WhatsApp`}
-      className={`fixed right-0 top-1/2 z-50 -translate-y-1/2 rounded-l-xl border px-3 py-2 text-xs font-semibold tracking-[0.08em] text-white shadow-[0_14px_35px_rgba(6,95,70,0.45)] transition ${
-        isWhatsappOnline
-          ? "border-emerald-300/30 bg-emerald-500 hover:bg-emerald-400"
-          : "border-slate-300/30 bg-slate-600 hover:bg-slate-500"
-      }`}
-      style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-    >
-      WhatsApp • {whatsappStatusLabel}
-    </a>
-  );
 
   // Login pages: completely standalone, no chrome
   if (pathname === "/login" || pathname === "/admin-login") {
@@ -354,7 +273,6 @@ export default function AppShell({
             <PlatformFooter />
           </div>
         </div>
-        {!isAdminPlatform ? whatsappNotch : null}
         {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
         {scrollTopButton}
       </>
@@ -367,7 +285,6 @@ export default function AppShell({
       <GlobalParallaxLayer />
       <main className="min-h-screen bg-slate-950">{children}</main>
       <Footer />
-      {whatsappNotch}
       {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
       {scrollTopButton}
     </>

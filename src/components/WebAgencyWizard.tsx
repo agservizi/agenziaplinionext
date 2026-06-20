@@ -16,12 +16,12 @@ const budgets = ["1-3k", "3-7k", "7-15k", "15k+"];
 
 const timelines = ["Urgente (2-4 settimane)", "1-2 mesi", "3-4 mesi", "Da pianificare"];
 
-export default function WebAgencyWizard() {
+export default function WebAgencyWizard({ preselectedProjectType }: { preselectedProjectType?: string } = {}) {
   const [step, setStep] = useState(0);
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
 
-  const [projectType, setProjectType] = useState("");
+  const [projectType, setProjectType] = useState(preselectedProjectType || "");
   const [budget, setBudget] = useState("");
   const [timeline, setTimeline] = useState("");
   const [goals, setGoals] = useState("");

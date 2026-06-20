@@ -30,8 +30,8 @@ export default function DigitaliPage() {
               Supporto locale su SPID, PEC, firma digitale e comunicazioni telematiche.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/consulenza?service=digitali" className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Richiedi supporto</Link>
-              <Link href="/servizi" className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200">Tutti i servizi</Link>
+              <Link href="/consulenza?service=digitali" className="cta-glass cta-glass-md cta-glass-primary-light">Richiedi supporto</Link>
+              <Link href="/servizi" className="cta-glass cta-glass-md cta-glass-secondary">Tutti i servizi</Link>
             </div>
           </div>
           <div className="glass-card rounded-4xl p-8">

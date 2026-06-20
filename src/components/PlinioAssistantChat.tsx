@@ -1,16 +1,16 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   clientFallbackReply,
-  detectConversationScope,
   includesAny,
   normalize,
 } from "@/lib/plinio-chat-fallback.mjs";
-import {
-  fetchPublicShippingPricing,
-  type PublicShippingPricingRule,
-} from "@/lib/shipping-pricing";
+
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
 type ChatMessage = {
   id: string;
@@ -23,47 +23,6 @@ type PlinioAssistantChatProps = {
   pathname: string;
 };
 
-type TrackingCarrier = "BRT" | "Poste Italiane" | "SDA" | "TNT/FedEx";
-type ShippingScope = "national" | "international";
-type UtilityServiceType = "luce" | "gas";
-type TelephonyLineType = "mobile" | "casa" | "mobile-casa";
-const HOURS_WHATSAPP_PHONE = "393773798570";
-const HOURS_WHATSAPP_TEXT =
-  "Ciao, vorrei conferma sugli orari di apertura.";
-const MAPS_PLACE_QUERY = "AG SERVIZI VIA PLINIO 72 DI CAVALIERE CARMINE";
-const SHIPPING_COUNTRY_OPTIONS: Array<{ code: string; label: string }> = [
-  { code: "IT", label: "Italia" },
-  { code: "AT", label: "Austria" },
-  { code: "BE", label: "Belgio" },
-  { code: "BG", label: "Bulgaria" },
-  { code: "HR", label: "Croazia" },
-  { code: "CZ", label: "Repubblica Ceca" },
-  { code: "DK", label: "Danimarca" },
-  { code: "EE", label: "Estonia" },
-  { code: "FI", label: "Finlandia" },
-  { code: "FR", label: "Francia" },
-  { code: "DE", label: "Germania" },
-  { code: "GB", label: "Regno Unito" },
-  { code: "GR", label: "Grecia" },
-  { code: "HU", label: "Ungheria" },
-  { code: "IE", label: "Irlanda" },
-  { code: "LV", label: "Lettonia" },
-  { code: "LT", label: "Lituania" },
-  { code: "LU", label: "Lussemburgo" },
-  { code: "NL", label: "Paesi Bassi" },
-  { code: "NO", label: "Norvegia" },
-  { code: "PL", label: "Polonia" },
-  { code: "PT", label: "Portogallo" },
-  { code: "RO", label: "Romania" },
-  { code: "SK", label: "Slovacchia" },
-  { code: "SI", label: "Slovenia" },
-  { code: "ES", label: "Spagna" },
-  { code: "SE", label: "Svezia" },
-  { code: "CH", label: "Svizzera" },
-  { code: "BA", label: "Bosnia ed Erzegovina" },
-  { code: "RS", label: "Serbia" },
-];
-
 type AssistantPayload = {
   message?: string;
   suggested_prompts?: string[];
@@ -71,6 +30,15 @@ type AssistantPayload = {
   intents?: string[];
   handoff_recommended?: boolean;
 };
+
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+
+const HOURS_WHATSAPP_PHONE = "393773798570";
+const HOURS_WHATSAPP_TEXT =
+  "Ciao, vorrei conferma sugli orari di apertura.";
+const MAPS_PLACE_QUERY = "AG SERVIZI VIA PLINIO 72 DI CAVALIERE CARMINE";
 
 const QUICK_PROMPT_POOL = [
   "Come faccio ad attivare lo SPID?",
@@ -88,18 +56,23 @@ const QUICK_PROMPT_POOL = [
 ];
 
 const QUICK_PROMPTS_VISIBLE = 4;
-const ATTENTION_TOOLTIPS = [
-  "Ti aiuto a scegliere il servizio giusto",
-  "Posso tracciare la tua spedizione qui",
-  "Hai bisogno di SPID o PEC?",
-];
-const CHAT_IDLE_AUTO_CLOSE_MS = 90_000;
-const CHAT_IDLE_NUDGE_MS = 30_000;
-const CHAT_IDLE_NUDGE_MESSAGES = ["Ci sei ancora?", "Sei ancora qui?"];
-const CHAT_MESSAGE_AUTO_HIDE_MS = 20_000;
-const BOT_MICRO_CTA_REAPPEAR_IDLE_MS = 300_000; // 5 minuti
-const BOT_MICRO_CTA_STATE_STORAGE_KEY = "plinio:micro-cta:dismissed";
-const BOT_MICRO_CTA_EVENT = "plinio:micro-cta:state";
+
+const CHAT_HISTORY_STORAGE_KEY = "plinio:chat:history";
+const CHAT_HISTORY_MAX_MESSAGES = 50;
+
+const CONTEXTUAL_PROMPTS: Record<string, string[]> = {
+  "/": ["Che servizi offrite?", "Dove vi trovate?", "Come posso prenotare?"],
+  "/servizi": ["Quali servizi di telefonia avete?", "Come attivo lo SPID?", "Fate spedizioni?"],
+  "/chi-siamo": ["Da quanto siete aperti?", "Quanti servizi offrite?"],
+  "/contatti": ["Quali sono gli orari?", "Posso venire senza appuntamento?"],
+  "/consulenza": ["Come funziona la consulenza?", "È gratuita?"],
+  "/prenota": ["Come prenoto un appuntamento?", "Quali servizi posso prenotare?"],
+  "/web-agency": ["Quanto costa un sito web?", "Che tecnologie usate?"],
+};
+
+/* ------------------------------------------------------------------ */
+/*  Helper functions                                                   */
+/* ------------------------------------------------------------------ */
 
 function makeChatMessage(role: ChatMessage["role"], content: string): ChatMessage {
   return {
@@ -130,76 +103,122 @@ function buildGoogleMapsLink() {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAPS_PLACE_QUERY)}`;
 }
 
+function relativeTime(ts: number): string {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return "adesso";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min fa`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ore fa`;
+  return `${Math.floor(diff / 86400)} giorni fa`;
+}
+
+function loadChatHistory(): ChatMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.slice(-CHAT_HISTORY_MAX_MESSAGES);
+  } catch {
+    return [];
+  }
+}
+
+function saveChatHistory(messages: ChatMessage[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const trimmed = messages.slice(-CHAT_HISTORY_MAX_MESSAGES);
+    window.localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(trimmed));
+  } catch {
+    /* quota exceeded -- silently ignore */
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sub-components                                                     */
+/* ------------------------------------------------------------------ */
+
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1 px-4 py-3">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="h-2 w-2 rounded-full bg-slate-400"
+          style={{
+            animation: `typingBounce 1.2s ease-in-out ${i * 0.15}s infinite`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main component                                                     */
+/* ------------------------------------------------------------------ */
+
 export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatProps) {
+  /* --- state -------------------------------------------------------- */
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [quickPromptOffset, setQuickPromptOffset] = useState(0);
-  const [showTrackingForm, setShowTrackingForm] = useState(false);
-  const [showShippingQuoteForm, setShowShippingQuoteForm] = useState(false);
-  const [showUtilityEstimateForm, setShowUtilityEstimateForm] = useState(false);
-  const [showTelephonyAuditForm, setShowTelephonyAuditForm] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(false);
-  const [trackingCarrier, setTrackingCarrier] = useState<TrackingCarrier>("BRT");
-  const [trackingCode, setTrackingCode] = useState("");
-  const [shippingScope, setShippingScope] = useState<ShippingScope>("national");
-  const [shippingCountry, setShippingCountry] = useState("IT");
-  const [shippingWeightKG, setShippingWeightKG] = useState("");
-  const [shippingLengthCM, setShippingLengthCM] = useState("");
-  const [shippingWidthCM, setShippingWidthCM] = useState("");
-  const [shippingHeightCM, setShippingHeightCM] = useState("");
-  const [shippingPricingRules, setShippingPricingRules] = useState<PublicShippingPricingRule[]>([]);
-  const [shippingPricingLoading, setShippingPricingLoading] = useState(false);
-  const [utilityServiceType, setUtilityServiceType] = useState<UtilityServiceType>("luce");
-  const [utilityMonthlySpend, setUtilityMonthlySpend] = useState("");
-  const [utilityAnnualKwh, setUtilityAnnualKwh] = useState("");
-  const [utilityAnnualSmc, setUtilityAnnualSmc] = useState("");
-  const [utilityContractType, setUtilityContractType] = useState("residenziale");
-  const [telephonyLineType, setTelephonyLineType] = useState<TelephonyLineType>("mobile");
-  const [telephonyMobileSpend, setTelephonyMobileSpend] = useState("");
-  const [telephonyHomeSpend, setTelephonyHomeSpend] = useState("");
-  const [telephonyDataGB, setTelephonyDataGB] = useState("");
-  const [telephonyMinutes, setTelephonyMinutes] = useState("");
-  const [telephonyHomeSpeedMbps, setTelephonyHomeSpeedMbps] = useState("");
-  const [telephonyPortability, setTelephonyPortability] = useState("si");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactService, setContactService] = useState("");
-  const [contactNotes, setContactNotes] = useState("");
   const [serverPrompts, setServerPrompts] = useState<string[]>([]);
-  const [tooltipIndex, setTooltipIndex] = useState(0);
-  const [microCtaDismissed, setMicroCtaDismissed] = useState(false);
-  const [microCtaReady, setMicroCtaReady] = useState(false);
-  const [lastActivityAt, setLastActivityAt] = useState(() => Date.now());
-  const [lastUserActionAt, setLastUserActionAt] = useState(() => Date.now());
-  const [messageVisibilityTick, setMessageVisibilityTick] = useState(() => Date.now());
-  const [idleNudgeSent, setIdleNudgeSent] = useState(false);
-  const [idleNudgeIndex, setIdleNudgeIndex] = useState(0);
-  const [unreadBadgeCount, setUnreadBadgeCount] = useState(0);
+  const [handoffData, setHandoffData] = useState<{ show: boolean; whatsappLink: string } | null>(null);
+  const [timestampTick, setTimestampTick] = useState(() => Date.now());
+
   const messagesViewportRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const inactivityTimerRef = useRef<number | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    makeChatMessage(
-      "assistant",
-      "Ciao, sono Plinio Assistant. Posso aiutarti su pagamenti, SPID/PEC, telefonia, spedizioni e altri servizi AG Servizi.",
-    ),
-  ]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const defaultWelcomeMessage = makeChatMessage(
+    "assistant",
+    "Ciao, sono Plinio Assistant. Posso aiutarti su pagamenti, SPID/PEC, telefonia, spedizioni e altri servizi AG Servizi.",
+  );
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const stored = loadChatHistory();
+    return stored.length > 0 ? stored : [defaultWelcomeMessage];
+  });
+
   const endpoint = useMemo(buildAssistantEndpoint, []);
 
+  /* --- derived ------------------------------------------------------ */
+
   const visibleMessages = useMemo(
-    () =>
-      messages
-        .filter((message) => messageVisibilityTick - message.createdAt < CHAT_MESSAGE_AUTO_HIDE_MS)
-        .slice(-12),
-    [messageVisibilityTick, messages],
+    () => messages.slice(-12),
+    [messages],
   );
+
   const quickPrompts = useMemo(
     () => rotateQuickPrompts(QUICK_PROMPT_POOL, quickPromptOffset, QUICK_PROMPTS_VISIBLE),
     [quickPromptOffset],
   );
-  const promptsForUi = serverPrompts.length > 0 ? serverPrompts.slice(0, QUICK_PROMPTS_VISIBLE) : quickPrompts;
+
+  const contextualPrompts = useMemo(() => {
+    const base = pathname.replace(/\/$/, "") || "/";
+    return CONTEXTUAL_PROMPTS[base] ?? null;
+  }, [pathname]);
+
+  const promptsForUi = useMemo(() => {
+    if (serverPrompts.length > 0) return serverPrompts.slice(0, QUICK_PROMPTS_VISIBLE);
+    if (contextualPrompts) return contextualPrompts.slice(0, QUICK_PROMPTS_VISIBLE);
+    return quickPrompts;
+  }, [serverPrompts, contextualPrompts, quickPrompts]);
+
+  /* --- effects ------------------------------------------------------ */
+
+  // Persist messages to localStorage
+  useEffect(() => {
+    saveChatHistory(messages);
+  }, [messages]);
+
+  // Update timestamps periodically
+  useEffect(() => {
+    const interval = window.setInterval(() => setTimestampTick(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (QUICK_PROMPT_POOL.length === 0) return;
@@ -212,94 +231,7 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     setQuickPromptOffset((prev) => (prev + QUICK_PROMPTS_VISIBLE) % QUICK_PROMPT_POOL.length);
   }, [open]);
 
-  useEffect(() => {
-    if (utilityServiceType === "luce") {
-      setUtilityAnnualSmc("");
-      return;
-    }
-    setUtilityAnnualKwh("");
-  }, [utilityServiceType]);
-
-  useEffect(() => {
-    if (open || ATTENTION_TOOLTIPS.length <= 1) return;
-    const interval = window.setInterval(() => {
-      setTooltipIndex((prev) => (prev + 1) % ATTENTION_TOOLTIPS.length);
-    }, 9000);
-    return () => window.clearInterval(interval);
-  }, [open]);
-
-  // Mostra la nuvoletta solo dopo 8s dal caricamento
-  useEffect(() => {
-    const t = window.setTimeout(() => setMicroCtaReady(true), 8_000);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (messages.length === 0) return;
-
-    const nextExpiry = messages
-      .map((message) => message.createdAt + CHAT_MESSAGE_AUTO_HIDE_MS - Date.now())
-      .filter((remaining) => remaining > 0)
-      .sort((a, b) => a - b)[0];
-
-    if (typeof nextExpiry !== "number") return;
-
-    const timer = window.setTimeout(() => {
-      setMessageVisibilityTick(Date.now());
-    }, nextExpiry + 50);
-
-    return () => window.clearTimeout(timer);
-  }, [messages, messageVisibilityTick]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedDismissed = window.sessionStorage.getItem(BOT_MICRO_CTA_STATE_STORAGE_KEY) === "1";
-    if (storedDismissed) {
-      setMicroCtaDismissed(true);
-    }
-
-    const onActivity = () => setLastActivityAt(Date.now());
-    const onSharedState = (event: Event) => {
-      const customEvent = event as CustomEvent<{ dismissed?: boolean }>;
-      setMicroCtaDismissed(Boolean(customEvent.detail?.dismissed));
-    };
-    const events: Array<keyof WindowEventMap> = ["mousemove", "keydown", "scroll", "touchstart", "click"];
-    events.forEach((eventName) => {
-      window.addEventListener(eventName, onActivity, { passive: true });
-    });
-    window.addEventListener(BOT_MICRO_CTA_EVENT, onSharedState as EventListener);
-    return () => {
-      events.forEach((eventName) => {
-        window.removeEventListener(eventName, onActivity);
-      });
-      window.removeEventListener(BOT_MICRO_CTA_EVENT, onSharedState as EventListener);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!microCtaDismissed || open) return;
-    const inactivityMs = Date.now() - lastActivityAt;
-    if (inactivityMs >= BOT_MICRO_CTA_REAPPEAR_IDLE_MS) {
-      setMicroCtaDismissed(false);
-      if (typeof window !== "undefined") {
-        window.sessionStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
-        window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: false } }));
-      }
-      return;
-    }
-    const timer = window.setTimeout(
-      () => {
-        setMicroCtaDismissed(false);
-        if (typeof window !== "undefined") {
-          window.sessionStorage.removeItem(BOT_MICRO_CTA_STATE_STORAGE_KEY);
-          window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: false } }));
-        }
-      },
-      BOT_MICRO_CTA_REAPPEAR_IDLE_MS - inactivityMs,
-    );
-    return () => window.clearTimeout(timer);
-  }, [lastActivityAt, microCtaDismissed, open]);
-
+  // Auto-scroll to bottom
   useEffect(() => {
     if (!open) return;
     const viewport = messagesViewportRef.current;
@@ -309,232 +241,45 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     messagesEndRef.current?.scrollIntoView({ block: "end", behavior: "auto" });
   }, [open, messages, loading]);
 
-  const clearInactivityTimer = useCallback(() => {
-    if (inactivityTimerRef.current !== null) {
-      window.clearTimeout(inactivityTimerRef.current);
-      inactivityTimerRef.current = null;
-    }
-  }, []);
-
-  const resetInactivityTimer = useCallback(() => {
+  // Escape key closes chat
+  useEffect(() => {
     if (!open) return;
-    clearInactivityTimer();
-    inactivityTimerRef.current = window.setTimeout(() => {
-      setOpen(false);
-    }, CHAT_IDLE_AUTO_CLOSE_MS);
-  }, [clearInactivityTimer, open]);
-
-  useEffect(() => {
-    if (!open) {
-      clearInactivityTimer();
-      return;
-    }
-
-    resetInactivityTimer();
-
-    return () => {
-      clearInactivityTimer();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
     };
-  }, [clearInactivityTimer, open, resetInactivityTimer]);
-
-  useEffect(() => {
-    if (open || loading || idleNudgeSent) return;
-    const elapsed = Date.now() - lastUserActionAt;
-    const remaining = Math.max(0, CHAT_IDLE_NUDGE_MS - elapsed);
-    const timer = window.setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          CHAT_IDLE_NUDGE_MESSAGES[idleNudgeIndex % CHAT_IDLE_NUDGE_MESSAGES.length],
-        ),
-      ]);
-      setUnreadBadgeCount((prev) => prev + 1);
-      setIdleNudgeIndex((prev) => (prev + 1) % CHAT_IDLE_NUDGE_MESSAGES.length);
-      setIdleNudgeSent(true);
-    }, remaining);
-    return () => window.clearTimeout(timer);
-  }, [idleNudgeIndex, idleNudgeSent, lastUserActionAt, loading, open]);
-
-  useEffect(() => {
-    if (open) {
-      setUnreadBadgeCount(0);
-      setIdleNudgeSent(false);
-    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  function isTrackingIntent(text: string) {
+  /* --- intent detection --------------------------------------------- */
+
+  function isBookingIntent(text: string) {
     const q = normalize(text);
-    return includesAny(q, ["tracking", "traccia", "tracci", "stato spedizione", "pacco"]);
+    return includesAny(q, ["prenotare", "appuntamento", "prenota", "prenotazione"]);
   }
 
-  function isShippingQuoteIntent(text: string) {
-    const q = normalize(text);
-    const asksQuote = includesAny(q, [
-      "preventivo",
-      "stima",
-      "quanto costa spedire",
-      "costo spedizione",
-      "prezzo spedizione",
-      "quanto viene spedire",
-    ]);
-    const shippingContext = includesAny(q, ["spedizion", "pacco", "corriere", "nazionale", "internazionale"]);
-    return asksQuote && shippingContext;
-  }
-
-  function isUtilityEstimateIntent(text: string) {
-    const q = normalize(text);
-    const asksEstimate = includesAny(q, ["stima", "preventivo", "analisi", "consiglio"]);
-    const utilityContext = includesAny(q, [
-      "bolletta",
-      "luce",
-      "gas",
-      "energia",
-      "pod",
-      "pdr",
-      "consumi",
-    ]);
-    return asksEstimate && utilityContext;
-  }
-
-  function isTelephonyAuditIntent(text: string) {
-    const q = normalize(text);
-    const asksAudit = includesAny(q, ["audit", "analisi", "consiglio", "confronto", "confrontare", "ottimizzare"]);
-    const phoneContext = includesAny(q, [
-      "telefonia",
-      "mobile",
-      "sim",
-      "fibra",
-      "portabilita",
-      "windtre",
-      "fastweb",
-      "iliad",
-      "operatore",
-      "gestore",
-    ]);
-    return asksAudit && phoneContext;
-  }
-
-  function maybeOpenTrackingFormFromText(text: string) {
-    if (isTrackingIntent(text)) {
-      setShowTrackingForm(true);
-    }
-  }
-
-  function maybeOpenShippingQuoteFormFromText(text: string) {
-    if (isShippingQuoteIntent(text)) {
-      setShowShippingQuoteForm(true);
-    }
-  }
-
-  function maybeOpenUtilityEstimateFormFromText(text: string) {
-    if (isUtilityEstimateIntent(text)) {
-      setShowUtilityEstimateForm(true);
-    }
-  }
-
-  function maybeOpenTelephonyAuditFormFromText(text: string) {
-    if (isTelephonyAuditIntent(text)) {
-      setShowTelephonyAuditForm(true);
-    }
-  }
-
-  function isOperatorIntent(text: string) {
-    const q = normalize(text);
-    return includesAny(q, [
-      "parlare con un operatore",
-      "parlare con operatore",
-      "operatore umano",
-      "assistenza umana",
-      "richiamami",
-      "ricontattami",
-      "voglio essere contattato",
-    ]);
-  }
-
-  function maybeOpenContactFormFromText(text: string) {
-    const q = normalize(text);
-    if (
-      isOperatorIntent(text) ||
-      (q.includes("farti richiamare") && q.includes("nome")) ||
-      (q.includes("dati di contatto") && q.includes("telefono")) ||
-      q.includes("modulo contatto")
-    ) {
-      setShowContactForm(true);
-    }
-  }
-
-  async function ensureShippingPricingLoaded() {
-    if (shippingPricingRules.length > 0) return shippingPricingRules;
-    if (shippingPricingLoading) return shippingPricingRules;
-    setShippingPricingLoading(true);
-    try {
-      const rules = await fetchPublicShippingPricing();
-      const normalized = Array.isArray(rules) ? rules : [];
-      setShippingPricingRules(normalized);
-      return normalized;
-    } catch {
-      setShippingPricingRules([]);
-      return [];
-    } finally {
-      setShippingPricingLoading(false);
-    }
-  }
+  /* --- sendMessage -------------------------------------------------- */
 
   async function sendMessage(message: string) {
     const trimmed = message.trim();
     if (!trimmed || loading) return;
 
     const nextMessages = [...messages, makeChatMessage("user", trimmed)];
-    const currentScope = detectConversationScope(nextMessages, trimmed);
-    const isShortConfirmation = includesAny(trimmed, [
-      "si",
-      "sì",
-      "ok",
-      "va bene",
-      "procedi",
-      "continua",
-      "certo",
-      "ci sono",
-      "sono qui",
-      "eccomi",
-      "presente",
-    ]);
-    const lastAssistantMessage = messages.at(-1);
-    const isReplyToIdleNudge =
-      lastAssistantMessage?.role === "assistant" &&
-      CHAT_IDLE_NUDGE_MESSAGES.some(
-        (item) => normalize(item) === normalize(lastAssistantMessage.content || ""),
-      ) &&
-      isShortConfirmation;
-    setLastUserActionAt(Date.now());
-    setIdleNudgeSent(false);
     setMessages(nextMessages);
     setInput("");
-    maybeOpenTrackingFormFromText(trimmed);
-    maybeOpenShippingQuoteFormFromText(trimmed);
-    maybeOpenUtilityEstimateFormFromText(trimmed);
-    maybeOpenTelephonyAuditFormFromText(trimmed);
-    maybeOpenContactFormFromText(trimmed);
-    if (isReplyToIdleNudge) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          "Perfetto, eccomi. Dimmi pure quale servizio ti serve e ti guido subito (es. telefonia, SPID, PEC, pagamenti, spedizioni).",
-        ),
-      ]);
-      return;
-    }
-    if (currentScope === "telefonia" && isShortConfirmation) {
-      setShowTelephonyAuditForm(true);
-    }
+
     if (QUICK_PROMPT_POOL.length > 0) {
       setQuickPromptOffset((prev) => (prev + 1) % QUICK_PROMPT_POOL.length);
     }
+
     setLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 15_000);
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -544,7 +289,15 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
           pathname,
           messages: nextMessages.slice(-10),
         }),
+        signal: controller.signal,
       });
+
+      window.clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`server_error:${response.status}`);
+      }
+
       const rawText = await response.text();
       let payload: AssistantPayload = {};
       try {
@@ -562,310 +315,49 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
       if (nextPrompts.length > 0) {
         setServerPrompts(Array.from(new Set(nextPrompts)).slice(0, QUICK_PROMPTS_VISIBLE));
       }
-      maybeOpenTrackingFormFromText(reply);
-      maybeOpenShippingQuoteFormFromText(reply);
-      maybeOpenUtilityEstimateFormFromText(reply);
-      maybeOpenTelephonyAuditFormFromText(reply);
-      maybeOpenContactFormFromText(reply);
+
       if (payload.handoff_recommended) {
-        setShowContactForm(true);
+        setHandoffData({
+          show: true,
+          whatsappLink: buildHoursWhatsappLink(),
+        });
       }
 
       setMessages((prev) => [...prev, makeChatMessage("assistant", reply)]);
-    } catch {
+    } catch (err: unknown) {
+      let errorReply: string;
+      if (err instanceof DOMException && err.name === "AbortError") {
+        errorReply = "La risposta sta impiegando troppo. Riprova o scrivici su WhatsApp.";
+      } else if (err instanceof TypeError) {
+        errorReply = "Sembra che tu sia offline. Controlla la connessione e riprova.";
+      } else if (err instanceof Error && err.message.startsWith("server_error:")) {
+        errorReply = "Il servizio è temporaneamente non disponibile. Riprova tra qualche secondo.";
+      } else {
+        errorReply = clientFallbackReply(trimmed, nextMessages);
+      }
+
       setMessages((prev) => [
         ...prev,
-        makeChatMessage("assistant", clientFallbackReply(trimmed, nextMessages)),
+        makeChatMessage("assistant", errorReply),
       ]);
-      maybeOpenTrackingFormFromText(trimmed);
-      maybeOpenShippingQuoteFormFromText(trimmed);
-      maybeOpenUtilityEstimateFormFromText(trimmed);
-      maybeOpenTelephonyAuditFormFromText(trimmed);
-      maybeOpenContactFormFromText(trimmed);
     } finally {
       setLoading(false);
     }
   }
+
+  /* --- form handlers ------------------------------------------------ */
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     void sendMessage(input);
   }
 
-  function onTrackingSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const code = trackingCode.trim().toUpperCase();
-    if (!code) return;
-    void sendMessage(`Traccia ${trackingCarrier} ${code}`);
-    setTrackingCode("");
-  }
-
-  async function onShippingQuoteSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const weight = Number.parseFloat(shippingWeightKG.replace(",", "."));
-    const length = Number.parseFloat(shippingLengthCM.replace(",", "."));
-    const width = Number.parseFloat(shippingWidthCM.replace(",", "."));
-    const height = Number.parseFloat(shippingHeightCM.replace(",", "."));
-
-    if (!Number.isFinite(weight) || weight <= 0) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage("assistant", "Per il preventivo indicativo inserisci un peso valido in KG."),
-      ]);
-      return;
-    }
-
-    if (![length, width, height].every((n) => Number.isFinite(n) && n > 0)) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          "Per il preventivo indicativo inserisci tutte le misure in cm (lunghezza, larghezza, altezza).",
-        ),
-      ]);
-      return;
-    }
-
-    const pricingRules = await ensureShippingPricingLoaded();
-    const volumeM3 = (length * width * height) / 1_000_000;
-    const destinationCountry = shippingScope === "national" ? "IT" : shippingCountry.trim().toUpperCase();
-
-    const activeRules = pricingRules.filter((rule) => rule.active);
-    const scopedRules = activeRules.filter((rule) => {
-      const scope = String(rule.serviceScope || "all").toLowerCase();
-      return scope === shippingScope || scope === "all";
-    });
-
-    const countryScopedRules =
-      shippingScope === "international"
-        ? scopedRules.filter((rule) => {
-            const code = String(rule.countryCode || "").trim().toUpperCase();
-            return code === destinationCountry || code === "" || code === "ALL";
-          })
-        : scopedRules;
-
-    const matchesWeight = (rule: PublicShippingPricingRule) => {
-      const minW = Number(rule.minWeightKG || 0);
-      const maxW = Number(rule.maxWeightKG || 0);
-      return weight >= minW && (maxW <= 0 || weight <= maxW);
-    };
-
-    const matchesVolume = (rule: PublicShippingPricingRule) => {
-      const minW = Number(rule.minWeightKG || 0);
-      const maxW = Number(rule.maxWeightKG || 0);
-      const minV = Number(rule.minVolumeM3 || 0);
-      const maxV = Number(rule.maxVolumeM3 || 0);
-      const weightMatches = weight >= minW && (maxW <= 0 || weight <= maxW);
-      const volumeMatches = volumeM3 >= minV && (maxV <= 0 || volumeM3 <= maxV);
-      return weightMatches && volumeMatches;
-    };
-
-    // Matching strategy:
-    // 1) scope+country with weight+volume
-    // 2) scope+country with weight only
-    // 3) scope (ignoring country) with weight only
-    // 4) any active rule with weight only
-    const matchedRuleByWeightAndVolume = countryScopedRules.find(matchesVolume);
-    const matchedRuleByWeightCountry = countryScopedRules.find(matchesWeight);
-    const matchedRuleByWeightScope = scopedRules.find(matchesWeight);
-    const matchedRuleByWeightAny = activeRules.find(matchesWeight);
-
-    const matchedRule =
-      matchedRuleByWeightAndVolume ||
-      matchedRuleByWeightCountry ||
-      matchedRuleByWeightScope ||
-      matchedRuleByWeightAny;
-    let usedWeightOnlyFallback = false;
-    if (matchedRule && !matchedRuleByWeightAndVolume) usedWeightOnlyFallback = true;
-
-    if (!matchedRule) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          "In base ai dati inseriti non trovo una fascia attiva nel listino. Per peso/volume extra ti invitiamo a portare il pacco in agenzia per un preventivo personalizzato.",
-        ),
-      ]);
-      return;
-    }
-
-    const scopeLabel = shippingScope === "national" ? "nazionale" : `internazionale (${destinationCountry})`;
-    const estimate = Number(matchedRule.priceEUR || 0).toFixed(2).replace(".", ",");
-    const fallbackNote = usedWeightOnlyFallback
-      ? " Ho usato la fascia peso (kg) perché il volume non rientrava in una fascia attiva."
-      : "";
-    setMessages((prev) => [
-      ...prev,
-      makeChatMessage(
-        "assistant",
-        `Preventivo indicativo spedizione ${scopeLabel}: € ${estimate} (${matchedRule.label || "fascia listino"}).${fallbackNote} Stima non vincolante, conferma finale in fase operativa.`,
-      ),
-    ]);
-  }
-
-  function onUtilityEstimateSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const monthlySpend = Number.parseFloat(utilityMonthlySpend.replace(",", "."));
-    const annualKwh =
-      utilityServiceType === "luce"
-        ? Number.parseFloat(utilityAnnualKwh.replace(",", "."))
-        : Number.NaN;
-    const annualSmc =
-      utilityServiceType === "gas"
-        ? Number.parseFloat(utilityAnnualSmc.replace(",", "."))
-        : Number.NaN;
-
-    if (!Number.isFinite(monthlySpend) || monthlySpend <= 0) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage("assistant", "Per la stima bolletta inserisci una spesa mensile valida in euro."),
-      ]);
-      return;
-    }
-
-    const annualSpend = monthlySpend * 12;
-    const lowSaving = annualSpend * 0.08;
-    const highSaving = annualSpend * 0.18;
-    const format = (value: number) => value.toFixed(0).replace(".", ",");
-    const consumptionHint: string[] = [];
-    if (utilityServiceType === "luce" && Number.isFinite(annualKwh) && annualKwh > 0) {
-      consumptionHint.push(`consumo luce ${format(annualKwh)} kWh/anno`);
-    }
-    if (utilityServiceType === "gas" && Number.isFinite(annualSmc) && annualSmc > 0) {
-      consumptionHint.push(`consumo gas ${format(annualSmc)} Smc/anno`);
-    }
-    const serviceLabel = utilityServiceType === "luce" ? "luce" : "gas";
-    const consumptionText =
-      consumptionHint.length > 0 ? ` Ho considerato ${consumptionHint.join(" e ")}.` : "";
-    setMessages((prev) => [
-      ...prev,
-      makeChatMessage(
-        "assistant",
-        `Stima indicativa ${serviceLabel} (${utilityContractType}): spesa annua circa € ${format(annualSpend)}.${consumptionText} Potenziale ottimizzazione: circa € ${format(lowSaving)} - € ${format(highSaving)} annui. Stima non vincolante: per conferma finale serve analisi completa della bolletta.`,
-      ),
-    ]);
-  }
-
-  function onTelephonyAuditSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const mobileSpend = Number.parseFloat(telephonyMobileSpend.replace(",", "."));
-    const homeSpend = Number.parseFloat(telephonyHomeSpend.replace(",", "."));
-    const dataGB = Number.parseFloat(telephonyDataGB.replace(",", "."));
-    const minutes = Number.parseFloat(telephonyMinutes.replace(",", "."));
-    const homeSpeedMbps = Number.parseFloat(telephonyHomeSpeedMbps.replace(",", "."));
-
-    const monthlySpend =
-      telephonyLineType === "mobile"
-        ? mobileSpend
-        : telephonyLineType === "casa"
-          ? homeSpend
-          : (Number.isFinite(mobileSpend) ? mobileSpend : 0) + (Number.isFinite(homeSpend) ? homeSpend : 0);
-
-    if (!Number.isFinite(monthlySpend) || monthlySpend <= 0) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          telephonyLineType === "mobile"
-            ? "Per il controllo mobile inserisci una spesa mensile valida."
-            : telephonyLineType === "casa"
-              ? "Per il controllo internet casa inserisci una spesa mensile valida."
-              : "Per il controllo mobile + casa inserisci una spesa valida per almeno una delle due linee.",
-        ),
-      ]);
-      return;
-    }
-
-    let recommendedBudgetMin = monthlySpend * 0.82;
-    let recommendedBudgetMax = monthlySpend * 0.95;
-    let profile = "profilo standard";
-    if (telephonyLineType === "mobile") {
-      recommendedBudgetMin = 4.99;
-      recommendedBudgetMax = 9.99;
-      profile =
-        Number.isFinite(dataGB) && dataGB >= 150
-          ? "profilo uso dati intenso"
-          : Number.isFinite(dataGB) && dataGB >= 70
-            ? "profilo uso dati medio"
-            : "profilo uso dati leggero";
-    } else if (telephonyLineType === "casa") {
-      recommendedBudgetMin = 22.99;
-      recommendedBudgetMax = 29.99;
-      profile =
-        Number.isFinite(homeSpeedMbps) && homeSpeedMbps >= 1000
-          ? "profilo fibra alta velocita"
-          : Number.isFinite(homeSpeedMbps) && homeSpeedMbps >= 200
-            ? "profilo fibra medio-alta"
-            : "profilo casa base";
-    } else {
-      recommendedBudgetMin = Math.max(24.9, monthlySpend * 0.76);
-      recommendedBudgetMax = Math.max(recommendedBudgetMin, monthlySpend * 0.9);
-      profile = "profilo combinato mobile + casa";
-    }
-    const format = (value: number) => value.toFixed(2).replace(".", ",");
-    const lineLabel =
-      telephonyLineType === "mobile" ? "mobile" : telephonyLineType === "casa" ? "internet casa" : "mobile + casa";
-    const minutesText =
-      telephonyLineType !== "casa" && Number.isFinite(minutes) && minutes > 0
-        ? `, minuti/mese ~${Math.round(minutes)}`
-        : "";
-    const portabilityText =
-      telephonyPortability === "si"
-        ? telephonyLineType === "casa"
-          ? " Con migrazione linea servono dati linea attuale e codice migrazione."
-          : telephonyLineType === "mobile-casa"
-            ? " Con portabilità/migrazione servono numero da migrare, ICCID SIM e dati linea casa."
-            : " Con portabilità servono numero da migrare e ICCID SIM."
-        : "";
-    setMessages((prev) => [
-      ...prev,
-      makeChatMessage(
-        "assistant",
-        `Controllo offerta telefonia (${lineLabel}): ${profile}${minutesText}. Budget target indicativo: € ${format(recommendedBudgetMin)} - € ${format(recommendedBudgetMax)}/mese rispetto all'attuale. Possiamo confrontare le opzioni WindTre, Fastweb e Iliad in base a copertura e utilizzo reale.${portabilityText} Stima indicativa, conferma finale con verifica commerciale.`,
-      ),
-    ]);
-  }
-
-  function onQuickAction(prompt: string) {
-    setOpen(true);
-    setMicroCtaDismissed(true);
+  function onClearChat() {
     if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
-      window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: true } }));
+      window.localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY);
     }
-    void sendMessage(prompt);
-  }
-
-  function onContactSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const name = contactName.trim();
-    const phone = contactPhone.trim();
-    const email = contactEmail.trim();
-    const service = contactService.trim();
-    const notes = contactNotes.trim();
-
-    if (name === "" || (phone === "" && email === "")) {
-      setMessages((prev) => [
-        ...prev,
-        makeChatMessage(
-          "assistant",
-          "Per inviare la richiesta contatto inserisci almeno nome e telefono oppure email.",
-        ),
-      ]);
-      return;
-    }
-
-    const message = `Richiamami. Nome: ${name}. Telefono: ${phone || "n/d"}. Email: ${email || "n/d"}. Servizio: ${service || "generico"}. Note: ${notes || "n/d"}.`;
-    void sendMessage(message);
-    setContactNotes("");
-  }
-
-  function onDismissMicroCta() {
-    setMicroCtaDismissed(true);
-    if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(BOT_MICRO_CTA_STATE_STORAGE_KEY, "1");
-      window.dispatchEvent(new CustomEvent(BOT_MICRO_CTA_EVENT, { detail: { dismissed: true } }));
-    }
+    setMessages([defaultWelcomeMessage]);
+    setHandoffData(null);
   }
 
   function shouldShowHoursWhatsappCta(content: string) {
@@ -881,523 +373,253 @@ export default function PlinioAssistantChat({ pathname }: PlinioAssistantChatPro
     );
   }
 
+  function shouldShowBookingButton(content: string) {
+    const value = normalize(content);
+    return includesAny(value, ["prenotare", "appuntamento", "prenota", "prenotazione"]);
+  }
+
+  /* --- render ------------------------------------------------------- */
+
   return (
     <>
-      {open ? (
-        <div
-          className="fixed top-4 right-4 bottom-44 z-[61] flex w-[min(92vw,390px)] flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-950/95 shadow-[0_18px_60px_rgba(2,6,23,0.6)] backdrop-blur sm:right-6 sm:top-6 sm:bottom-44"
-          onMouseMove={resetInactivityTimer}
-          onClick={resetInactivityTimer}
-          onKeyDown={resetInactivityTimer}
-          onWheel={resetInactivityTimer}
-          onTouchStart={resetInactivityTimer}
-        >
-          <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-white">Plinio Assistant</p>
-              <p className="text-xs text-cyan-300">Assistente AG Servizi</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-              aria-label="Chiudi chat"
-            >
-              Chiudi
-            </button>
-          </div>
+      {/* Keyframe styles for typing indicator */}
+      <style>{`
+        @keyframes typingBounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+        @keyframes chatPulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(94,14,215,0.3); }
+          50% { box-shadow: 0 0 30px rgba(94,14,215,0.5); }
+        }
+        .chat-scrollbar::-webkit-scrollbar { width: 4px; }
+        .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(94,14,215,0.4); border-radius: 9999px; }
+        .chat-scrollbar { scrollbar-width: thin; scrollbar-color: rgba(94,14,215,0.4) transparent; }
+      `}</style>
 
-          <div ref={messagesViewportRef} className="flex-1 min-h-0 space-y-3 overflow-y-auto px-4 py-4">
-            {visibleMessages.map((message) => (
-              <div
-                key={message.id}
-                className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm leading-6 ${
-                  message.role === "assistant"
-                    ? "bg-slate-800 text-slate-100"
-                    : "ml-auto bg-cyan-500 text-slate-950"
-                }`}
-              >
-                {message.role === "assistant" ? (
-                  <div className="space-y-2">
-                    <p>{message.content}</p>
-                    {shouldShowHoursWhatsappCta(message.content) ? (
-                      <a
-                        href={buildHoursWhatsappLink()}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-400"
-                      >
-                        Conferma orari su WhatsApp
-                      </a>
-                    ) : null}
-                    {shouldShowMapsCta(message.content) ? (
-                      <a
-                        href={buildGoogleMapsLink()}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400"
-                      >
-                        Apri su Google Maps
-                      </a>
-                    ) : null}
-                  </div>
-                ) : (
-                  message.content
-                )}
+      <AnimatePresence mode="wait">
+        {open ? (
+          <motion.div
+            key="chat-panel"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+              mass: 0.8,
+            }}
+            className="fixed bottom-6 right-6 z-50 flex w-[380px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-purple-500/10 max-sm:inset-0 max-sm:w-full max-sm:rounded-none max-sm:border-0 sm:h-[600px]"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 bg-linear-to-r from-[#5E0ED7]/20 to-transparent px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5E0ED7] text-sm font-bold text-white">
+                  P
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">Plinio</p>
+                  <p className="text-xs text-white/50">Assistente AG SERVIZI</p>
+                </div>
               </div>
-            ))}
-            {loading ? (
-              <div className="inline-flex items-center gap-2 rounded-2xl bg-slate-800 px-3 py-2 text-sm text-slate-300">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-400" />
-                Sto scrivendo...
-              </div>
-            ) : null}
-            <div ref={messagesEndRef} />
-          </div>
-
-          <div className="max-h-[46%] overflow-y-auto border-t border-slate-800 px-4 py-3">
-            {showTrackingForm ? (
-              <form
-                onSubmit={onTrackingSubmit}
-                className="mb-3 space-y-2 rounded-xl border border-slate-700 bg-slate-900/70 p-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                  Traccia spedizione
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <select
-                    value={trackingCarrier}
-                    onChange={(event) => setTrackingCarrier(event.target.value as TrackingCarrier)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="BRT">BRT</option>
-                    <option value="Poste Italiane">Poste Italiane</option>
-                    <option value="SDA">SDA</option>
-                    <option value="TNT/FedEx">TNT/FedEx</option>
-                  </select>
-                  <input
-                    value={trackingCode}
-                    onChange={(event) => setTrackingCode(event.target.value)}
-                    placeholder="Inserisci codice tracking"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading || trackingCode.trim() === ""}
-                    className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-                  >
-                    Verifica tracking
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowTrackingForm(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-                  >
-                    Nascondi
-                  </button>
-                </div>
-              </form>
-            ) : null}
-            {showShippingQuoteForm ? (
-              <form
-                onSubmit={onShippingQuoteSubmit}
-                className="mb-3 space-y-2 rounded-xl border border-slate-700 bg-slate-900/70 p-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                  Preventivo spedizione
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <select
-                    value={shippingScope}
-                    onChange={(event) => setShippingScope(event.target.value as ShippingScope)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="national">Nazionale (Italia)</option>
-                    <option value="international">Internazionale</option>
-                  </select>
-                  <select
-                    value={shippingCountry}
-                    onChange={(event) => setShippingCountry(event.target.value)}
-                    disabled={shippingScope === "national"}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400 disabled:opacity-60"
-                  >
-                    {SHIPPING_COUNTRY_OPTIONS.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    value={shippingWeightKG}
-                    onChange={(event) => setShippingWeightKG(event.target.value)}
-                    placeholder="Peso (kg)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  <input
-                    value={shippingLengthCM}
-                    onChange={(event) => setShippingLengthCM(event.target.value)}
-                    placeholder="Lunghezza (cm)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  <input
-                    value={shippingWidthCM}
-                    onChange={(event) => setShippingWidthCM(event.target.value)}
-                    placeholder="Larghezza (cm)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  <input
-                    value={shippingHeightCM}
-                    onChange={(event) => setShippingHeightCM(event.target.value)}
-                    placeholder="Altezza (cm)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading || shippingPricingLoading}
-                    className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-                  >
-                    {shippingPricingLoading ? "Calcolo..." : "Calcola stima"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowShippingQuoteForm(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-                  >
-                    Nascondi
-                  </button>
-                </div>
-              </form>
-            ) : null}
-            {showUtilityEstimateForm ? (
-              <form
-                onSubmit={onUtilityEstimateSubmit}
-                className="mb-3 space-y-2 rounded-xl border border-slate-700 bg-slate-900/70 p-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                  Stima bolletta luce o gas
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <select
-                    value={utilityServiceType}
-                    onChange={(event) => setUtilityServiceType(event.target.value as UtilityServiceType)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="luce">Solo Luce</option>
-                    <option value="gas">Solo Gas</option>
-                  </select>
-                  <select
-                    value={utilityContractType}
-                    onChange={(event) => setUtilityContractType(event.target.value)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="residenziale">Residenziale</option>
-                    <option value="business">Business</option>
-                  </select>
-                  <input
-                    value={utilityMonthlySpend}
-                    onChange={(event) => setUtilityMonthlySpend(event.target.value)}
-                    placeholder="Spesa media mensile (€)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  {utilityServiceType === "luce" ? (
-                    <input
-                      value={utilityAnnualKwh}
-                      onChange={(event) => setUtilityAnnualKwh(event.target.value)}
-                      placeholder="Consumo annuo luce (kWh)"
-                      className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                    />
-                  ) : null}
-                  {utilityServiceType === "gas" ? (
-                    <input
-                      value={utilityAnnualSmc}
-                      onChange={(event) => setUtilityAnnualSmc(event.target.value)}
-                      placeholder="Consumo annuo gas (Smc)"
-                      className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                    />
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-                  >
-                    Calcola stima
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowUtilityEstimateForm(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-                  >
-                    Nascondi
-                  </button>
-                </div>
-              </form>
-            ) : null}
-            {showTelephonyAuditForm ? (
-              <form
-                onSubmit={onTelephonyAuditSubmit}
-                className="mb-3 space-y-2 rounded-xl border border-slate-700 bg-slate-900/70 p-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                  Controllo offerta telefonia
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <select
-                    value={telephonyLineType}
-                    onChange={(event) => setTelephonyLineType(event.target.value as TelephonyLineType)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="mobile">Mobile</option>
-                    <option value="casa">Internet Casa</option>
-                    <option value="mobile-casa">Mobile + Casa</option>
-                  </select>
-                  <select
-                    value={telephonyPortability}
-                    onChange={(event) => setTelephonyPortability(event.target.value)}
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
-                  >
-                    <option value="si">
-                      {telephonyLineType === "casa"
-                        ? "Migrazione linea: Sì"
-                        : telephonyLineType === "mobile-casa"
-                          ? "Portabilità/Migrazione: Sì"
-                          : "Portabilità: Sì"}
-                    </option>
-                    <option value="no">
-                      {telephonyLineType === "casa"
-                        ? "Migrazione linea: No"
-                        : telephonyLineType === "mobile-casa"
-                          ? "Portabilità/Migrazione: No"
-                          : "Portabilità: No"}
-                    </option>
-                  </select>
-                  {telephonyLineType === "mobile" ? (
-                    <>
-                      <input
-                        value={telephonyMobileSpend}
-                        onChange={(event) => setTelephonyMobileSpend(event.target.value)}
-                        placeholder="Spesa mobile mensile (€)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyDataGB}
-                        onChange={(event) => setTelephonyDataGB(event.target.value)}
-                        placeholder="Traffico dati mensile (GB)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyMinutes}
-                        onChange={(event) => setTelephonyMinutes(event.target.value)}
-                        placeholder="Minuti mensili (opzionale)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400 sm:col-span-2"
-                      />
-                    </>
-                  ) : null}
-                  {telephonyLineType === "casa" ? (
-                    <>
-                      <input
-                        value={telephonyHomeSpend}
-                        onChange={(event) => setTelephonyHomeSpend(event.target.value)}
-                        placeholder="Spesa internet casa mensile (€)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyHomeSpeedMbps}
-                        onChange={(event) => setTelephonyHomeSpeedMbps(event.target.value)}
-                        placeholder="Velocità attuale (Mbps, opz.)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                    </>
-                  ) : null}
-                  {telephonyLineType === "mobile-casa" ? (
-                    <>
-                      <input
-                        value={telephonyMobileSpend}
-                        onChange={(event) => setTelephonyMobileSpend(event.target.value)}
-                        placeholder="Spesa mobile mensile (€)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyHomeSpend}
-                        onChange={(event) => setTelephonyHomeSpend(event.target.value)}
-                        placeholder="Spesa internet casa mensile (€)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyDataGB}
-                        onChange={(event) => setTelephonyDataGB(event.target.value)}
-                        placeholder="Traffico dati mobile (GB)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                      <input
-                        value={telephonyHomeSpeedMbps}
-                        onChange={(event) => setTelephonyHomeSpeedMbps(event.target.value)}
-                        placeholder="Velocità casa (Mbps, opz.)"
-                        className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                      />
-                    </>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-                  >
-                    Avvia controllo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowTelephonyAuditForm(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-                  >
-                    Nascondi
-                  </button>
-                </div>
-              </form>
-            ) : null}
-            {showContactForm ? (
-              <form
-                onSubmit={onContactSubmit}
-                className="mb-3 space-y-2 rounded-xl border border-slate-700 bg-slate-900/70 p-3"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-cyan-300">
-                  Contatto operatore
-                </p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <input
-                    value={contactName}
-                    onChange={(event) => setContactName(event.target.value)}
-                    placeholder="Nome e cognome"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400 sm:col-span-2"
-                  />
-                  <input
-                    value={contactPhone}
-                    onChange={(event) => setContactPhone(event.target.value)}
-                    placeholder="Telefono"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  <input
-                    value={contactEmail}
-                    onChange={(event) => setContactEmail(event.target.value)}
-                    placeholder="Email"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                  />
-                  <input
-                    value={contactService}
-                    onChange={(event) => setContactService(event.target.value)}
-                    placeholder="Servizio richiesto (es. SPID)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400 sm:col-span-2"
-                  />
-                  <input
-                    value={contactNotes}
-                    onChange={(event) => setContactNotes(event.target.value)}
-                    placeholder="Messaggio breve (opzionale)"
-                    className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400 sm:col-span-2"
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-                  >
-                    Invia contatto
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowContactForm(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 transition hover:border-slate-500 hover:text-white"
-                  >
-                    Nascondi
-                  </button>
-                </div>
-              </form>
-            ) : null}
-            <div className="mb-3 flex flex-wrap gap-2">
-              {promptsForUi.map((prompt) => (
+              <div className="flex items-center gap-2">
                 <button
-                  key={prompt}
                   type="button"
-                  onClick={() => void sendMessage(prompt)}
-                  className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-200 transition hover:border-cyan-400 hover:text-cyan-200"
+                  onClick={onClearChat}
+                  className="text-[10px] text-white/30 transition hover:text-white/60"
+                  aria-label="Cancella chat"
                 >
-                  {prompt}
+                  Cancella chat
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/60 transition hover:text-white"
+                  aria-label="Chiudi chat"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <form onSubmit={onSubmit} className="flex gap-2">
-              <input
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder="Scrivi la tua domanda..."
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-cyan-400"
-              />
-              <button
-                type="submit"
-                disabled={loading || input.trim() === ""}
-                className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-60"
-              >
-                Invia
-              </button>
-            </form>
-          </div>
-        </div>
-      ) : null}
 
-      {!open && !microCtaDismissed && microCtaReady ? (
-        <div className="fixed right-4 bottom-42 z-[60] flex w-[min(90vw,320px)] flex-col items-end gap-2 sm:right-6">
-          <div className="rounded-xl border border-cyan-300/35 bg-slate-900/95 px-3 py-2 text-xs font-medium text-cyan-100 shadow-[0_12px_30px_rgba(8,47,73,0.4)] backdrop-blur animate-[fadeIn_0.35s_ease-out]">
-            <div className="flex items-start justify-between gap-3">
-              <span>{ATTENTION_TOOLTIPS[tooltipIndex]}</span>
-              <button
-                type="button"
-                onClick={onDismissMicroCta}
-                className="rounded-md border border-slate-600 px-1.5 py-0.5 text-[10px] font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-200"
-                aria-label="Chiudi suggerimenti rapidi"
-              >
-                ×
-              </button>
+            {/* Messages area */}
+            <div
+              ref={messagesViewportRef}
+              className="chat-scrollbar flex-1 min-h-0 space-y-3 overflow-y-auto px-4 py-4"
+              role="log"
+              aria-live="polite"
+            >
+              <AnimatePresence initial={false}>
+                {visibleMessages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className={`max-w-[88%] ${
+                      message.role === "user" ? "ml-auto" : ""
+                    }`}
+                  >
+                    <div
+                      className={`px-4 py-3 text-sm leading-relaxed ${
+                        message.role === "assistant"
+                          ? "rounded-2xl rounded-bl-sm bg-white/8 text-white/90"
+                          : "rounded-2xl rounded-br-sm bg-[#5E0ED7] text-white"
+                      }`}
+                    >
+                      {message.role === "assistant" ? (
+                        <div className="space-y-2">
+                          <p>{message.content}</p>
+                          {shouldShowHoursWhatsappCta(message.content) ? (
+                            <a
+                              href={buildHoursWhatsappLink()}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-400"
+                            >
+                              Conferma orari su WhatsApp
+                            </a>
+                          ) : null}
+                          {shouldShowMapsCta(message.content) ? (
+                            <a
+                              href={buildGoogleMapsLink()}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex rounded-full bg-[#5E0ED7] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#4e0bb5]"
+                            >
+                              Apri su Google Maps
+                            </a>
+                          ) : null}
+                          {shouldShowBookingButton(message.content) ? (
+                            <button
+                              type="button"
+                              onClick={() => window.dispatchEvent(new Event("plinio:open-booking"))}
+                              className="inline-flex rounded-full bg-[#5E0ED7] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#4e0bb5]"
+                            >
+                              Prenota un appuntamento
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : (
+                        message.content
+                      )}
+                    </div>
+                    <p className="mt-1 text-[10px] text-white/25" suppressHydrationWarning>
+                      {relativeTime(message.createdAt)}
+                    </p>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Handoff card */}
+              {handoffData?.show ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4"
+                >
+                  <p className="font-semibold text-amber-200">Serve assistenza personalizzata</p>
+                  <p className="text-sm text-amber-100/70">Per questa richiesta è meglio parlare con un operatore.</p>
+                  <div className="mt-3 flex gap-2">
+                    <a
+                      href={handoffData.whatsappLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-400"
+                    >
+                      WhatsApp
+                    </a>
+                    <a
+                      href="tel:+393773798570"
+                      className="inline-flex items-center rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white/80 transition hover:text-white hover:border-white/30"
+                    >
+                      Chiama
+                    </a>
+                  </div>
+                </motion.div>
+              ) : null}
+
+              {/* Typing indicator */}
+              {loading ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-2xl rounded-bl-sm bg-white/8"
+                >
+                  <TypingIndicator />
+                </motion.div>
+              ) : null}
+
+              <div ref={messagesEndRef} />
             </div>
-          </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            {promptsForUi.slice(0, 2).map((prompt) => (
-              <button
-                key={`chip-${prompt}`}
-                type="button"
-                onClick={() => onQuickAction(prompt)}
-                className="rounded-full border border-slate-600 bg-slate-900/90 px-3 py-1 text-[11px] text-slate-100 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:text-cyan-200"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
 
+            {/* Bottom area: quick prompts + input */}
+            <div className="max-h-[46%] overflow-y-auto border-t border-white/10 bg-slate-900/80 backdrop-blur-sm">
+              <div className="px-4 py-3 space-y-3">
+                {/* Quick prompts */}
+                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  {promptsForUi.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => void sendMessage(prompt)}
+                      className="shrink-0 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/70 transition hover:border-[#5E0ED7]/40 hover:text-white"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input */}
+                <form onSubmit={onSubmit} className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    placeholder="Scrivi la tua domanda..."
+                    className="w-full rounded-full border border-white/10 bg-white/8 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#5E0ED7]/50 transition"
+                  />
+                  <AnimatePresence>
+                    {input.trim() !== "" ? (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        type="submit"
+                        disabled={loading || input.trim() === ""}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#5E0ED7] text-white transition hover:bg-[#4e0bb5] disabled:opacity-60"
+                        aria-label="Invia messaggio"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M8 14V2M8 2L3 7M8 2L13 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </motion.button>
+                    ) : null}
+                  </AnimatePresence>
+                </form>
+              </div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Chat bubble button */}
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="fixed right-4 bottom-24 z-[90] h-16 w-16 cursor-pointer bg-transparent transition hover:-translate-y-0.5 sm:right-6 sm:bottom-24"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#5E0ED7] text-white shadow-[0_0_20px_rgba(94,14,215,0.3)] transition hover:scale-105 hover:shadow-[0_0_30px_rgba(94,14,215,0.5)]"
+        style={{ animation: "chatPulse 2.8s ease-in-out infinite" }}
         aria-label="Apri assistente AI"
       >
-        {unreadBadgeCount > 0 ? (
-          <span className="absolute -top-1 -right-1 z-[100] inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-lg shadow-rose-900/30">
-            {unreadBadgeCount > 9 ? "9+" : unreadBadgeCount}
-          </span>
-        ) : null}
-        <img
-          src="/plinio-bot.png"
-          alt=""
-          aria-hidden="true"
-          className="block h-full w-full object-contain drop-shadow-[0_14px_28px_rgba(8,47,73,0.42)] animate-[pulse_2.8s_ease-in-out_infinite]"
-          draggable={false}
-        />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
     </>
   );

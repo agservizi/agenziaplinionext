@@ -181,7 +181,7 @@ export default function ContactInteractiveSection() {
                 href={company.googleBusinessUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 inline-flex rounded-full bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500"
+                className="btn-action btn-action-primary cta-glass-sm mt-4 inline-flex"
               >
                 Apri navigazione su Google Maps
               </Link>

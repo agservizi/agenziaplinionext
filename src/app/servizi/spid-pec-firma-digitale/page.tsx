@@ -34,13 +34,13 @@ export default function SpidPecFirmaPage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/consulenza?service=digitali"
-                className="rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                className="cta-glass cta-glass-md cta-glass-primary-light"
               >
                 Richiedi assistenza
               </Link>
               <Link
                 href="/servizi"
-                className="rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-200"
+                className="cta-glass cta-glass-md cta-glass-secondary"
               >
                 Tutti i servizi
               </Link>

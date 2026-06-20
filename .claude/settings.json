@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/carminecavaliere/.nvm/versions/node/**)",
+      "Read(//opt/homebrew/Cellar/simdjson/4.6.3/lib/**)",
+      "Read(//opt/homebrew/Cellar/simdjson/**)",
+      "Bash(ln -sf /opt/homebrew/opt/simdjson/lib/libsimdjson.33.dylib /opt/homebrew/opt/simdjson/lib/libsimdjson.29.dylib)",
+      "Bash(zip -r deploy-out.zip deploy-out/)"
+    ]
+  }
+}

@@ -67,7 +67,8 @@ export function resolveClientBookingApiBase() {
 
   const hostname = window.location.hostname;
   if (hostname === "localhost" || hostname === "127.0.0.1") {
-    return window.location.origin;
+    const base = resolveBookingApiBase(hostname);
+    return base || window.location.origin;
   }
 
   return resolveBookingApiBase(hostname);

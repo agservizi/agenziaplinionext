@@ -5,11 +5,24 @@ export const company = {
   vat: "08442881218",
   sdi: "KRRH6B9",
   openedYear: 2016,
+  openedMonth: 6,
+  openedDay: 1,
   phone: "+39 377 379 8570",
   whatsapp: "393773798570",
   googleBusinessUrl:
     "https://maps.app.goo.gl/FDVRXDWNp7J5dRrk8",
 };
+
+export function getYearsActive(): number {
+  const now = new Date();
+  const opened = new Date(company.openedYear, company.openedMonth - 1, company.openedDay);
+  let years = now.getFullYear() - opened.getFullYear();
+  const anniversaryPassed =
+    now.getMonth() > opened.getMonth() ||
+    (now.getMonth() === opened.getMonth() && now.getDate() >= opened.getDate());
+  if (!anniversaryPassed) years--;
+  return years;
+}
 
 export const navigation = [
   { label: "Home", href: "/" },

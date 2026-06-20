@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import { clientAreas, type ClientAreaConfig } from "@/lib/client-area";
+import Container from "@/components/Container";
 
 function cardTitle(area: ClientAreaConfig): string {
   return area.key === "consulenza-utenze" ? "Consulenza Utenze" : area.title;
@@ -61,21 +63,35 @@ function useCountUp(target: number, resetKey: string) {
   return value;
 }
 
-function MetricCounter({ target, label, resetKey }: { target: number; label: string; resetKey: string }) {
+function MetricCounter({
+  target,
+  label,
+  resetKey,
+}: {
+  target: number;
+  label: string;
+  resetKey: string;
+}) {
   const value = useCountUp(target, resetKey);
   return (
-    <div className="rounded-xl border border-cyan-300/20 bg-slate-900/55 p-3 text-center">
-      <p className="text-lg font-semibold text-cyan-300">{value}</p>
-      <p className="text-[11px] text-slate-400">{label}</p>
+    <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+      <p className="text-lg font-semibold text-purple-300">{value}</p>
+      <p className="text-[11px] text-white/35">{label}</p>
     </div>
   );
 }
+
+const EASE_CINEMATIC: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export default function ClientAreaInteractiveHero() {
   const [activeKey, setActiveKey] = useState(clientAreas[0]?.key ?? "spedizioni");
   const [isHoveringCards, setIsHoveringCards] = useState(false);
   const [ctaPulseOnce, setCtaPulseOnce] = useState(true);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+
+  const prefersReducedMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
 
   const activeArea = useMemo(
     () => clientAreas.find((area) => area.key === activeKey) ?? clientAreas[0],
@@ -107,10 +123,14 @@ export default function ClientAreaInteractiveHero() {
 
   if (!activeArea) return null;
 
+  const noMotion = !!prefersReducedMotion;
+
   return (
     <section
-      className="hero-gradient relative isolate overflow-hidden bg-slate-950 py-20 md:py-28"
+      ref={sectionRef}
+      className="relative isolate overflow-hidden bg-slate-950 py-28 md:py-36"
       onMouseMove={(event) => {
+        if (noMotion) return;
         const rect = event.currentTarget.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width - 0.5) * 12;
         const y = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
@@ -118,24 +138,120 @@ export default function ClientAreaInteractiveHero() {
       }}
       onMouseLeave={() => setParallax({ x: 0, y: 0 })}
     >
+      {/* Gradient overlay */}
       <div
-        className="client-hero-parallax"
+        className="pointer-events-none absolute inset-0 bg-linear-to-br from-[#5E0ED7]/5 via-transparent to-[#22d3ee]/3"
         aria-hidden="true"
-        style={{ transform: `translate3d(${parallax.x}px, ${parallax.y}px, 0)` }}
       />
-      <div className="hero-grid-glow" aria-hidden="true" />
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl space-y-4 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">Area Clienti</p>
-          <h2 className="text-3xl font-semibold text-white md:text-4xl">
-            Gestisci tutto online, senza passare in sede
-          </h2>
-          <p className="text-base text-slate-300 md:text-lg">
-            Un portale dedicato dove puoi inviare richieste, seguire le pratiche e ricevere aggiornamenti in tempo reale.
-          </p>
+
+      {/* Film grain texture */}
+      <div className="pointer-events-none absolute inset-0" style={{ opacity: 0.025 }} aria-hidden="true">
+        <svg width="100%" height="100%">
+          <filter id="heroGrain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#heroGrain)" />
+        </svg>
+      </div>
+
+      {/* Floating orbs */}
+      <div
+        className="orb-float-1 pointer-events-none absolute -right-32 -top-32 h-[420px] w-[420px] rounded-full bg-[#5E0ED7]/15 blur-[120px]"
+        aria-hidden="true"
+        style={{
+          transform: noMotion
+            ? undefined
+            : `translate3d(${parallax.x * 0.6}px, ${parallax.y * 0.6}px, 0)`,
+        }}
+      />
+      <div
+        className="orb-float-2 pointer-events-none absolute -bottom-32 -left-32 h-[360px] w-[360px] rounded-full bg-[#22d3ee]/10 blur-[120px]"
+        aria-hidden="true"
+        style={{
+          transform: noMotion
+            ? undefined
+            : `translate3d(${parallax.x * -0.4}px, ${parallax.y * -0.4}px, 0)`,
+        }}
+      />
+
+      {/* Keyframes for gradient text animation */}
+      <style>{`
+        @keyframes heroGradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+
+      <Container>
+        {/* Header */}
+        <div className="mx-auto max-w-2xl space-y-5 text-center">
+          <motion.p
+            className="text-[11px] font-semibold uppercase tracking-[0.25em] text-purple-400"
+            initial={noMotion ? false : { opacity: 0, y: 10 }}
+            animate={isInView || noMotion ? { opacity: 1, y: 0 } : undefined}
+            transition={{ duration: 0.6, ease: EASE_CINEMATIC }}
+          >
+            Area Clienti
+          </motion.p>
+
+          <div
+            style={{
+              fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
+              lineHeight: 0.92,
+              fontWeight: 900,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {/* Line 1 */}
+            <div className="overflow-hidden pb-1">
+              <motion.div
+                initial={noMotion ? false : { y: "105%" }}
+                animate={isInView || noMotion ? { y: 0 } : undefined}
+                transition={{ duration: 0.8, ease: EASE_CINEMATIC, delay: 0.1 }}
+                className="text-white"
+              >
+                Gestisci tutto online,
+              </motion.div>
+            </div>
+            {/* Line 2 */}
+            <div className="overflow-hidden pb-1">
+              <motion.div
+                initial={noMotion ? false : { y: "105%" }}
+                animate={isInView || noMotion ? { y: 0 } : undefined}
+                transition={{ duration: 0.8, ease: EASE_CINEMATIC, delay: 0.2 }}
+              >
+                <span
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
+                    backgroundSize: "300% 100%",
+                    animation: noMotion ? "none" : "heroGradientShift 5s ease infinite",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  senza passare in sede
+                </span>
+              </motion.div>
+            </div>
+          </div>
+
+          <motion.p
+            className="text-base text-white/45 md:text-lg"
+            initial={noMotion ? false : { opacity: 0, y: 12 }}
+            animate={isInView || noMotion ? { opacity: 1, y: 0 } : undefined}
+            transition={{ duration: 0.7, ease: EASE_CINEMATIC, delay: 0.35 }}
+          >
+            Un portale dedicato dove puoi inviare richieste, seguire le pratiche e
+            ricevere aggiornamenti in tempo reale.
+          </motion.p>
         </div>
 
+        {/* Grid: cards + detail panel */}
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          {/* Service cards */}
           <div
             className="grid gap-4 md:grid-cols-2"
             onMouseEnter={() => setIsHoveringCards(true)}
@@ -145,81 +261,115 @@ export default function ClientAreaInteractiveHero() {
               const isActive = area.key === activeArea.key;
               const title = cardTitle(area);
               return (
-                <button
+                <motion.button
                   key={area.key}
                   type="button"
                   onClick={() => setActiveKey(area.key)}
-                  className={`premium-panel client-hero-card text-left rounded-3xl p-6 transition ${
+                  className={`min-h-[44px] cursor-pointer rounded-2xl border p-6 text-left backdrop-blur-sm transition-all ${
                     isActive
-                      ? "client-hero-card-active border-cyan-300/60 ring-1 ring-cyan-300/50 shadow-[0_26px_60px_rgba(6,182,212,0.25)]"
-                      : "border-cyan-900/40 hover:-translate-y-0.5"
+                      ? "border-[#5E0ED7]/50 bg-[#5E0ED7]/10 shadow-[0_0_30px_rgba(94,14,215,0.15)]"
+                      : "border-white/10 bg-white/3 hover:-translate-y-0.5 hover:border-white/20"
                   }`}
-                  style={{ animationDelay: `${index * 70}ms` }}
+                  initial={noMotion ? false : { opacity: 0, y: 24 }}
+                  animate={isInView || noMotion ? { opacity: 1, y: 0 } : undefined}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 24,
+                    delay: index * 0.06,
+                  }}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-400">{area.eyebrow}</p>
-                  <h3 className={`mt-3 text-xl font-semibold text-white ${area.key === "consulenza-utenze" ? "whitespace-nowrap" : ""}`}>
+                  <p
+                    className={`text-xs font-semibold uppercase tracking-[0.2em] ${
+                      isActive ? "text-purple-400" : "text-white/30"
+                    }`}
+                  >
+                    {area.eyebrow}
+                  </p>
+                  <h3
+                    className={`mt-3 text-xl font-bold text-white ${
+                      area.key === "consulenza-utenze" ? "whitespace-nowrap" : ""
+                    }`}
+                  >
                     {title}
                   </h3>
-                  <p className="mt-2 text-sm text-slate-300">{area.subtitle}</p>
-                </button>
+                  <p className="mt-2 text-sm text-white/45">{area.subtitle}</p>
+                </motion.button>
               );
             })}
           </div>
 
-          <div className="glass-card rounded-3xl p-7">
-            <div key={activeArea.key} className="client-hero-panel-enter">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">{activeArea.eyebrow}</p>
-            <h3 className="mt-3 text-2xl font-semibold text-white">{cardTitle(activeArea)}</h3>
-            <p className="mt-3 text-sm text-slate-300">{activeArea.description}</p>
-            <ul className="mt-5 space-y-2 text-sm text-slate-300">
-              {activeArea.highlights.slice(0, 3).map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href={activeArea.path}
-                className={`inline-flex rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 ${
-                  ctaPulseOnce ? "client-hero-cta-pulse cta-shine-once" : ""
-                }`}
+          {/* Detail panel */}
+          <div className="rounded-2xl border border-white/10 bg-white/3 p-7 backdrop-blur-sm">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeArea.key}
+                initial={noMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={noMotion ? undefined : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: EASE_CINEMATIC }}
               >
-                {activeArea.cta}
-              </Link>
-              <Link
-                href="/area-clienti"
-                className="inline-flex rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-cyan-300 hover:text-cyan-200"
-              >
-                Scopri l'Area Clienti
-              </Link>
-            </div>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              {metrics.map((metric) => (
-                <MetricCounter
-                  key={`${activeArea.key}-${metric.label}`}
-                  target={metric.value}
-                  label={metric.label}
-                  resetKey={activeArea.key}
-                />
-              ))}
-            </div>
-            <div className="mt-5 flex items-center gap-2">
-              {clientAreas.map((area, index) => (
-                <span
-                  key={`dot-${area.key}`}
-                  className={`h-1.5 rounded-full transition-all ${
-                    area.key === activeArea.key ? "w-8 bg-cyan-300" : "w-1.5 bg-slate-500"
-                  }`}
-                  style={{ opacity: index === activeIndex ? 1 : 0.7 }}
-                />
-              ))}
-            </div>
-            </div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-400">
+                  {activeArea.eyebrow}
+                </p>
+                <h3 className="mt-3 text-2xl font-bold text-white">
+                  {cardTitle(activeArea)}
+                </h3>
+                <p className="mt-3 text-sm text-white/50">{activeArea.description}</p>
+
+                <ul className="mt-5 space-y-2 text-sm text-white/50">
+                  {activeArea.highlights.slice(0, 3).map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="mt-1 block h-1.5 w-1.5 shrink-0 rounded-full bg-[#5E0ED7]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link
+                    href={activeArea.path}
+                    className="inline-flex rounded-full bg-linear-to-r from-[#5E0ED7] to-purple-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(94,14,215,0.3)] transition hover:shadow-[0_0_30px_rgba(94,14,215,0.45)]"
+                  >
+                    {activeArea.cta}
+                  </Link>
+                  <Link
+                    href="/area-clienti"
+                    className="inline-flex rounded-full border border-white/15 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/30"
+                  >
+                    Scopri l&apos;Area Clienti
+                  </Link>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-2">
+                  {metrics.map((metric) => (
+                    <MetricCounter
+                      key={`${activeArea.key}-${metric.label}`}
+                      target={metric.value}
+                      label={metric.label}
+                      resetKey={activeArea.key}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-5 flex items-center gap-2">
+                  {clientAreas.map((area, index) => (
+                    <span
+                      key={`dot-${area.key}`}
+                      className={`h-1.5 rounded-full transition-all ${
+                        area.key === activeArea.key
+                          ? "w-8 bg-[#5E0ED7]"
+                          : "w-1.5 bg-white/20"
+                      }`}
+                      style={{ opacity: index === activeIndex ? 1 : 0.7 }}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

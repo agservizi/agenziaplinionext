@@ -1,8 +1,9 @@
 import { company, serviceCategories } from "@/lib/site-data";
-import { SITE_URL, SITE_NAME, GEO } from "@/lib/seo";
+import { absoluteImageUrl, absoluteUrl, SITE_URL, SITE_NAME, GEO } from "@/lib/seo";
 
 export default function LocalBusinessJsonLd() {
   const services = serviceCategories.map((category) => category.title);
+  const sameAs = [company.googleBusinessUrl].filter(Boolean);
 
   const address = {
     "@type": "PostalAddress" as const,
@@ -29,24 +30,26 @@ export default function LocalBusinessJsonLd() {
         name: company.name,
         legalName: company.legalName,
         url: SITE_URL,
+        telephone: company.phone,
         logo: {
           "@type": "ImageObject",
           "@id": `${SITE_URL}/#logo`,
-          url: `${SITE_URL}/favicon.png`,
-          contentUrl: `${SITE_URL}/favicon.png`,
+          url: absoluteImageUrl("/favicon.png"),
+          contentUrl: absoluteImageUrl("/favicon.png"),
           caption: SITE_NAME,
         },
-        image: `${SITE_URL}/og-default.svg`,
+        image: absoluteImageUrl("/og-default.svg"),
         foundingDate: String(company.openedYear),
         vatID: company.vat,
         address,
         contactPoint: {
           "@type": "ContactPoint",
           contactType: "customer service",
+          telephone: company.phone,
           availableLanguage: "Italian",
           areaServed: GEO.country,
         },
-        sameAs: company.googleBusinessUrl ? [company.googleBusinessUrl] : undefined,
+        sameAs: sameAs.length > 0 ? sameAs : undefined,
       },
 
       /* ── WebSite + SearchAction (sitelinks search box) ─ */
@@ -63,7 +66,7 @@ export default function LocalBusinessJsonLd() {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: `${SITE_URL}/servizi?q={search_term_string}`,
+            urlTemplate: `${absoluteUrl("/servizi")}?q={search_term_string}`,
           },
           "query-input": "required name=search_term_string",
         },
@@ -75,8 +78,9 @@ export default function LocalBusinessJsonLd() {
         "@id": `${SITE_URL}/#localbusiness`,
         name: company.name,
         url: SITE_URL,
-        image: `${SITE_URL}/og-default.svg`,
+        image: absoluteImageUrl("/og-default.svg"),
         logo: { "@id": `${SITE_URL}/#logo` },
+        telephone: company.phone,
         address,
         geo,
         hasMap: company.googleBusinessUrl,
@@ -124,6 +128,7 @@ export default function LocalBusinessJsonLd() {
         currenciesAccepted: "EUR",
         paymentAccepted: "Cash, Credit Card, Debit Card",
         isAccessibleForFree: false,
+        sameAs: sameAs.length > 0 ? sameAs : undefined,
         makesOffer: services.map((service) => ({
           "@type": "Offer",
           itemOffered: {
@@ -133,6 +138,45 @@ export default function LocalBusinessJsonLd() {
             areaServed: { "@type": "Country", name: "Italy" },
           },
         })),
+      },
+
+      {
+        "@type": "Service",
+        "@id": `${SITE_URL}/#service-catalog`,
+        serviceType: "Agenzia servizi e consulenza multiservizi",
+        provider: { "@id": `${SITE_URL}/#organization` },
+        areaServed: { "@type": "Country", name: "Italy" },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Catalogo servizi AG SERVIZI",
+          itemListElement: serviceCategories.map((category, index) => ({
+            "@type": "OfferCatalog",
+            name: category.title,
+            position: index + 1,
+            itemListElement: category.items.map((item) => ({
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: item.title,
+                description: item.description,
+                serviceType: category.title,
+                provider: { "@id": `${SITE_URL}/#organization` },
+              },
+            })),
+          })),
+        },
+      },
+
+      {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/#webpage`,
+        url: SITE_URL,
+        name: `${SITE_NAME} | Home`,
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        about: { "@id": `${SITE_URL}/#organization` },
+        primaryImageOfPage: { "@id": `${SITE_URL}/#logo` },
+        inLanguage: "it-IT",
+        breadcrumb: { "@id": `${SITE_URL}/#breadcrumb` },
       },
 
       /* ── BreadcrumbList (homepage) ───────────────────── */
