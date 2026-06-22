@@ -113,9 +113,21 @@ export default function DepositsListClient() {
         );
       }
 
-      const data = json.data ?? json;
-      setDeposits(data.deposits ?? data.items ?? []);
-      setTotal(data.total ?? data.deposits?.length ?? 0);
+      const wrapper = json.data ?? json;
+      const list = Array.isArray(wrapper)
+        ? wrapper
+        : wrapper.deposits ?? wrapper.items ?? wrapper.results ?? [];
+      const mapped: DepositSummary[] = list.map((d: Record<string, unknown>) => ({
+        depositCode: (d.depositCode ?? d.code ?? d.deposit_code ?? "") as string,
+        bookingDate: (d.bookingDate ?? d.booking_date ?? d.date ?? "") as string,
+        bagCount: Number(d.bagCount ?? d.bag_count ?? d.bags ?? 0),
+        status: (d.status ?? "PRENOTATO") as DepositStatus,
+        totalAmount: Number(d.totalAmount ?? d.total_amount ?? d.total ?? 0),
+        currency: (d.currency ?? "EUR") as string,
+      }));
+      setDeposits(mapped);
+      const meta = json.meta ?? wrapper.meta;
+      setTotal(meta?.total ?? mapped.length);
       setPage(pageNum);
       setFetchState("done");
     } catch (err) {
