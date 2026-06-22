@@ -78,6 +78,7 @@ function CounterStat({ stat, index }: { stat: StatItem; index: number }) {
 }
 
 function ScrollIndicator() {
+  const reduced = useReducedMotion();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -86,8 +87,8 @@ function ScrollIndicator() {
       className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:bottom-8"
     >
       <motion.div
-        animate={{ y: [0, 6, 0] }}
-        transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+        animate={reduced ? undefined : { y: [0, 6, 0] }}
+        transition={reduced ? undefined : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
         className="flex flex-col items-center gap-1.5"
       >
         <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-white/30">
@@ -120,6 +121,8 @@ export default function VideoHero({
 }: VideoHeroProps) {
   const reduced = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -180,12 +183,12 @@ export default function VideoHero({
         style={{ y: reduced ? 0 : videoY }}
       >
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          poster="/images/hero-poster.jpg"
           className="h-[120%] w-full object-cover"
           style={{ opacity: 0.45 }}
         >
@@ -316,6 +319,34 @@ export default function VideoHero({
           </div>
         </div>
       </motion.div>
+
+      {/* ── Video pause/play toggle ── */}
+      <button
+        type="button"
+        onClick={() => {
+          if (videoRef.current) {
+            if (isPlaying) {
+              videoRef.current.pause();
+            } else {
+              videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+          }
+        }}
+        aria-label={isPlaying ? "Metti in pausa il video" : "Riproduci il video"}
+        className="absolute bottom-20 right-6 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/60 backdrop-blur-sm transition hover:bg-white/20 hover:text-white"
+      >
+        {isPlaying ? (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="4" width="4" height="16" rx="1" />
+            <rect x="14" y="4" width="4" height="16" rx="1" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
 
       {/* ── Scroll indicator ── */}
       <ScrollIndicator />

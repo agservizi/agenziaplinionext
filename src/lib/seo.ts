@@ -4,7 +4,7 @@ import { company } from "@/lib/site-data";
 export const SITE_URL =
   (process.env.NEXT_PUBLIC_SITE_URL ?? "https://agenziaplinio.it").replace(/\/+$/, "");
 export const SITE_NAME = "AG SERVIZI";
-export const DEFAULT_OG_IMAGE = "/og-default.png";
+export const DEFAULT_OG_IMAGE = "/og-image";
 export const DEFAULT_LOCALE = "it_IT";
 export const DEFAULT_LANGUAGE = "it-IT";
 export const DEFAULT_KEYWORDS = [

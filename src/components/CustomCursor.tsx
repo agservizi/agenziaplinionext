@@ -52,6 +52,16 @@ export default function CustomCursor() {
   const raf = useRef(0);
   const toastTimer = useRef(0);
   const luminanceCheck = useRef(0);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -134,6 +144,7 @@ export default function CustomCursor() {
     };
   }, []);
 
+  if (prefersReducedMotion) return null;
   if (!visible) return null;
 
   const dotColor = isDark ? "#ffffff" : "#5E0ED7";

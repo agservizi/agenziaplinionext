@@ -2,6 +2,8 @@ import { buildMetadata } from "@/lib/seo";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import WebAgencyShowcase from "@/components/WebAgencyShowcase";
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "Web Agency creativa su misura a Castellammare di Stabia",

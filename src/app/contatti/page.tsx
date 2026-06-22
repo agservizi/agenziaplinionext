@@ -3,6 +3,8 @@ import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import FaqJsonLd from "@/components/seo/FaqJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "Contatti AG SERVIZI | Castellammare di Stabia",

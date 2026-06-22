@@ -615,8 +615,8 @@ export default function WebAgencyShowcase() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
           <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            animate={reduced ? undefined : { y: [0, 6, 0] }}
+            transition={reduced ? undefined : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
             className="flex flex-col items-center gap-1.5"
           >
             <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500" style={{ fontFamily: "var(--font-inter)" }}>

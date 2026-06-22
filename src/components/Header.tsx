@@ -565,6 +565,8 @@ export default function Header() {
         {mobileOpen && (
           <motion.div
             key="mobile-overlay"
+            role="presentation"
+            aria-hidden="true"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -579,6 +581,9 @@ export default function Header() {
         {mobileOpen && (
           <motion.div
             key="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu di navigazione"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

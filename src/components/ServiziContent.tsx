@@ -185,7 +185,6 @@ export default function ServiziContent() {
             muted
             playsInline
             preload="none"
-            poster="/images/servizi-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >
@@ -342,8 +341,8 @@ export default function ServiziContent() {
               className="h-5 w-5"
               fill="none"
               style={{ color: "rgba(255,255,255,0.3)" }}
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              animate={reduced ? undefined : { y: [0, 8, 0] }}
+              transition={reduced ? undefined : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
               <path d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </motion.svg>

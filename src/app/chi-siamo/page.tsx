@@ -2,6 +2,8 @@ import ChiSiamoContent from "@/components/ChiSiamoContent";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "Chi siamo | AG SERVIZI Castellammare di Stabia",

@@ -25,6 +25,8 @@ export default function Home() {
   );
 }
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "AG SERVIZI | Pagamenti, Telefonia, Luce e Gas a Castellammare di Stabia",

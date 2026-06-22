@@ -2,6 +2,8 @@ import ServiziContent from "@/components/ServiziContent";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "Servizi a Castellammare di Stabia",

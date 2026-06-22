@@ -133,7 +133,6 @@ export default function ConsulenzaContent() {
             muted
             playsInline
             preload="none"
-            poster="/images/consulenza-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >
@@ -302,8 +301,8 @@ export default function ConsulenzaContent() {
               className="h-5 w-5"
               fill="none"
               style={{ color: "rgba(255,255,255,0.3)" }}
-              animate={{ y: [0, 8, 0] }}
-              transition={{
+              animate={reduced ? undefined : { y: [0, 8, 0] }}
+              transition={reduced ? undefined : {
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut",

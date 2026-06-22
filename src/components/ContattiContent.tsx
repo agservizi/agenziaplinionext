@@ -217,7 +217,6 @@ export default function ContattiContent() {
             muted
             playsInline
             preload="none"
-            poster="/images/contatti-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >
@@ -452,8 +451,8 @@ export default function ContattiContent() {
           transition={{ delay: 1.5, duration: 1 }}
         >
           <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{
+            animate={reduced ? undefined : { y: [0, 6, 0] }}
+            transition={reduced ? undefined : {
               repeat: Infinity,
               duration: 1.6,
               ease: "easeInOut",

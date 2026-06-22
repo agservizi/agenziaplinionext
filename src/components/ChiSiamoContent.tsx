@@ -148,7 +148,6 @@ export default function ChiSiamoContent() {
             muted
             playsInline
             preload="none"
-            poster="/images/chi-siamo-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >
@@ -277,8 +276,8 @@ export default function ChiSiamoContent() {
           className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:bottom-8"
         >
           <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            animate={reduced ? undefined : { y: [0, 6, 0] }}
+            transition={reduced ? undefined : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
             className="flex flex-col items-center gap-1.5"
           >
             <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-white/30">

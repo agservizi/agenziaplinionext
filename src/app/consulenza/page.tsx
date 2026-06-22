@@ -2,6 +2,8 @@ import ConsulenzaContent from "@/components/ConsulenzaContent";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
+export const revalidate = 3600;
+
 export function generateMetadata() {
   return buildMetadata({
     title: "Consulenza Interattiva a Castellammare di Stabia | AG SERVIZI",

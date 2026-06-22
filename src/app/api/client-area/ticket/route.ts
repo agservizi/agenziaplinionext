@@ -112,6 +112,9 @@ async function loadTicketMessages(ticketIds: number[]) {
   return map;
 }
 
+const ALLOWED_EXTENSIONS = new Set([".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".webp"]);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 async function saveAttachments(files: File[], ticketIdHint: string) {
   if (!files.length) return [] as string[];
 
@@ -124,6 +127,17 @@ async function saveAttachments(files: File[], ticketIdHint: string) {
 
   for (const [index, file] of files.entries()) {
     const extension = path.extname(file.name).replace(/[^a-zA-Z0-9.]/g, "").slice(0, 10);
+
+    if (!ALLOWED_EXTENSIONS.has(extension.toLowerCase())) {
+      console.warn(`[Ticket Upload] Skipping file with disallowed extension: ${file.name}`);
+      continue;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      console.warn(`[Ticket Upload] Skipping file exceeding size limit: ${file.name} (${file.size} bytes)`);
+      continue;
+    }
+
     const baseName =
       file.name
         .replace(/\.[^.]+$/, "")

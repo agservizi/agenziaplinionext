@@ -5,12 +5,20 @@ import { serviceCategories } from "@/lib/site-data";
 import { buildMetadata } from "@/lib/seo";
 
 export function generateMetadata() {
-  return buildMetadata({
+  const meta = buildMetadata({
     title: "SPID, PEC e Firma Digitale a Castellammare di Stabia",
     description:
       "AG SERVIZI a Castellammare di Stabia: attivazioni SPID, PEC e Firma Digitale con supporto Namirial e assistenza in sede.",
     path: "/servizi/spid-pec-firma-digitale",
   });
+
+  return {
+    ...meta,
+    alternates: {
+      ...meta.alternates,
+      canonical: "https://agenziaplinio.it/servizi/digitali",
+    },
+  };
 }
 
 export default function SpidPecFirmaPage() {

@@ -212,6 +212,9 @@ async function getMagicRequest(token: string) {
   } satisfies MagicRequestRow & { magicLinkId: number };
 }
 
+const ALLOWED_EXTENSIONS = new Set([".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".webp"]);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 async function storeUploadedFiles(requestId: number, files: File[]) {
   const validFiles = files.filter((file) => file.size > 0);
   if (!validFiles.length) {
@@ -225,6 +228,17 @@ async function storeUploadedFiles(requestId: number, files: File[]) {
 
   for (const [index, file] of validFiles.entries()) {
     const extension = path.extname(file.name).replace(/[^a-zA-Z0-9.]/g, "").slice(0, 10);
+
+    if (!ALLOWED_EXTENSIONS.has(extension.toLowerCase())) {
+      console.warn(`[Visure Upload] Skipping file with disallowed extension: ${file.name}`);
+      continue;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      console.warn(`[Visure Upload] Skipping file exceeding size limit: ${file.name} (${file.size} bytes)`);
+      continue;
+    }
+
     const baseName =
       file.name
         .replace(/\.[^.]+$/, "")
