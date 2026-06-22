@@ -54,8 +54,8 @@ function TiltCard({
         x.set(0);
         y.set(0);
       }}
-      style={{ rotateX, rotateY, transformPerspective: 800 }}
-      className={className}
+      style={{ rotateX, rotateY, transformPerspective: 800, transformStyle: "preserve-3d" as const }}
+      className={`${className} [&_button]:relative [&_button]:z-10`}
     >
       {children}
     </motion.div>
