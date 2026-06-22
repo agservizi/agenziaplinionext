@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { serviceCategories, type ServiceCategory } from "@/lib/site-data";
@@ -245,11 +246,12 @@ export default function HomeServicesGrid() {
       </StaggerContainer>
 
       {/* ── Modal with boomerang spring effect ─── */}
+      {typeof document !== "undefined" && createPortal(
       <AnimatePresence>
         {selected && (
           <motion.div
             key="backdrop"
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-70 bg-black/40 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -269,7 +271,7 @@ export default function HomeServicesGrid() {
           return (
             <motion.div
               key="modal"
-              className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="pointer-events-none fixed inset-0 z-70 flex items-center justify-center p-4"
               initial={{ opacity: 0, scale: 0.4, y: 60, rotate: -2 }}
               animate={{
                 opacity: [0, 1, 1, 1],
@@ -393,6 +395,7 @@ export default function HomeServicesGrid() {
           );
         })()}
       </AnimatePresence>
+      , document.body)}
     </>
   );
 }
