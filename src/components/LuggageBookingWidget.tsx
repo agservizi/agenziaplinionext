@@ -358,10 +358,10 @@ export default function LuggageBookingWidget() {
 
   /* ── Trust stats ── */
   const trustItems = [
-    { icon: <ShieldIcon />, text: "Assicurazione inclusa" },
-    { icon: <CheckCircleIcon />, text: "Cancellazione gratuita" },
-    { icon: <ClockIcon />, text: "Deposito sicuro 24/7" },
-    { icon: <UsersIcon />, text: "Oltre 500 clienti" },
+    { icon: <ShieldIcon />, text: "Borse al sicuro" },
+    { icon: <CheckCircleIcon />, text: "Cancelli gratis" },
+    { icon: <ClockIcon />, text: "Orari flessibili" },
+    { icon: <UsersIcon />, text: "500+ clienti soddisfatti" },
   ];
 
   return (
@@ -417,7 +417,7 @@ export default function LuggageBookingWidget() {
                   letterSpacing: "-0.02em",
                 }}
               >
-                Deposito bagagli sicuro
+                Lascia le valigie da noi.
               </h2>
             </FadeUp>
 
@@ -430,14 +430,14 @@ export default function LuggageBookingWidget() {
                   backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee)",
                 }}
               >
-                a Castellammare di Stabia
+                Gira leggero.
               </p>
             </FadeUp>
 
             <FadeUp delay={0.3}>
               <p className="mt-4 text-sm text-white/50 sm:text-base">
-                Liberta di esplorare a partire da{" "}
-                <span className="font-semibold text-white/80">&euro;{dailyRate}/giorno</span>
+                Deposita le tue borse in agenzia e vai a goderti la giornata. Da{" "}
+                <span className="font-semibold text-white/80">&euro;{dailyRate} al giorno</span> per borsa.
               </p>
             </FadeUp>
           </div>
@@ -447,12 +447,12 @@ export default function LuggageBookingWidget() {
             <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:p-6">
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
                 {/* ── Field 1: Location ── */}
-                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex h-[72px] items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4">
                   <SearchIcon className="h-5 w-5 shrink-0 text-white/40" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Luogo</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Dove</p>
                     <p className="truncate text-sm font-medium text-white/80" title="AG SERVIZI - Via Plinio il Vecchio 72, Castellammare di Stabia">
-                      AG SERVIZI - Via Plinio il Vecchio 72
+                      Via Plinio il Vecchio 72
                     </p>
                   </div>
                   <LockIcon className="h-4 w-4 shrink-0 text-white/25" />
@@ -475,11 +475,11 @@ export default function LuggageBookingWidget() {
                     aria-expanded={dateOpen}
                     aria-haspopup="dialog"
                     aria-label="Seleziona date e orari di check-in e check-out"
-                    className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:border-white/20 hover:bg-white/8"
+                    className="flex h-[72px] w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
                   >
                     <CalendarIcon className="h-5 w-5 shrink-0 text-white/40" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Date e orari</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Quando</p>
                       <p className={`truncate text-sm font-medium ${hasDates ? "text-white/80" : "text-white/40"}`}>
                         {dateSummary}
                       </p>
@@ -505,7 +505,7 @@ export default function LuggageBookingWidget() {
                       ref={datePopoverRef}
                       role="dialog"
                       aria-label="Seleziona date e orari"
-                      className="absolute left-0 right-0 top-full z-50 mt-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[340px] md:left-auto md:right-auto md:w-[360px]"
+                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[340px] md:left-auto md:right-auto md:w-[360px]"
                     >
                       <div className="space-y-4">
                         {/* Check-in */}
@@ -606,11 +606,11 @@ export default function LuggageBookingWidget() {
                     aria-expanded={bagsOpen}
                     aria-haspopup="dialog"
                     aria-label="Seleziona numero e tipo di bagagli"
-                    className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:border-white/20 hover:bg-white/8"
+                    className="flex h-[72px] w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
                   >
                     <SuitcaseIcon className="h-5 w-5 shrink-0 text-white/40" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Bagagli</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Quanti</p>
                       <p className={`text-sm font-medium ${hasBags ? "text-white/80" : "text-white/40"}`}>
                         {bagsSummary}
                       </p>
@@ -626,7 +626,7 @@ export default function LuggageBookingWidget() {
                       ref={bagsPopoverRef}
                       role="dialog"
                       aria-label="Seleziona il numero di bagagli"
-                      className="absolute left-0 right-0 top-full z-50 mt-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[280px] md:left-auto md:right-0 md:w-[300px]"
+                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[280px] md:left-auto md:right-0 md:w-[300px]"
                     >
                       <div className="space-y-1">
                         <BagCounter
@@ -677,7 +677,7 @@ export default function LuggageBookingWidget() {
                   onClick={handleSubmit}
                   disabled={!isValid}
                   aria-label="Cerca deposito bagagli"
-                  className={`flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white transition-all duration-300 md:col-span-2 lg:col-span-1 ${
+                  className={`flex h-[72px] items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white transition-all duration-300 md:col-span-2 lg:col-span-1 ${
                     isValid
                       ? "bg-linear-to-r from-[#0066FF] to-[#0099FF] shadow-lg shadow-blue-500/25 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/35"
                       : "cursor-not-allowed bg-white/10 text-white/30"
