@@ -143,11 +143,25 @@ export default function RisultatiClient() {
           pricingJson.error?.message ?? "Impossibile caricare i prezzi.",
         );
       } else {
-        setPricing(pricingJson.data ?? pricingJson);
+        const p = pricingJson.data ?? pricingJson.pricing ?? pricingJson;
+        setPricing({
+          dailyRate: p.dailyRate ?? p.daily_rate ?? 1.95,
+          currency: p.currency ?? "EUR",
+          maxBagsPerBooking: p.maxBagsPerBooking ?? 10,
+          maxDaysAdvance: p.maxDaysAdvance ?? 30,
+          operatingHours: p.operatingHours ?? p.operating_hours ?? null,
+          capacity: p.capacity ?? 50,
+        });
       }
 
       if (availJson.success !== false) {
-        setAvailability(availJson.data ?? availJson);
+        const av = availJson.data ?? availJson.availability ?? availJson;
+        setAvailability({
+          date: av.date ?? checkin,
+          available: av.available ?? (av.availableBags > 0),
+          spotsLeft: av.spotsLeft ?? av.availableBags ?? 0,
+          capacity: av.capacity ?? 50,
+        });
       }
     } catch {
       setError("Servizio momentaneamente non disponibile.");
@@ -395,9 +409,9 @@ export default function RisultatiClient() {
                         <div>
                           <p className="text-xs text-slate-500">Orari</p>
                           <p className="text-sm font-medium text-white">
-                            {pricing
+                            {pricing?.operatingHours
                               ? `${pricing.operatingHours.open} - ${pricing.operatingHours.close}`
-                              : "--"}
+                              : "08:45 - 19:00"}
                           </p>
                         </div>
                       </div>
