@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { startTransition, useEffect, useState } from "react";
@@ -235,12 +236,13 @@ export default function Header() {
         <Container className="flex items-center justify-between py-3 sm:py-4 xl:py-5">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center">
-            <img
+            <Image
               src="/logo.png"
               alt="AG SERVIZI"
-              width={140}
-              height={36}
+              width={155}
+              height={32}
               className="h-8 w-auto"
+              priority
             />
             <span className="sr-only">AG SERVIZI</span>
           </Link>
@@ -586,7 +588,7 @@ export default function Header() {
             {/* Mobile header */}
             <div className="flex items-center justify-between">
               <Link href="/" onClick={() => setMobileOpen(false)} className="inline-flex">
-                <img src="/logo.png" alt="AG SERVIZI" width={120} height={32} className="h-7 w-auto brightness-0 invert" />
+                <Image src="/logo.png" alt="AG SERVIZI" width={135} height={28} className="h-7 w-auto brightness-0 invert" />
               </Link>
               <button
                 type="button"

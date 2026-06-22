@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 import { getWebAgencyServiceBySlug, webAgencyServiceDetails } from "@/lib/web-agency-services";
 
@@ -40,6 +41,12 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
   const isWebsiteProject = service.slug === "realizzazione-siti-web";
 
   return (
+    <>
+    <BreadcrumbJsonLd items={[
+      { name: "Servizi", href: "/servizi" },
+      { name: "Web Agency", href: "/servizi/web-agency" },
+      { name: service.title, href: `/servizi/web-agency/${service.slug}` },
+    ]} />
     <div className="pb-24">
       <section
         className={`relative overflow-hidden pt-40 pb-24 md:pb-28 text-white ${
@@ -274,5 +281,6 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
 
       </div>
     </div>
+    </>
   );
 }

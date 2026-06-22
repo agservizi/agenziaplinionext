@@ -1,4 +1,5 @@
 import PrenotaContent from "@/components/PrenotaContent";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
 export function generateMetadata() {
@@ -10,5 +11,10 @@ export function generateMetadata() {
 }
 
 export default function PrenotaPage() {
-  return <PrenotaContent />;
+  return (
+    <>
+      <PrenotaContent />
+      <BreadcrumbJsonLd items={[{ name: "Prenota", href: "/prenota" }]} />
+    </>
+  );
 }

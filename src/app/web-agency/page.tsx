@@ -1,4 +1,5 @@
 import { buildMetadata } from "@/lib/seo";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import WebAgencyShowcase from "@/components/WebAgencyShowcase";
 
 export function generateMetadata() {
@@ -11,5 +12,10 @@ export function generateMetadata() {
 }
 
 export default function WebAgencyShowcasePage() {
-  return <WebAgencyShowcase />;
+  return (
+    <>
+      <WebAgencyShowcase />
+      <BreadcrumbJsonLd items={[{ name: "Web Agency", href: "/web-agency" }]} />
+    </>
+  );
 }

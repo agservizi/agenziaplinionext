@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 import { energyServiceDetails, getEnergyServiceBySlug } from "@/lib/energy-services";
 
@@ -44,6 +45,12 @@ export default async function EnergyServiceDetailPage({ params }: EnergyServiceD
     .slice(0, 4);
 
   return (
+    <>
+    <BreadcrumbJsonLd items={[
+      { name: "Servizi", href: "/servizi" },
+      { name: "Energia", href: "/servizi/energia" },
+      { name: service.title, href: `/servizi/energia/${service.slug}` },
+    ]} />
     <div className="pb-24">
       <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
         <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
@@ -199,5 +206,6 @@ export default async function EnergyServiceDetailPage({ params }: EnergyServiceD
         </section>
       </div>
     </div>
+    </>
   );
 }

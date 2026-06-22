@@ -30,6 +30,7 @@ export const navigation = [
   { label: "Servizi", href: "/servizi" },
   { label: "Area Clienti", href: "/area-clienti" },
   { label: "Web Agency", href: "/web-agency" },
+  { label: "Consulenza", href: "/consulenza" },
   { label: "Contatti", href: "/contatti" },
 ];
 

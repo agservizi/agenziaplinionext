@@ -1,0 +1,6 @@
+node_modules
+.next
+deploy-out
+deploy-out.zip
+booking-backend/node_modules
+*.log

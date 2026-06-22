@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import AdminPortalLoginForm from "@/components/admin-area/AdminPortalLoginForm";
 
@@ -62,12 +63,13 @@ export default function AdminLoginPage() {
         {/* Logo */}
         <div>
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <img
+            <Image
               src="/logo.png"
               alt="AG SERVIZI"
-              width={140}
-              height={36}
+              width={155}
+              height={32}
               className="h-8 w-auto opacity-90 group-hover:opacity-100 transition"
+              priority
             />
           </Link>
         </div>
@@ -110,11 +112,11 @@ export default function AdminLoginPage() {
           {/* Logo (mobile only) */}
           <div className="flex justify-center lg:hidden">
             <Link href="/">
-              <img
+              <Image
                 src="/logo.png"
                 alt="AG SERVIZI"
-                width={120}
-                height={31}
+                width={135}
+                height={28}
                 className="h-7 w-auto"
               />
             </Link>

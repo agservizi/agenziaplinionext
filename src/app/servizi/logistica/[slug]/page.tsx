@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 import { getLogisticsServiceBySlug, logisticsServiceDetails } from "@/lib/logistics-services";
 
@@ -39,6 +40,12 @@ export default async function LogisticsServiceDetailPage({ params }: LogisticsSe
   const relatedServices = logisticsServiceDetails.filter((item) => item.slug !== service.slug).slice(0, 4);
 
   return (
+    <>
+    <BreadcrumbJsonLd items={[
+      { name: "Servizi", href: "/servizi" },
+      { name: "Logistica", href: "/servizi/logistica" },
+      { name: service.title, href: `/servizi/logistica/${service.slug}` },
+    ]} />
     <div className="pb-24">
       <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
         <Container className="space-y-5">
@@ -129,5 +136,6 @@ export default async function LogisticsServiceDetailPage({ params }: LogisticsSe
         </section>
       </div>
     </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import ServiziContent from "@/components/ServiziContent";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
 export function generateMetadata() {
@@ -11,5 +12,10 @@ export function generateMetadata() {
 }
 
 export default function ServiziPage() {
-  return <ServiziContent />;
+  return (
+    <>
+      <ServiziContent />
+      <BreadcrumbJsonLd items={[{ name: "Servizi", href: "/servizi" }]} />
+    </>
+  );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "@/components/Container";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 import { getPhoneServiceBySlug, phoneServiceDetails } from "@/lib/phone-services";
 
@@ -169,6 +170,12 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
       };
 
   return (
+    <>
+    <BreadcrumbJsonLd items={[
+      { name: "Servizi", href: "/servizi" },
+      { name: "Telefonia", href: "/servizi/telefonia" },
+      { name: service.title, href: `/servizi/telefonia/${service.slug}` },
+    ]} />
     <div className="pb-24">
       <section className={`hero-gradient pt-40 pb-16 text-white ${theme.heroBg}`}>
         <Container className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
@@ -343,5 +350,6 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
         </section>
       </div>
     </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -132,11 +133,11 @@ export default function PageTransitionOverlay() {
         }}
       >
         {/* Logo */}
-        <img
+        <Image
           src="/logo.png"
           alt=""
-          width={140}
-          height={36}
+          width={155}
+          height={32}
           style={{
             height: 32,
             width: "auto",

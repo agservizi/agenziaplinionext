@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Container from "./Container";
@@ -68,7 +69,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-5">
             <Link href="/" className="inline-flex">
-              <img src="/logo.png" alt="AG SERVIZI" className="h-9 w-auto" />
+              <Image src="/logo.png" alt="AG SERVIZI" width={174} height={36} className="h-9 w-auto" />
             </Link>
             <p className="text-sm leading-relaxed text-slate-400">
               Agenzia multiservizi a Castellammare di Stabia. Pagamenti, telefonia, energia, SPID, PEC e web agency. Dal 2016.
@@ -123,6 +124,18 @@ export default function Footer() {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                href="/prenota"
+                className="text-sm text-slate-400 transition hover:text-[#5E0ED7]"
+              >
+                Prenota
+              </Link>
+              <Link
+                href="/consulenza"
+                className="text-sm text-slate-400 transition hover:text-[#5E0ED7]"
+              >
+                Consulenza
+              </Link>
             </div>
           </div>
 

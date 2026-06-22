@@ -1,4 +1,5 @@
 import ConsulenzaContent from "@/components/ConsulenzaContent";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
 export function generateMetadata() {
@@ -11,5 +12,10 @@ export function generateMetadata() {
 }
 
 export default function ConsulenzaPage() {
-  return <ConsulenzaContent />;
+  return (
+    <>
+      <ConsulenzaContent />
+      <BreadcrumbJsonLd items={[{ name: "Consulenza", href: "/consulenza" }]} />
+    </>
+  );
 }

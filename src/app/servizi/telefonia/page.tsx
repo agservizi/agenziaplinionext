@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "@/components/Container";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { serviceCategories } from "@/lib/site-data";
 import { buildMetadata } from "@/lib/seo";
 import { phoneServiceDetails } from "@/lib/phone-services";
@@ -25,6 +26,11 @@ export default function TelefoniaPage() {
   };
 
   return (
+    <>
+    <BreadcrumbJsonLd items={[
+      { name: "Servizi", href: "/servizi" },
+      { name: "Telefonia", href: "/servizi/telefonia" },
+    ]} />
     <div className="pb-24">
       <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
         <Container className="grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center">
@@ -177,5 +183,6 @@ export default function TelefoniaPage() {
         </section>
       </div>
     </div>
+    </>
   );
 }

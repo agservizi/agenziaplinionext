@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
@@ -126,12 +127,13 @@ export default function AppShell({
             <div className="mx-auto flex w-full max-w-none items-center justify-between px-5 py-3.5 md:px-8 lg:px-12">
               <div className="inline-flex items-center gap-3">
                 <Link href="/" className="inline-flex items-center gap-3">
-                  <img
+                  <Image
                     src="/logo.png"
                     alt="AG SERVIZI"
-                    width={140}
-                    height={36}
+                    width={155}
+                    height={32}
                     className="h-8 w-auto"
+                    priority
                   />
                   <span className={`hidden text-xs font-semibold uppercase tracking-[0.2em] md:inline ${isAdminPlatform ? "text-slate-500" : "text-slate-300"}`}>
                     {platformLabel}

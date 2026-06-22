@@ -1,4 +1,5 @@
 import ChiSiamoContent from "@/components/ChiSiamoContent";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
 export function generateMetadata() {
@@ -11,5 +12,10 @@ export function generateMetadata() {
 }
 
 export default function ChiSiamoPage() {
-  return <ChiSiamoContent />;
+  return (
+    <>
+      <ChiSiamoContent />
+      <BreadcrumbJsonLd items={[{ name: "Chi siamo", href: "/chi-siamo" }]} />
+    </>
+  );
 }

@@ -1,4 +1,5 @@
 import ContattiContent from "@/components/ContattiContent";
+import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import FaqJsonLd from "@/components/seo/FaqJsonLd";
 import { buildMetadata } from "@/lib/seo";
 
@@ -16,6 +17,7 @@ export default function ContattiPage() {
     <>
       <ContattiContent />
       <FaqJsonLd />
+      <BreadcrumbJsonLd items={[{ name: "Contatti", href: "/contatti" }]} />
     </>
   );
 }

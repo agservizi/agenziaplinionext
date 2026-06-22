@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { company } from "@/lib/site-data";
 
@@ -7,7 +8,7 @@ export default function PlatformFooter() {
       <div className="mx-auto flex w-full max-w-none flex-col gap-4 px-6 py-5 text-sm text-slate-300 md:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-14">
         <div className="space-y-1">
           <Link href="/" className="inline-flex items-center">
-            <img src="/logo.png" alt="AG SERVIZI" className="h-9 w-auto" />
+            <Image src="/logo.png" alt="AG SERVIZI" width={174} height={36} className="h-9 w-auto" />
             <span className="sr-only">{company.name}</span>
           </Link>
           <p className="text-xs text-slate-400">
@@ -31,7 +32,7 @@ export default function PlatformFooter() {
             className="inline-flex items-center transition hover:opacity-90"
             aria-label="Hostinger referral"
           >
-            <img
+            <Image
               src="/hostinger_logo_white_fixed.png"
               alt="Hostinger"
               width={88}

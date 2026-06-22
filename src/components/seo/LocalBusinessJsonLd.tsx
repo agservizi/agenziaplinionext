@@ -183,33 +183,6 @@ export default function LocalBusinessJsonLd() {
         about: { "@id": `${SITE_URL}/#organization` },
         primaryImageOfPage: { "@id": `${SITE_URL}/#logo` },
         inLanguage: "it-IT",
-        breadcrumb: { "@id": `${SITE_URL}/#breadcrumb` },
-      },
-
-      /* ── BreadcrumbList (homepage) ───────────────────── */
-      {
-        "@type": "BreadcrumbList",
-        "@id": `${SITE_URL}/#breadcrumb`,
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: SITE_URL,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Servizi",
-            item: `${SITE_URL}/servizi`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: "Contatti",
-            item: `${SITE_URL}/contatti`,
-          },
-        ],
       },
 
       /* ── GeoShape (raggio di servizio) ───────────────── */
