@@ -94,6 +94,24 @@ function FadeUp({
   );
 }
 
+/* ─── Format ISO datetime to readable Italian ────────────────────── */
+
+function formatDateTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("it-IT", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 /* ─── Detail row helper ────────────────────────────────────────────── */
 
 function DetailRow({
@@ -373,13 +391,13 @@ export default function DepositDetailClient({ code }: { code: string }) {
               {deposit.expectedCheckIn && (
                 <DetailRow
                   label="Check-in previsto"
-                  value={deposit.expectedCheckIn}
+                  value={formatDateTime(deposit.expectedCheckIn)}
                 />
               )}
               {deposit.expectedCheckOut && (
                 <DetailRow
                   label="Check-out previsto"
-                  value={deposit.expectedCheckOut}
+                  value={formatDateTime(deposit.expectedCheckOut)}
                 />
               )}
               {deposit.actualCheckIn && (
@@ -402,30 +420,56 @@ export default function DepositDetailClient({ code }: { code: string }) {
               <div className="border-t border-white/10 pt-4">
                 <DetailRow
                   label="Tariffa giornaliera"
-                  value={`${deposit.dailyRate.toFixed(2).replace(".", ",")} ${deposit.currency}`}
+                  value={`${(deposit.dailyRate ?? 0).toFixed(2).replace(".", ",")} ${deposit.currency}`}
                 />
-                <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-                  <dt className="min-w-[140px] text-sm font-semibold text-slate-300">
-                    Totale
-                  </dt>
-                  <dd className="text-lg font-bold text-white">
-                    {deposit.totalAmount.toFixed(2).replace(".", ",")}{" "}
-                    {deposit.currency}
-                  </dd>
-                </div>
+                {(() => {
+                  const days = deposit.expectedCheckIn && deposit.expectedCheckOut
+                    ? Math.max(1, Math.round((new Date(deposit.expectedCheckOut).getTime() - new Date(deposit.expectedCheckIn).getTime()) / 86_400_000))
+                    : 1;
+                  const estimatedTotal = deposit.totalAmount > 0
+                    ? deposit.totalAmount
+                    : (deposit.dailyRate ?? 0) * deposit.bagCount * days;
+                  return (
+                    <>
+                      <DetailRow label="Giorni" value={`${days}`} />
+                      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
+                        <dt className="min-w-[140px] text-sm font-semibold text-slate-300">
+                          Totale stimato
+                        </dt>
+                        <dd className="text-lg font-bold text-white">
+                          {estimatedTotal.toFixed(2).replace(".", ",")}{" "}
+                          {deposit.currency}
+                        </dd>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
-              {/* QR token */}
+              {/* QR verification link */}
               {deposit.qrToken && (
                 <div className="border-t border-white/10 pt-4">
-                  <DetailRow
-                    label="QR Token"
-                    value={
-                      <code className="rounded-md bg-slate-800 px-2 py-1 text-xs text-cyan-400">
-                        {deposit.qrToken}
-                      </code>
-                    }
-                  />
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
+                    <dt className="min-w-[140px] text-sm font-medium text-slate-400">
+                      Verifica deposito
+                    </dt>
+                    <dd>
+                      <a
+                        href={`/deposito-bagagli/verifica?token=${deposit.qrToken}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#5E0ED7]/15 px-3 py-2 text-sm font-medium text-purple-300 ring-1 ring-[#5E0ED7]/30 transition hover:bg-[#5E0ED7]/25"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="7" height="7" />
+                          <rect x="14" y="3" width="7" height="7" />
+                          <rect x="3" y="14" width="7" height="7" />
+                          <rect x="14" y="14" width="7" height="7" />
+                        </svg>
+                        Apri pagina di verifica QR
+                      </a>
+                    </dd>
+                  </div>
                 </div>
               )}
             </dl>
