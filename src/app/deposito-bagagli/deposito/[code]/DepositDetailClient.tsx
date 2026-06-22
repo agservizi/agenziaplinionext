@@ -170,7 +170,7 @@ export default function DepositDetailClient({ code }: { code: string }) {
       setDeposit(data);
       setEditBagCount(data.bagCount);
       setEditBookingDate(data.bookingDate);
-      setEditNotes(data.notes);
+      setEditNotes(data.notes ?? "");
       setPageState("ready");
     } catch (err) {
       setPageState("error");
