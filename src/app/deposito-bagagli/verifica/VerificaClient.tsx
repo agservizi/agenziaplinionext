@@ -54,8 +54,7 @@ const STATUS_LABEL: Record<DepositStatus, string> = {
   NO_SHOW: "No show",
 };
 
-const VERIFY_API_BASE =
-  "https://coresuite.it/api/public/deposito-bagagli/verify";
+const VERIFY_API_BASE = "/api/deposito-bagagli/verify";
 
 /* ─── Detail row helper ────────────────────────────────────────────── */
 
