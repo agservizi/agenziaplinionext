@@ -154,11 +154,23 @@ export default function DepositDetailClient({ code }: { code: string }) {
         throw new Error(json.error?.message ?? "Errore nel caricamento.");
       }
 
-      const data: DepositDetail = json.data ?? json;
+      const raw = json.data ?? json;
+      const data: DepositDetail = {
+        ...raw,
+        depositCode: raw.depositCode ?? raw.code ?? code,
+        bagCount: Number(raw.bagCount ?? raw.bag_count ?? 0),
+        totalAmount: Number(raw.totalAmount ?? raw.total_amount ?? raw.total ?? 0),
+        currency: raw.currency ?? "EUR",
+        status: raw.status ?? "PRENOTATO",
+        bookingDate: raw.bookingDate ?? raw.booking_date ?? "",
+        customerName: raw.customerName ?? raw.customer_name ?? "",
+        customerEmail: raw.customerEmail ?? raw.customer_email ?? "",
+        notes: raw.notes ?? "",
+      };
       setDeposit(data);
       setEditBagCount(data.bagCount);
       setEditBookingDate(data.bookingDate);
-      setEditNotes(data.notes ?? "");
+      setEditNotes(data.notes);
       setPageState("ready");
     } catch (err) {
       setPageState("error");
