@@ -13,7 +13,7 @@ type PricingData = {
   currency: string;
   maxBagsPerBooking: number;
   maxDaysAdvance: number;
-  operatingHours: { open: string; close: string };
+  operatingHours: { open: string; close: string } | null;
   capacity: number;
 };
 
@@ -574,8 +574,8 @@ export default function RisultatiClient() {
                         />
                       </svg>
                       <span>
-                        Orari: {pricing.operatingHours.open} -{" "}
-                        {pricing.operatingHours.close}
+                        Orari: {pricing.operatingHours?.open ?? "08:45"} -{" "}
+                        {pricing.operatingHours?.close ?? "19:00"}
                       </span>
                     </div>
                   )}
