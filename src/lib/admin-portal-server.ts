@@ -51,8 +51,12 @@ function getServerEnv(key: string, fallback = "") {
 
 const adminPortalUsername = getServerEnv("STORE_ADMIN_USER", "");
 const adminPortalSessionSecret = getServerEnv("ADMIN_PORTAL_SESSION_SECRET", "");
-if (!adminPortalSessionSecret) {
-  throw new Error("FATAL: ADMIN_PORTAL_SESSION_SECRET is not set");
+
+function requireAdminSecret(): string {
+  if (!adminPortalSessionSecret) {
+    throw new Error("ADMIN_PORTAL_SESSION_SECRET is not set");
+  }
+  return adminPortalSessionSecret;
 }
 const localPhpApiOrigin = String(process.env.LOCAL_PHP_API_ORIGIN || "http://localhost:8089").replace(
   /\/$/,
@@ -64,7 +68,7 @@ export function verifyAdminPortalToken(token: string) {
   if (!payload || !signature) return null;
 
   const expectedSignature = crypto
-    .createHmac("sha256", adminPortalSessionSecret)
+    .createHmac("sha256", requireAdminSecret())
     .update(payload)
     .digest("base64url");
 
