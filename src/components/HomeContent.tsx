@@ -7,6 +7,7 @@ import Container from "./Container";
 import HomeServicesGrid from "./HomeServicesGrid";
 import HomeReviews from "./HomeReviews";
 import ClientAreaInteractiveHero from "./ClientAreaInteractiveHero";
+import LuggageBookingWidget from "./LuggageBookingWidget";
 import { values } from "@/lib/site-data";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -391,6 +392,11 @@ export default function HomeContent() {
           AREA CLIENTI — dark accent
       ═══════════════════════════════════════ */}
       <ClientAreaInteractiveHero />
+
+      {/* ═══════════════════════════════════════
+          Deposito Bagagli
+      ═══════════════════════════════════════ */}
+      <LuggageBookingWidget />
 
       {/* ═══════════════════════════════════════
           CTA FINALE — white premium
