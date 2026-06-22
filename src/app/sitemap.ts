@@ -29,6 +29,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/contatti",
     "/cookie-policy",
     "/privacy-policy",
+    "/deposito-bagagli",
+    "/deposito-bagagli/i-miei-depositi",
+    "/deposito-bagagli/verifica",
   ];
 
   const paymentRoutes = paymentServiceDetails.map(
@@ -75,21 +78,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const isBrandPage = path === "/chi-siamo";
     const isTopLevel = !isService && path.split("/").length <= 2;
 
+    const depositoPriority: Record<string, number> = {
+      "/deposito-bagagli": 0.8,
+      "/deposito-bagagli/i-miei-depositi": 0.5,
+      "/deposito-bagagli/verifica": 0.3,
+    };
+
     return {
       url,
       lastModified: now,
       changeFrequency: isHome ? "weekly" : isStrategicLeadPage ? "weekly" : isBrandPage ? "monthly" : "monthly",
-      priority: isHome
-        ? 1.0
-        : isStrategicLeadPage
-          ? 0.9
-          : isBrandPage
-            ? 0.8
-            : isService
+      priority: depositoPriority[path] != null
+        ? depositoPriority[path]
+        : isHome
+          ? 1.0
+          : isStrategicLeadPage
+            ? 0.9
+            : isBrandPage
               ? 0.8
-              : isTopLevel
-                ? 0.7
-                : 0.6,
+              : isService
+                ? 0.8
+                : isTopLevel
+                  ? 0.7
+                  : 0.6,
       images: [absoluteImageUrl("/og-default.svg")],
       alternates: {
         languages: {

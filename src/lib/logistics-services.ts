@@ -51,6 +51,28 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
       "Tempi e costi cambiano in base al paese e al periodo.",
     ],
   },
+  {
+    slug: "deposito-bagagli",
+    title: "Deposito bagagli",
+    shortDescription: "Prenota online il deposito bagagli e ritira in agenzia a Castellammare di Stabia.",
+    heroDescription:
+      "Devi lasciare le valigie per qualche ora? Prenota online, deposita in Via Plinio il Vecchio 72 e ritira quando vuoi. Paghi a giornata.",
+    customerBenefits: [
+      "Prenoti online in un minuto, senza chiamare.",
+      "Depositi e ritiri in agenzia, negli orari di apertura.",
+      "Paghi solo per i giorni di deposito.",
+    ],
+    requiredInfo: [
+      "Nome e cognome.",
+      "Email per la conferma.",
+      "Numero di borse o valigie.",
+      "Data del deposito.",
+    ],
+    notes: [
+      "Il deposito e disponibile negli orari di apertura dell'agenzia.",
+      "La tariffa e giornaliera, per borsa.",
+    ],
+  },
 ];
 
 export function getLogisticsServiceBySlug(slug: string) {
@@ -60,6 +82,7 @@ export function getLogisticsServiceBySlug(slug: string) {
 const logisticsSlugByCatalogTitle: Record<string, string> = {
   "Spedizioni nazionali": "spedizioni-nazionali",
   "Spedizioni internazionali": "spedizioni-internazionali",
+  "Deposito bagagli": "deposito-bagagli",
 };
 
 export function getLogisticsServiceSlugByCatalogTitle(title: string) {

@@ -16,9 +16,12 @@ export function generateMetadata() {
 
 export default function LogisticaPage() {
   const category = serviceCategories.find((item) => item.id === "logistica");
-  const cardLinksByTitle = Object.fromEntries(
-    logisticsServiceDetails.map((service) => [service.title, `/servizi/logistica/${service.slug}`]),
-  );
+  const cardLinksByTitle: Record<string, string> = {
+    ...Object.fromEntries(
+      logisticsServiceDetails.map((service) => [service.title, `/servizi/logistica/${service.slug}`]),
+    ),
+    "Deposito bagagli": "/deposito-bagagli",
+  };
 
   return (
     <>

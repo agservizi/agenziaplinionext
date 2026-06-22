@@ -110,6 +110,7 @@ export default function ContactForm({
           <option>Altri operatori energia</option>
           <option>Spedizioni nazionali</option>
           <option>Spedizioni internazionali</option>
+          <option>Deposito bagagli</option>
           <option>SPID</option>
           <option>PEC</option>
           <option>Firma Digitale</option>
