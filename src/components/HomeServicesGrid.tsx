@@ -247,6 +247,7 @@ export default function HomeServicesGrid() {
 
       {/* ── Modal with boomerang spring effect ─── */}
       {typeof document !== "undefined" && createPortal(
+      <>
       <AnimatePresence>
         {selected && (
           <motion.div
@@ -395,6 +396,7 @@ export default function HomeServicesGrid() {
           );
         })()}
       </AnimatePresence>
+      </>
       , document.body)}
     </>
   );
