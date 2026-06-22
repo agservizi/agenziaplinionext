@@ -11,9 +11,11 @@ type Tab = "login" | "register";
 export default function ClientLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/area-clienti";
+  const rawCallbackUrl = searchParams.get("callbackUrl") || "/area-clienti";
+  const callbackUrl = rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//") ? rawCallbackUrl : "/area-clienti";
+  const initialTab = searchParams.get("tab") === "register" ? "register" : "login";
 
-  const [tab, setTab] = useState<Tab>("login");
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -70,16 +72,13 @@ export default function ClientLoginForm() {
 
     setLoading(true);
     try {
-      const msg = await submitClientPortalRegistrationRequest({
+      await submitClientPortalRegistrationRequest({
         fullName: fullName.trim(),
         email: regEmail.trim(),
         password: regPassword,
       });
-      setSuccess(msg || "Richiesta inviata. Ti ricontatteremo entro 24 ore.");
-      setFullName("");
-      setRegEmail("");
-      setRegPassword("");
-      setRegConfirm("");
+      await loginClientPortal(regEmail.trim(), regPassword);
+      router.push(callbackUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registrazione non riuscita.");
     } finally {

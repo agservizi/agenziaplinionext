@@ -212,7 +212,7 @@ export default function ClientAreaInteractiveHero() {
                 transition={{ duration: 0.8, ease: EASE_CINEMATIC, delay: 0.1 }}
                 className="text-white"
               >
-                Gestisci tutto online,
+                Fai tutto da casa,
               </motion.div>
             </div>
             {/* Line 2 */}
@@ -232,7 +232,7 @@ export default function ClientAreaInteractiveHero() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  senza passare in sede
+                  ci pensiamo noi
                 </span>
               </motion.div>
             </div>
@@ -244,8 +244,8 @@ export default function ClientAreaInteractiveHero() {
             animate={isInView || noMotion ? { opacity: 1, y: 0 } : undefined}
             transition={{ duration: 0.7, ease: EASE_CINEMATIC, delay: 0.35 }}
           >
-            Un portale dedicato dove puoi inviare richieste, seguire le pratiche e
-            ricevere aggiornamenti in tempo reale.
+            Spedizioni, visure, CAF, consulenze e fotocopie. Apri la pratica da casa,
+            noi la portiamo avanti e ti aggiorniamo.
           </motion.p>
         </div>
 

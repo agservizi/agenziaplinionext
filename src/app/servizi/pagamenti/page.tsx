@@ -21,6 +21,7 @@ export default function PagamentiPage() {
     F24: "/servizi/pagamenti/f24",
     PagoPA: "/servizi/pagamenti/pagopa",
     "Tassa di possesso": "/servizi/pagamenti/bollo-auto",
+    "Versamento passaporto": "/servizi/pagamenti/versamento-passaporto",
   };
 
   return (

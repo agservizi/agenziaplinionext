@@ -166,7 +166,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Nessun messaggio ricevuto." }, { status: 400 });
   }
 
-  const pageContext = body.pathname ? `\n\n[L'utente si trova sulla pagina: ${body.pathname}]` : "";
+  const safePath = (body.pathname || "").replace(/[^a-zA-Z0-9/\-_]/g, "").slice(0, 100);
+  const pageContext = safePath ? `\n\n[L'utente si trova sulla pagina: ${safePath}]` : "";
 
   try {
     const response = await fetch(GROQ_API_URL, {

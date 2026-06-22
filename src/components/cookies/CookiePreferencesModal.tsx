@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { cookieCategories } from "@/lib/cookies";
 import { ConsentState, defaultConsent } from "@/lib/consent";
 import { useConsent } from "@/components/cookies/ConsentProvider";
@@ -43,17 +43,27 @@ export default function CookiePreferencesModal() {
   const [draft, setDraft] = useState<ConsentState | null>(null);
   const current = useMemo(() => consent ?? defaultConsent, [consent]);
 
+  const handleEscapeKey = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") closePreferences();
+  }, [closePreferences]);
+
   useEffect(() => {
     if (preferencesOpen) { setDraft(current); return; }
     setDraft(null);
   }, [current, preferencesOpen]);
+
+  useEffect(() => {
+    if (!preferencesOpen) return;
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, [preferencesOpen, handleEscapeKey]);
 
   if (!preferencesOpen) return null;
 
   const working = draft ?? current;
 
   return (
-    <div className="fixed inset-0 z-70 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-70 flex items-center justify-center px-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={closePreferences} />
 
       <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
@@ -109,7 +119,7 @@ export default function CookiePreferencesModal() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-semibold" style={{ color: "#0f172a" }}>{category.label}</p>
-                    <p className="text-[11px] leading-relaxed text-slate-500">{category.description}</p>
+                    <p className="text-[11px] leading-relaxed text-slate-600">{category.description}</p>
                   </div>
                   <button
                     type="button"

@@ -1,15 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-
 export default function Template({ children }: { children: React.ReactNode }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const, delay: 0.05 }}
-    >
+    <div className="animate-[fadeSlideIn_0.35s_cubic-bezier(0.22,1,0.36,1)_0.05s_both]">
       {children}
-    </motion.div>
+    </div>
   );
 }

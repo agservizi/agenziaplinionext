@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { company } from "@/lib/site-data";
 

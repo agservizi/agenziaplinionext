@@ -139,9 +139,9 @@ const ICON_COLORS = [
 ];
 
 const STEPS = [
-  { n: "01", title: "Analizziamo", desc: "Raccogliamo dati, obiettivi e consumi. Fotografia precisa della situazione, senza giri di parole.", accent: "text-[#5E0ED7]", border: "border-purple-100 bg-purple-50/50 hover:border-purple-200" },
-  { n: "02", title: "Proponiamo", desc: "Confronto tra soluzioni disponibili, preventivo chiaro. Nessuna pressione, scelta guidata.", accent: "text-[#22d3ee]", border: "border-cyan-100 bg-cyan-50/50 hover:border-cyan-200" },
-  { n: "03", title: "Supportiamo", desc: "Assistenza post-attivazione dedicata. Se c'è un problema, lo risolviamo. Stesso numero, stessa persona.", accent: "text-emerald-500", border: "border-emerald-100 bg-emerald-50/50 hover:border-emerald-200" },
+  { n: "01", title: "Ascoltiamo", desc: "Ci dici cosa ti serve, guardiamo i numeri e capiamo la situazione. Niente giri di parole.", accent: "text-[#5E0ED7]", border: "border-purple-100 bg-purple-50/50 hover:border-purple-200" },
+  { n: "02", title: "Proponiamo", desc: "Ti facciamo vedere le opzioni, ti diciamo i costi e i tempi. Poi scegli tu, con calma.", accent: "text-[#22d3ee]", border: "border-cyan-100 bg-cyan-50/50 hover:border-cyan-200" },
+  { n: "03", title: "Ci siamo dopo", desc: "Se qualcosa non va dopo l'attivazione, chiamaci. Stesso numero, stessa persona di prima.", accent: "text-emerald-500", border: "border-emerald-100 bg-emerald-50/50 hover:border-emerald-200" },
 ];
 
 export default function HomeContent() {
@@ -188,9 +188,9 @@ export default function HomeContent() {
             </TextReveal>
 
             <FadeUp delay={0.3}>
-              <p className="max-w-xl text-lg leading-relaxed text-slate-500">
-                Pagamenti, telefonia, energia, logistica, SPID, PEC e siti web.
-                Un unico punto, zero call center.
+              <p className="max-w-xl text-lg leading-relaxed text-slate-600">
+                Pagamenti, telefonia, energia, spedizioni, SPID, PEC e siti web.
+                Passa da noi, ti spieghiamo tutto.
               </p>
             </FadeUp>
 
@@ -242,8 +242,8 @@ export default function HomeContent() {
               </TextReveal>
             </div>
             <FadeUp delay={0.3}>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-500 md:text-base">
-                Un processo lineare, tempi chiari e un consulente reale dall&apos;inizio alla fine.
+              <p className="max-w-sm text-sm leading-relaxed text-slate-600 md:text-base">
+                Ti diciamo cosa facciamo, quanto ci vuole e quanto costa. Sempre la stessa persona, dall&apos;inizio alla fine.
               </p>
             </FadeUp>
           </div>
@@ -264,7 +264,7 @@ export default function HomeContent() {
                       <div className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] transition-transform duration-500 group-hover:scale-x-100" />
                       <p className={`text-6xl font-black leading-none ${step.accent} opacity-15`}>{step.n}</p>
                       <h3 className="mt-3 text-xl font-bold text-slate-900">{step.title}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-slate-500">{step.desc}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-slate-600">{step.desc}</p>
                     </div>
                   </div>
                 </ScaleCard>
@@ -292,7 +292,7 @@ export default function HomeContent() {
             </FadeUp>
             <TextReveal>
               <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
-                Un partner vero.
+                Sempre gli stessi.
               </h2>
             </TextReveal>
             <TextReveal delay={0.12}>
@@ -323,7 +323,7 @@ export default function HomeContent() {
                     {VALUE_ICONS[i]}
                   </div>
                   <h3 className="text-xl font-bold text-slate-900">{val.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-500">{val.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{val.description}</p>
                 </div>
               </ScaleCard>
             ))}
@@ -432,8 +432,8 @@ export default function HomeContent() {
             </TextReveal>
 
             <FadeUp delay={0.35}>
-              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-slate-500">
-                Consulenza gratuita, senza impegno. Portaci il problema e troviamo la soluzione.
+              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-slate-600">
+                Consulenza gratuita, senza impegno. Spiegaci cosa ti serve e ci pensiamo noi.
                 Dal 2016, ogni giorno.
               </p>
             </FadeUp>

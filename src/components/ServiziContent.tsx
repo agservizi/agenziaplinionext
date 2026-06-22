@@ -184,6 +184,8 @@ export default function ServiziContent() {
             loop
             muted
             playsInline
+            preload="none"
+            poster="/images/servizi-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >

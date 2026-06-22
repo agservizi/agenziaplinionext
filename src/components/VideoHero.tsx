@@ -184,6 +184,8 @@ export default function VideoHero({
           loop
           muted
           playsInline
+          preload="auto"
+          poster="/images/hero-poster.jpg"
           className="h-[120%] w-full object-cover"
           style={{ opacity: 0.45 }}
         >
@@ -226,7 +228,7 @@ export default function VideoHero({
           {/* Left column: heading + description */}
           <div className="max-w-3xl">
             {/* ── Massive heading with reveal ── */}
-            <div>
+            <h1 className="m-0 p-0">
               {headingWords.map((word, i) => (
                 <div key={word} className="overflow-hidden">
                   <motion.div
@@ -272,7 +274,7 @@ export default function VideoHero({
                   </motion.div>
                 </div>
               ))}
-            </div>
+            </h1>
 
             {/* ── Animated gradient line ── */}
             <motion.div

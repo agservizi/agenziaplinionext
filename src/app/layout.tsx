@@ -38,6 +38,9 @@ export default function RootLayout({
         <GeoMetaTags />
       </head>
       <body className="min-h-screen bg-slate-950 text-white antialiased">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:rounded-lg focus:bg-[#5E0ED7] focus:px-4 focus:py-2 focus:text-white focus:shadow-lg">
+          Vai al contenuto principale
+        </a>
         <Script id="consent-default" strategy="beforeInteractive">
           {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}

@@ -74,7 +74,10 @@ export async function GET() {
       active: Boolean(row.active),
     }));
 
-    return NextResponse.json({ ok: true, rules }, { status: 200 });
+    return NextResponse.json({ ok: true, rules }, {
+      status: 200,
+      headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" },
+    });
   } catch (error) {
     return NextResponse.json(
       {

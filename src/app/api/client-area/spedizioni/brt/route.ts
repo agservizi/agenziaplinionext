@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPool } from "@/lib/db";
+import { getPool, isTableEnsured, markTableEnsured } from "@/lib/db";
 import {
   createBrtOrmPickup,
   createBrtManifest,
@@ -28,6 +28,7 @@ function hasDatabaseConfig() {
 }
 
 async function ensureClientAreaRequestsTable() {
+  if (isTableEnsured("client_area_requests")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_requests (
@@ -46,9 +47,11 @@ async function ensureClientAreaRequestsTable() {
       KEY idx_client_area_requests_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_requests");
 }
 
 async function ensureClientAreaShipmentsTable() {
+  if (isTableEnsured("client_area_shipments")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_shipments (
@@ -64,9 +67,11 @@ async function ensureClientAreaShipmentsTable() {
       KEY idx_client_area_shipments_tracking (tracking_code)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_shipments");
 }
 
 async function ensureClientAreaPaymentsTable() {
+  if (isTableEnsured("client_area_payments")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_payments (
@@ -87,9 +92,11 @@ async function ensureClientAreaPaymentsTable() {
       KEY idx_client_area_payments_shipment (shipment_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_payments");
 }
 
 async function ensureClientAreaInvoicesTable() {
+  if (isTableEnsured("client_area_invoices")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_invoices (
@@ -110,6 +117,7 @@ async function ensureClientAreaInvoicesTable() {
       KEY idx_client_area_invoices_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_invoices");
 }
 
 function requireString(value: unknown) {
@@ -227,10 +235,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    await ensureClientAreaRequestsTable();
-    await ensureClientAreaShipmentsTable();
-    await ensureClientAreaPaymentsTable();
-    await ensureClientAreaInvoicesTable();
+    await Promise.all([
+      ensureClientAreaRequestsTable(),
+      ensureClientAreaShipmentsTable(),
+      ensureClientAreaPaymentsTable(),
+      ensureClientAreaInvoicesTable(),
+    ]);
 
     const pool = getPool();
     const taxableWeightKG = Math.max(payload.weightKG, volumetricWeightKG);

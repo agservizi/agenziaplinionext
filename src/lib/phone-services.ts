@@ -16,14 +16,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
   {
     slug: "iliad-space",
     title: "Iliad Space",
-    shortDescription: "Supporto su offerte iliad mobile e iliad fibra con assistenza in sede.",
+    shortDescription: "Ti aiutiamo a scegliere tra le offerte iliad mobile e fibra, direttamente in sede.",
     heroDescription:
-      "In sede ti supportiamo sia sulle offerte iliad per la telefonia mobile sia sull'attivazione iliad fibra, con verifica pratica dei requisiti e dei passaggi operativi.",
+      "Vieni in agenzia e vediamo insieme quale offerta iliad fa al caso tuo. Controlliamo la copertura, ti spieghiamo le differenze tra i piani e gestiamo la pratica.",
     customerBenefits: [
-      "Analisi guidata delle offerte mobile iliad (bundle voce/SMS/dati e opzioni disponibili).",
-      "Verifica copertura e fattibilità per iliad fibra FTTH prima dell'attivazione.",
-      "Supporto pratico sul vantaggio Fibra + Mobile quando applicabile.",
-      "Assistenza locale su portabilità numero e passaggi amministrativi iniziali.",
+      "Ti spieghiamo le offerte mobile iliad e quale conviene per come usi il telefono.",
+      "Controlliamo se la fibra FTTH arriva al tuo indirizzo prima di procedere.",
+      "Se hai gia il mobile iliad, vediamo se conviene aggiungere la fibra.",
+      "Gestiamo la portabilita del numero e i documenti.",
     ],
     requiredInfo: [
       "Documento di identità valido.",
@@ -60,14 +60,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     slug: "windtre",
     title: "WindTre",
     shortDescription:
-      "Supporto completo su offerte WindTre mobile e rete fissa/fibra con assistenza in sede.",
+      "Mobile, casa e fibra WindTre. Ti aiutiamo a scegliere e gestiamo tutto noi.",
     heroDescription:
-      "Ti assistiamo nella scelta e attivazione delle offerte WindTre per telefonia mobile e connessione casa, con verifica pratica di copertura, portabilità e documentazione.",
+      "Ci dici come usi il telefono e internet, noi ti facciamo vedere le offerte WindTre che hanno senso. Poi gestiamo portabilita, documenti e attivazione.",
     customerBenefits: [
-      "Confronto guidato tra offerte mobile WindTre in base a minuti, GB e priorità d'uso.",
-      "Verifica preliminare copertura per linea fissa/fibra prima di avviare la pratica.",
-      "Assistenza su portabilità numero mobile e migrazione linea fissa.",
-      "Supporto locale su passaggi operativi, tempistiche e attivazione servizi inclusi.",
+      "Confrontiamo le offerte mobile in base a quanto navighi e chiami.",
+      "Controlliamo la copertura fibra al tuo indirizzo prima di partire.",
+      "Ci occupiamo noi della portabilita e della migrazione della linea fissa.",
+      "Ti diciamo i tempi reali e seguiamo la pratica fino all'attivazione.",
     ],
     requiredInfo: [
       "Documento di identità valido.",
@@ -104,14 +104,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     slug: "fastweb",
     title: "Fastweb",
     shortDescription:
-      "Supporto completo su offerte Fastweb mobile e internet casa con assistenza in sede.",
+      "Offerte Fastweb mobile e internet casa. Vediamo insieme cosa conviene.",
     heroDescription:
-      "Ti accompagniamo nella scelta delle offerte Fastweb per linea mobile e connettività casa/ufficio, con supporto pratico su copertura, migrazione e attivazione.",
+      "Portiamo avanti la pratica Fastweb per te: scelta piano, verifica copertura, portabilita e attivazione. Tu ci dici cosa ti serve, al resto pensiamo noi.",
     customerBenefits: [
-      "Analisi guidata delle opzioni Fastweb mobile in base a consumo dati e uso quotidiano.",
-      "Valutazione delle offerte internet casa con verifica preliminare della copertura disponibile.",
-      "Assistenza su portabilità numero e migrazione linea fissa da altro operatore.",
-      "Supporto locale su documentazione, passaggi tecnici e tempi stimati di attivazione.",
+      "Ti facciamo vedere le offerte mobile in base a quanti giga usi davvero.",
+      "Controlliamo che tipo di fibra arriva a casa tua prima di procedere.",
+      "Gestiamo portabilita del numero e migrazione da altro operatore.",
+      "Ti aggiorniamo su tempi e stato della pratica fino all'attivazione.",
     ],
     requiredInfo: [
       "Documento di identità valido.",
@@ -144,14 +144,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     slug: "very-mobile",
     title: "Very Mobile",
     shortDescription:
-      "Supporto Very Mobile per attivazioni SIM, offerte dati e portabilità numero.",
+      "Attivazione SIM Very Mobile e portabilita del numero, con assistenza in sede.",
     heroDescription:
-      "Gestiamo attivazioni Very Mobile con assistenza su scelta tariffa, passaggi operativi e portabilità del numero.",
+      "Vuoi passare a Very Mobile? Vieni in agenzia: ti aiutiamo a scegliere il piano giusto, controlliamo i dati e facciamo partire la pratica.",
     customerBenefits: [
-      "Procedura guidata per attivazione nuova SIM o cambio operatore verso Very.",
-      "Supporto nel confronto tra offerte in base al profilo di utilizzo dati/voce.",
-      "Assistenza locale per ridurre errori su ICCID e dati anagrafici.",
-      "Verifica pratica dei passaggi chiave prima di confermare la richiesta.",
+      "Ti guidiamo nell'attivazione, sia per nuova SIM che per cambio operatore.",
+      "Confrontiamo le offerte in base a come usi voce e dati.",
+      "Controlliamo ICCID e documenti per evitare errori nella portabilita.",
+      "Verifichiamo tutto insieme prima di confermare.",
     ],
     requiredInfo: [
       "Documento di identità valido.",
@@ -179,14 +179,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     slug: "ho-mobile",
     title: "Ho. Mobile",
     shortDescription:
-      "Assistenza su offerte ho. Mobile, attivazione SIM e passaggio operatore.",
+      "Attivazione ho. Mobile e portabilita numero. Ci pensiamo noi in sede.",
     heroDescription:
-      "Ti supportiamo nelle pratiche ho. Mobile: dalla scelta dell'offerta all'attivazione e alla portabilità del numero.",
+      "Vuoi attivare ho. Mobile o portare il tuo numero? Vieni da noi, controlliamo i dati e avviamo la pratica. Ci metti pochi minuti.",
     customerBenefits: [
-      "Supporto operativo rapido per nuova SIM o passaggio da altro operatore.",
-      "Verifica guidata dei dati richiesti prima dell'invio pratica.",
-      "Assistenza locale su attivazione, tempistiche e primi step post-attivazione.",
-      "Aiuto nella lettura delle condizioni principali dell'offerta scelta.",
+      "Nuova SIM o cambio operatore, lo facciamo direttamente in sede.",
+      "Controlliamo documenti e dati prima di inviare la richiesta.",
+      "Ti diciamo i tempi reali di attivazione e cosa fare dopo.",
+      "Se hai dubbi sulle condizioni dell'offerta, te le spieghiamo.",
     ],
     requiredInfo: [
       "Documento di identità valido.",
@@ -218,14 +218,14 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     slug: "digi-mobile",
     title: "Digi Mobile",
     shortDescription:
-      "Supporto su offerte DIGI Mobil, attivazione SIM e portabilità numero.",
+      "Attivazione DIGI Mobil e portabilita numero, con assistenza in agenzia.",
     heroDescription:
-      "Ti seguiamo nelle pratiche DIGI Mobil con assistenza locale su attivazione, scelta piano e trasferimento numero.",
+      "Ti aiutiamo ad attivare DIGI Mobil: scegliamo il piano giusto, controlliamo i documenti e seguiamo la pratica. Se qualcosa non va dopo, ci trovi sempre qui.",
     customerBenefits: [
-      "Assistenza in sede su attivazione e configurazione iniziale della linea.",
-      "Supporto nella scelta del piano in base alle esigenze reali di utilizzo.",
-      "Aiuto operativo su portabilità numero e controllo dati richiesti.",
-      "Punto di riferimento locale per chiarimenti e supporto post-attivazione.",
+      "Attivazione e configurazione della linea, fatta insieme in sede.",
+      "Ti consigliamo il piano in base a come usi il telefono davvero.",
+      "Controlliamo i dati per la portabilita prima di confermare.",
+      "Se hai un problema dopo l'attivazione, ci trovi allo stesso numero.",
     ],
     requiredInfo: [
       "Documento di identità valido.",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useMotionValue, useInView, animate } from "framer-motion";
+import { useMotionValue, useInView, animate, useReducedMotion } from "framer-motion";
 
 function parseValue(value: string | number): {
   from: number;
@@ -22,9 +22,10 @@ export default function AnimatedCounter({ value }: { value: string | number }) {
   const parsed = parseValue(value);
   const motionValue = useMotionValue(parsed?.from ?? 0);
   const isInView = useInView(ref, { once: true });
+  const reduced = useReducedMotion();
 
   useEffect(() => {
-    if (!isInView || !parsed) return;
+    if (!isInView || !parsed || reduced) return;
     if (ref.current) {
       ref.current.textContent = parsed.prefix + parsed.from + parsed.suffix;
     }
@@ -40,7 +41,7 @@ export default function AnimatedCounter({ value }: { value: string | number }) {
     });
     return controls.stop;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInView]);
+  }, [isInView, reduced]);
 
   if (!parsed) {
     return <>{value}</>;

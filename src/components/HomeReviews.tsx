@@ -184,7 +184,7 @@ export default function HomeReviews() {
           <SectionHeading
             eyebrow="Recensioni clienti"
             title="Cosa dicono di noi"
-            description="Tutte le recensioni Google verificate dei nostri clienti a Castellammare di Stabia."
+            description="Le recensioni dei clienti che passano in agenzia. Tutte verificate su Google."
             tone="dark"
             align="center"
           />
@@ -199,7 +199,7 @@ export default function HomeReviews() {
               ))}
             </div>
             <p className="text-2xl font-bold text-slate-900">5.0</p>
-            <p className="flex items-center gap-1.5 text-sm text-slate-500">
+            <p className="flex items-center gap-1.5 text-sm text-slate-600">
               <GoogleLogo />
               su Google · {reviews.length} recensioni verificate
             </p>
@@ -247,7 +247,7 @@ export default function HomeReviews() {
                   </div>
 
                   {/* Text */}
-                  <p className="flex-1 text-sm leading-relaxed text-slate-500">
+                  <p className="flex-1 text-sm leading-relaxed text-slate-600">
                     {review.text ? `"${review.text}"` : (
                       <span className="italic text-slate-400">Recensione con 5 stelle.</span>
                     )}
@@ -283,8 +283,8 @@ export default function HomeReviews() {
         {/* CTA */}
         <Reveal delay={0.1}>
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-sm text-slate-500">
-              La tua esperienza con AG SERVIZI è stata positiva?
+            <p className="text-sm text-slate-600">
+              Sei stato da noi? Raccontalo su Google.
             </p>
             <a
               href="https://www.google.com/maps/place/AG+SERVIZI+VIA+PLINIO+72+DI+CAVALIERE+CARMINE/@40.7004667,14.4853708,17z/data=!3m1!5s0x133bbd4640846007:0x127e51d71a00ab80!4m6!3m5!1s0x133bbd463f76daab:0xcb56bc8d70daedc5!8m2!3d40.7004667!4d14.4853708!16s%2Fg%2F11cn8yvt32?entry=ttu&g_ep=EgoyMDI2MDQxMi4wIKXMDSoASAFQAw%3D%3D"

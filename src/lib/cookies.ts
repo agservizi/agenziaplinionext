@@ -5,25 +5,25 @@ export const cookieCategories = [
     key: "necessary",
     label: "Cookie tecnici",
     description:
-      "Necessari per il corretto funzionamento del sito e non disattivabili.",
+      "Servono a far funzionare il sito. Non si possono disattivare.",
   },
   {
     key: "preferences",
     label: "Cookie di preferenza",
     description:
-      "Memorizzano scelte e preferenze per migliorare l’esperienza utente.",
+      "Ricordano le tue scelte (es. lingua, impostazioni) per non doverle ripetere.",
   },
   {
     key: "analytics",
     label: "Cookie statistici / analytics",
     description:
-      "Utilizzati per analizzare l’utilizzo del sito e migliorare i contenuti.",
+      "Ci dicono quante persone visitano il sito e quali pagine guardano di piu.",
   },
   {
     key: "marketing",
     label: "Cookie di marketing / profilazione",
     description:
-      "Usati per personalizzare contenuti e misurare campagne marketing.",
+      "Servono a mostrarti contenuti e annunci piu rilevanti per te.",
   },
 ] as const;
 

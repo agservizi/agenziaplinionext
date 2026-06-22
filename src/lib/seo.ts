@@ -4,7 +4,7 @@ import { company } from "@/lib/site-data";
 export const SITE_URL =
   (process.env.NEXT_PUBLIC_SITE_URL ?? "https://agenziaplinio.it").replace(/\/+$/, "");
 export const SITE_NAME = "AG SERVIZI";
-export const DEFAULT_OG_IMAGE = "/og-default.svg";
+export const DEFAULT_OG_IMAGE = "/og-default.png";
 export const DEFAULT_LOCALE = "it_IT";
 export const DEFAULT_LANGUAGE = "it-IT";
 export const DEFAULT_KEYWORDS = [
@@ -160,7 +160,7 @@ export function buildMetadata({
 
 export function buildRootMetadata(): Metadata {
   const description =
-    "AG SERVIZI è un'agenzia di servizi a Castellammare di Stabia specializzata in consulenze per telefonia, energia elettrica e gas, spedizioni, SPID, PEC, visure e soluzioni digitali su misura.";
+    "AG SERVIZI a Castellammare di Stabia: consulenze telefonia, energia, SPID, PEC, spedizioni, visure, CAF e siti web. Vieni in Via Plinio 72 o scrivici su WhatsApp.";
 
   return {
     metadataBase: new URL(SITE_URL),

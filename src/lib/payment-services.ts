@@ -12,13 +12,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "bollettini-postali",
     title: "Bollettini postali",
-    shortDescription: "Pagamento bollettini bianchi e premarcati in sede, con ricevuta immediata.",
+    shortDescription: "Porti il bollettino, lo compiliamo e lo paghi in sede. Ricevuta subito.",
     heroDescription:
-      "Gestiamo il pagamento di bollettini postali bianchi e premarcati con verifica dei dati principali prima della conferma.",
+      "Portaci il bollettino, bianco o premarcato. Lo compiliamo insieme, controlliamo i dati e lo paghi direttamente. Ricevuta in mano.",
     customerBenefits: [
-      "Supporto nella compilazione dei campi principali.",
-      "Conferma operazione e ricevuta al termine del pagamento.",
-      "Servizio utile per utenze, contributi e versamenti ricorrenti.",
+      "Se non sai come compilarlo, lo facciamo noi.",
+      "Ti diamo la ricevuta subito, da conservare.",
+      "Utenze, contributi, affitti, versamenti ricorrenti: li gestiamo tutti.",
     ],
     requiredInfo: [
       "Bollettino cartaceo o dati del bollettino.",
@@ -33,13 +33,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "pagopa",
     title: "Bollettini PagoPA",
-    shortDescription: "Pagamento avvisi PagoPA verso enti pubblici e soggetti aderenti.",
+    shortDescription: "Multe, tasse, ticket sanitari. Porti l'avviso PagoPA e lo paghi qui.",
     heroDescription:
-      "Puoi pagare avvisi PagoPA per tasse, tributi, multe, ticket e altri servizi verso Pubblica Amministrazione ed enti aderenti.",
+      "Hai un avviso PagoPA? Portalo in agenzia. Lo paghiamo in pochi minuti e ti diamo subito la ricevuta. Niente app, niente SPID.",
     customerBenefits: [
-      "Procedura guidata con controllo codice avviso.",
-      "Ricevuta pagamento rilasciata subito.",
-      "Supporto in sede per evitare errori di digitazione.",
+      "Controlliamo il codice avviso e l'importo prima di pagare.",
+      "Ricevuta in mano subito dopo il pagamento.",
+      "Se il codice non funziona o hai dubbi sull'ente, ci pensiamo noi.",
     ],
     requiredInfo: [
       "Avviso PagoPA (cartaceo o digitale).",
@@ -54,13 +54,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "f24",
     title: "Deleghe F24",
-    shortDescription: "Pagamento F24 per imposte, contributi e altri adempimenti fiscali.",
+    shortDescription: "Porti il modello F24 compilato, controlliamo i dati e lo paghiamo in sede.",
     heroDescription:
-      "Eseguiamo pagamenti tramite modello F24 per imposte e contributi, con verifica preliminare della delega prima dell'invio.",
+      "Portaci il tuo F24. Controlliamo che i dati siano corretti e lo paghiamo. Ricevuta per il tuo archivio.",
     customerBenefits: [
-      "Supporto sulla correttezza dei dati inseriti nel modello.",
-      "Gestione operativa più rapida in un unico punto.",
-      "Ricevuta utile per archivio personale o aziendale.",
+      "Diamo un'occhiata ai dati prima di pagare, per sicurezza.",
+      "Lo fai in un unico posto, senza passare dalla banca.",
+      "Ti diamo la ricevuta da tenere per il commercialista.",
     ],
     requiredInfo: [
       "Modello F24 compilato.",
@@ -75,13 +75,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "bollettini-bancari",
     title: "Bollettini bancari",
-    shortDescription: "Pagamento bollettini verso fatturatori con IBAN bancario o postale.",
+    shortDescription: "Pagamento con IBAN o coordinate bancarie. Controlliamo i dati insieme.",
     heroDescription:
-      "Gestiamo pagamenti verso beneficiari con coordinate bancarie o postali, con controllo dati e conferma dell'operazione.",
+      "Devi pagare qualcosa con un IBAN? Portaci il foglio con i dati. Controlliamo causale e coordinate e facciamo il pagamento.",
     customerBenefits: [
-      "Assistenza in sede nella lettura dei riferimenti pagamento.",
-      "Riduzione errori su causale e dati beneficiario.",
-      "Ricevuta immediata da conservare.",
+      "Se non capisci i riferimenti sul foglio, te li spieghiamo.",
+      "Controlliamo IBAN e causale prima di pagare.",
+      "Ricevuta subito, da conservare.",
     ],
     requiredInfo: [
       "Documento di pagamento con IBAN e riferimenti.",
@@ -96,13 +96,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "mav-rav",
     title: "Bollettini MAV e RAV",
-    shortDescription: "Pagamento avvisi MAV e RAV con assistenza operativa in agenzia.",
+    shortDescription: "Porti il MAV o il RAV, controlliamo il codice e lo paghi in agenzia.",
     heroDescription:
-      "Eseguiamo pagamenti MAV e RAV verificando i riferimenti principali prima della conferma dell'operazione.",
+      "Hai un MAV o un RAV da pagare? Portalo da noi. Controlliamo il codice avviso e l'importo, e lo paghiamo in pochi minuti.",
     customerBenefits: [
-      "Supporto diretto per identificare correttamente il codice avviso.",
-      "Pagamento rapido senza procedure online complesse.",
-      "Ricevuta rilasciata a fine operazione.",
+      "Se non trovi il codice avviso, ti aiutiamo a identificarlo.",
+      "Lo paghi qui, senza dover andare online o in banca.",
+      "Ricevuta in mano a fine operazione.",
     ],
     requiredInfo: [
       "Avviso MAV/RAV.",
@@ -117,13 +117,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "bollo-auto",
     title: "Bollo auto",
-    shortDescription: "Pagamento bollo auto con verifica dei dati veicolo e scadenza.",
+    shortDescription: "Paghi il bollo auto in agenzia. Basta la targa.",
     heroDescription:
-      "Puoi pagare il bollo auto in agenzia con supporto sul controllo dati principali del veicolo e dell'annualità di riferimento.",
+      "Porta la targa, controlliamo l'annualita e l'importo, e paghi il bollo auto direttamente in sede. Pochi minuti.",
     customerBenefits: [
-      "Pagamento assistito senza passaggi complessi.",
-      "Controllo operativo dei dati prima della conferma.",
-      "Ricevuta utile per archivio personale.",
+      "Non devi fare niente online, lo fai qui.",
+      "Controlliamo targa, importo e annualita prima di confermare.",
+      "Ricevuta da conservare.",
     ],
     requiredInfo: [
       "Targa del veicolo.",
@@ -138,13 +138,13 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
   {
     slug: "bonifici",
     title: "Bonifici bancari",
-    shortDescription: "Supporto in sede per disposizioni di bonifico con controllo dati.",
+    shortDescription: "Devi fare un bonifico? Controlliamo IBAN e causale e lo facciamo insieme.",
     heroDescription:
-      "Ti assistiamo nella disposizione di bonifici con verifica dei dati principali del beneficiario e della causale.",
+      "Portaci i dati del beneficiario. Controlliamo l'IBAN, la causale e l'importo prima di inviare. Se qualcosa non ti torna, ne parliamo.",
     customerBenefits: [
-      "Controllo operativo dei campi essenziali prima dell'invio.",
-      "Maggiore tranquillità per importi importanti.",
-      "Supporto locale in caso di dubbi sui dati.",
+      "Controlliamo IBAN, intestatario e causale prima di confermare.",
+      "Se l'importo e alto e vuoi essere sicuro, facciamo tutto con calma.",
+      "Se hai dubbi su un dato, ti aiutiamo a verificarlo.",
     ],
     requiredInfo: [
       "IBAN beneficiario.",
@@ -154,6 +154,27 @@ export const paymentServiceDetails: PaymentServiceDetail[] = [
     notes: [
       "I tempi di accredito dipendono dal circuito bancario.",
       "Controlla sempre IBAN e intestatario prima della conferma.",
+    ],
+  },
+  {
+    slug: "versamento-passaporto",
+    title: "Versamento passaporto",
+    shortDescription: "Pagamento del bollettino per rilascio o rinnovo del passaporto, direttamente in sede.",
+    heroDescription:
+      "Devi fare il versamento per il passaporto? Vieni in agenzia con un documento. Paghiamo il bollettino e ti diamo la ricevuta da portare in Questura.",
+    customerBenefits: [
+      "Non devi cercare l'importo o il conto corrente, lo sappiamo gia.",
+      "Paghiamo il bollettino e ti diamo subito la ricevuta.",
+      "Se hai dubbi su cosa serve per la richiesta del passaporto, ti diamo le indicazioni.",
+    ],
+    requiredInfo: [
+      "Documento di identita valido.",
+      "Codice fiscale.",
+      "Dati per la compilazione del bollettino (te li forniamo noi se non li hai).",
+    ],
+    notes: [
+      "L'importo del versamento e stabilito dal Ministero e puo variare.",
+      "Conserva la ricevuta: serve per la pratica in Questura o al Comune.",
     ],
   },
 ];
@@ -168,6 +189,7 @@ const paymentSlugByCatalogTitle: Record<string, string> = {
   F24: "f24",
   PagoPA: "pagopa",
   "Tassa di possesso": "bollo-auto",
+  "Versamento passaporto": "versamento-passaporto",
 };
 
 export function getPaymentServiceSlugByCatalogTitle(title: string) {

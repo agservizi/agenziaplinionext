@@ -1,17 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { startTransition, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Container from "./Container";
-import PublicBookingDrawer from "./PublicBookingDrawer";
+
+const PublicBookingDrawer = dynamic(() => import("./PublicBookingDrawer"), { ssr: false });
 import { navigation } from "@/lib/site-data";
 import {
   fetchClientPortalProfile,
   getClientPortalToken,
   clearClientPortalToken,
   loginClientPortal,
+  submitClientPortalRegistrationRequest,
 } from "@/lib/client-portal-auth";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
@@ -32,6 +35,14 @@ export default function Header() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [dropdownView, setDropdownView] = useState<"login" | "register">("login");
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirm, setRegConfirm] = useState("");
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState("");
+  const [regSuccess, setRegSuccess] = useState("");
   const primaryNavigation = navigation.filter((item) => item.href !== "/area-clienti");
   const clientAreaCta = clientSessionValid
     ? { href: "/area-clienti", label: clientFullName || "Area clienti" }
@@ -164,6 +175,46 @@ export default function Header() {
     }
   }
 
+  async function handleInlineRegister(e: React.FormEvent) {
+    e.preventDefault();
+    setRegError("");
+    setRegSuccess("");
+    if (!regName.trim() || !regEmail.trim() || !regPassword) {
+      setRegError("Compila tutti i campi.");
+      return;
+    }
+    if (regPassword !== regConfirm) {
+      setRegError("Le password non coincidono.");
+      return;
+    }
+    if (regPassword.length < 8) {
+      setRegError("La password deve avere almeno 8 caratteri.");
+      return;
+    }
+    setRegLoading(true);
+    try {
+      await submitClientPortalRegistrationRequest({
+        fullName: regName.trim(),
+        email: regEmail.trim(),
+        password: regPassword,
+      });
+      const token = await loginClientPortal(regEmail.trim(), regPassword);
+      const profile = await fetchClientPortalProfile(token);
+      setClientSessionValid(true);
+      setClientFullName((profile.profile.fullName || "").trim());
+      setRegName("");
+      setRegEmail("");
+      setRegPassword("");
+      setRegConfirm("");
+      setAvatarOpen(false);
+      router.push("/area-clienti");
+    } catch (err) {
+      setRegError(err instanceof Error ? err.message : "Registrazione non riuscita.");
+    } finally {
+      setRegLoading(false);
+    }
+  }
+
   return (
     <>
       {/* ── Header ── */}
@@ -266,6 +317,8 @@ export default function Header() {
                   useDarkText ? "hover:bg-slate-100" : "hover:bg-white/10"
                 }`}
                 aria-label={clientSessionValid ? "Menu utente" : "Accedi"}
+                aria-expanded={avatarOpen}
+                aria-haspopup="true"
               >
                 <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${
                   clientSessionValid
@@ -350,55 +403,134 @@ export default function Header() {
                         </div>
                       </>
                     ) : (
-                      <form onSubmit={handleInlineLogin} className="p-4 pb-5">
-                        <p className="mb-3 text-sm font-semibold text-slate-900">Accedi all&apos;area clienti</p>
-                        <div className="space-y-2.5">
-                          <input
-                            type="text"
-                            placeholder="Email o username"
-                            value={loginEmail}
-                            onChange={(e) => setLoginEmail(e.target.value)}
-                            autoComplete="username"
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
-                            required
-                          />
-                          <input
-                            type="password"
-                            placeholder="Password"
-                            value={loginPassword}
-                            onChange={(e) => setLoginPassword(e.target.value)}
-                            autoComplete="current-password"
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
-                            required
-                          />
-                        </div>
-                        {loginError && (
-                          <p className="mt-2 text-xs text-red-600">{loginError}</p>
+                      <div className="p-4 pb-5">
+                        {dropdownView === "login" ? (
+                          <form onSubmit={handleInlineLogin}>
+                            <p className="mb-3 text-sm font-semibold text-slate-900">Accedi all&apos;area clienti</p>
+                            <div className="space-y-2.5">
+                              <input
+                                type="text"
+                                placeholder="Email o username"
+                                aria-label="Email o username"
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                autoComplete="username"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                              <input
+                                type="password"
+                                placeholder="Password"
+                                aria-label="Password"
+                                value={loginPassword}
+                                onChange={(e) => setLoginPassword(e.target.value)}
+                                autoComplete="current-password"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                            </div>
+                            {loginError && (
+                              <p className="mt-2 text-xs text-red-600">{loginError}</p>
+                            )}
+                            <label className="mt-3 flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                defaultChecked
+                                className="h-4 w-4 rounded border-slate-300 text-[#5E0ED7] accent-[#5E0ED7]"
+                              />
+                              <span className="text-xs text-slate-600">Ricorda l&apos;accesso</span>
+                            </label>
+                            <button
+                              type="submit"
+                              disabled={loginLoading}
+                              className="mt-3 w-full rounded-lg bg-[#5E0ED7] py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a0bab] disabled:opacity-60"
+                            >
+                              {loginLoading ? "Accesso..." : "Accedi"}
+                            </button>
+                            <Link
+                              href="/login"
+                              onClick={() => setAvatarOpen(false)}
+                              className="mt-3 block text-center text-xs font-semibold underline"
+                              style={{ color: "#0f172a" }}
+                            >
+                              Hai dimenticato la password?
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => { setDropdownView("register"); setLoginError(""); }}
+                              className="mt-2 block w-full text-center text-xs text-slate-500"
+                            >
+                              Non hai un account? <span className="font-semibold text-[#5E0ED7]">Registrati</span>
+                            </button>
+                          </form>
+                        ) : (
+                          <form onSubmit={handleInlineRegister}>
+                            <p className="mb-3 text-sm font-semibold text-slate-900">Crea un account</p>
+                            <div className="space-y-2.5">
+                              <input
+                                type="text"
+                                placeholder="Nome e cognome"
+                                aria-label="Nome e cognome"
+                                value={regName}
+                                onChange={(e) => setRegName(e.target.value)}
+                                autoComplete="name"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                              <input
+                                type="email"
+                                placeholder="Email"
+                                aria-label="Email"
+                                value={regEmail}
+                                onChange={(e) => setRegEmail(e.target.value)}
+                                autoComplete="email"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                              <input
+                                type="password"
+                                placeholder="Password"
+                                aria-label="Password"
+                                value={regPassword}
+                                onChange={(e) => setRegPassword(e.target.value)}
+                                autoComplete="new-password"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                              <input
+                                type="password"
+                                placeholder="Conferma password"
+                                aria-label="Conferma password"
+                                value={regConfirm}
+                                onChange={(e) => setRegConfirm(e.target.value)}
+                                autoComplete="new-password"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5E0ED7]/50 focus:ring-2 focus:ring-[#5E0ED7]/10"
+                                required
+                              />
+                            </div>
+                            {regError && (
+                              <p className="mt-2 text-xs text-red-600">{regError}</p>
+                            )}
+                            {regSuccess && (
+                              <p className="mt-2 text-xs text-emerald-600">{regSuccess}</p>
+                            )}
+                            <button
+                              type="submit"
+                              disabled={regLoading}
+                              className="mt-3 w-full rounded-lg bg-[#5E0ED7] py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a0bab] disabled:opacity-60"
+                            >
+                              {regLoading ? "Invio..." : "Registrati"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setDropdownView("login"); setRegError(""); setRegSuccess(""); }}
+                              className="mt-3 block w-full text-center text-xs text-slate-500"
+                            >
+                              Hai gia un account? <span className="font-semibold text-[#5E0ED7]">Accedi</span>
+                            </button>
+                          </form>
                         )}
-                        <label className="mt-3 flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            defaultChecked
-                            className="h-4 w-4 rounded border-slate-300 text-[#5E0ED7] accent-[#5E0ED7]"
-                          />
-                          <span className="text-xs text-slate-600">Ricorda l&apos;accesso</span>
-                        </label>
-                        <button
-                          type="submit"
-                          disabled={loginLoading}
-                          className="mt-3 w-full rounded-lg bg-[#5E0ED7] py-2.5 text-sm font-semibold text-white transition hover:bg-[#4a0bab] disabled:opacity-60"
-                        >
-                          {loginLoading ? "Accesso..." : "Accedi"}
-                        </button>
-                        <Link
-                          href="/login"
-                          onClick={() => setAvatarOpen(false)}
-                          className="mt-3 block text-center text-xs font-semibold underline"
-                          style={{ color: "#0f172a" }}
-                        >
-                          Hai dimenticato la password?
-                        </Link>
-                      </form>
+                      </div>
                     )}
                   </motion.div>
                 )}

@@ -16,3 +16,13 @@ export function getPool() {
 
   return pool;
 }
+
+const ensuredTables = new Set<string>();
+
+export function markTableEnsured(name: string) {
+  ensuredTables.add(name);
+}
+
+export function isTableEnsured(name: string): boolean {
+  return ensuredTables.has(name);
+}

@@ -9,24 +9,24 @@ type HeroCopy = {
 
 const HERO_COPIES: HeroCopy[] = [
   {
-    title: "Consulenze affidabili per telefonia, energia e servizi digitali.",
+    title: "Telefonia, energia, SPID e spedizioni. Tutto in Via Plinio 72.",
     description:
-      "AG SERVIZI supporta privati e aziende con soluzioni personalizzate, rapide e trasparenti, combinando competenza locale e innovazione digitale.",
+      "Vieni in agenzia, spiegaci cosa ti serve e ci pensiamo noi. Niente call center, niente attese. Dal 2016 a Castellammare di Stabia.",
   },
   {
-    title: "Un unico punto di riferimento per semplificare le tue pratiche quotidiane.",
+    title: "Hai una bolletta da pagare, un contratto da cambiare o uno SPID da fare?",
     description:
-      "Ti aiutiamo a scegliere soluzioni chiare e concrete su telefonia, energia e servizi digitali, con assistenza umana e tempi rapidi.",
+      "Passa da noi. Ti seguiamo dall'inizio alla fine, di persona. Consulenza gratuita, sempre.",
   },
   {
-    title: "Servizi essenziali gestiti con metodo, velocita e supporto reale.",
+    title: "Stessa agenzia, stesse facce. Da dieci anni.",
     description:
-      "Dalla consulenza iniziale all'operativita, AG SERVIZI affianca famiglie e imprese con un approccio pratico e orientato al risultato.",
+      "Non siamo una catena e non abbiamo un menu vocale. Ci trovi in Via Plinio 72, dal lunedi al sabato.",
   },
   {
-    title: "Tecnologia e presenza locale per decisioni piu semplici e sicure.",
+    title: "Spedizioni, visure, PEC, firma digitale. E anche siti web.",
     description:
-      "Confrontiamo opzioni, riduciamo complessita e ti guidiamo passo dopo passo con una consulenza trasparente su misura.",
+      "Se non sai da dove iniziare, vieni a parlarne. Ti diciamo cosa conviene e quanto costa, prima di fare qualsiasi cosa.",
   },
 ];
 

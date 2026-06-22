@@ -147,6 +147,8 @@ export default function PrenotaContent() {
             loop
             muted
             playsInline
+            preload="none"
+            poster="/images/prenota-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >

@@ -69,6 +69,7 @@ export default function FloatingContact() {
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.93 }}
             aria-label="Contattaci"
+            aria-expanded={expanded}
             className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-xl shadow-[#25D366]/40 transition-colors hover:bg-[#20c05c]"
           >
             <motion.span

@@ -1,5 +1,6 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { getPool } from "@/lib/db";
+import { getPool, isTableEnsured, markTableEnsured } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -12,21 +13,34 @@ function hasDatabaseConfig() {
   );
 }
 
-function parseTokenPayload(
+function verifyClientPortalToken(
   token: string,
 ): { username: string; userId: number | null } | null {
-  if (!token) return null;
-  const [payloadPart] = token.split(".");
-  if (!payloadPart) return null;
+  const secret = process.env.CLIENT_PORTAL_SESSION_SECRET;
+  if (!secret) return null;
+
+  const [payloadPart, signature] = String(token || "").split(".");
+  if (!payloadPart || !signature) return null;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(payloadPart)
+    .digest("base64url");
+
+  const actual = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+  if (actual.length !== expected.length) return null;
+  if (!crypto.timingSafeEqual(actual, expected)) return null;
 
   try {
-    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
-    const raw = Buffer.from(padded, "base64").toString("utf8");
-    const parsed = JSON.parse(raw) as {
+    const parsed = JSON.parse(
+      Buffer.from(payloadPart, "base64url").toString("utf8"),
+    ) as {
       username?: string;
       userId?: number | null;
+      exp?: number;
     };
+    if (!parsed?.exp || Number(parsed.exp) < Date.now()) return null;
     if (!parsed?.username) return null;
     return {
       username: String(parsed.username).toLowerCase().trim(),
@@ -41,6 +55,7 @@ function parseTokenPayload(
 }
 
 async function ensureClientAreaRequestsTable() {
+  if (isTableEnsured("client_area_requests")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_requests (
@@ -59,9 +74,11 @@ async function ensureClientAreaRequestsTable() {
       KEY idx_client_area_requests_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_requests");
 }
 
 async function ensureClientAreaShipmentsTable() {
+  if (isTableEnsured("client_area_shipments")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_shipments (
@@ -77,9 +94,11 @@ async function ensureClientAreaShipmentsTable() {
       KEY idx_client_area_shipments_tracking (tracking_code)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_shipments");
 }
 
 async function ensureClientAreaPaymentsTable() {
+  if (isTableEnsured("client_area_payments")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_payments (
@@ -100,9 +119,11 @@ async function ensureClientAreaPaymentsTable() {
       KEY idx_client_area_payments_shipment (shipment_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_payments");
 }
 
 async function ensureClientAreaInvoicesTable() {
+  if (isTableEnsured("client_area_invoices")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_invoices (
@@ -123,12 +144,13 @@ async function ensureClientAreaInvoicesTable() {
       KEY idx_client_area_invoices_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_invoices");
 }
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const token = String(body?.token || "").trim();
-  const identity = parseTokenPayload(token);
+  const identity = verifyClientPortalToken(token);
 
   if (!identity) {
     return NextResponse.json(
@@ -145,10 +167,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    await ensureClientAreaRequestsTable();
-    await ensureClientAreaShipmentsTable();
-    await ensureClientAreaPaymentsTable();
-    await ensureClientAreaInvoicesTable();
+    await Promise.all([
+      ensureClientAreaRequestsTable(),
+      ensureClientAreaShipmentsTable(),
+      ensureClientAreaPaymentsTable(),
+      ensureClientAreaInvoicesTable(),
+    ]);
 
     const pool = getPool();
 

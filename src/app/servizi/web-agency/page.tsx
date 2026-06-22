@@ -6,7 +6,7 @@ import { webAgencyServiceDetails } from "@/lib/web-agency-services";
 
 export function generateMetadata() {
   return buildMetadata({
-    title: "Web Agency su misura",
+    title: "Web Agency su misura a Castellammare di Stabia",
     description:
       "AG SERVIZI: realizzazione siti web e gestionali su misura con supporto strategico e operativo.",
     path: "/servizi/web-agency",

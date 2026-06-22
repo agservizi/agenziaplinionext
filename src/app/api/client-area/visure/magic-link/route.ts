@@ -11,7 +11,7 @@ const VISURE_MAGIC_LINK_SECRET = String(
     process.env.CAF_PATRONATO_MAGIC_LINK_SECRET ||
     process.env.ADMIN_PORTAL_SESSION_SECRET ||
     process.env.CLIENT_PORTAL_SESSION_SECRET ||
-    "ag-visure-magic-link",
+    "",
 ).trim();
 
 type MagicRequestRow = {
@@ -242,6 +242,10 @@ async function storeUploadedFiles(requestId: number, files: File[]) {
 }
 
 export async function POST(request: Request) {
+  if (!VISURE_MAGIC_LINK_SECRET) {
+    return NextResponse.json({ message: "Magic link secret non configurato." }, { status: 503 });
+  }
+
   if (!hasDatabaseConfig()) {
     return NextResponse.json({ message: "Database non configurato." }, { status: 503 });
   }

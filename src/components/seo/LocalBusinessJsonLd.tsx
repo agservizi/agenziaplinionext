@@ -59,7 +59,7 @@ export default function LocalBusinessJsonLd() {
         url: SITE_URL,
         name: company.name,
         description:
-          "AG SERVIZI è un'agenzia di servizi moderna e dinamica specializzata in consulenze per telefonia, energia elettrica e gas, con soluzioni digitali su misura.",
+          "AG SERVIZI a Castellammare di Stabia: consulenze telefonia, energia, SPID, PEC, spedizioni, visure, CAF e siti web. In Via Plinio il Vecchio 72, dal 2016.",
         publisher: { "@id": `${SITE_URL}/#organization` },
         inLanguage: "it-IT",
         potentialAction: {
@@ -124,6 +124,13 @@ export default function LocalBusinessJsonLd() {
         ],
         foundingDate: String(company.openedYear),
         vatID: company.vat,
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "5.0",
+          reviewCount: "10",
+          bestRating: "5",
+          worstRating: "1",
+        },
         priceRange: "€",
         currenciesAccepted: "EUR",
         paymentAccepted: "Cash, Credit Card, Debit Card",

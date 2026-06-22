@@ -53,7 +53,7 @@ export default function CookiePolicyPage() {
         </div>
 
         <div className="lux-panel rounded-3xl p-8">
-          <h3 className="text-lg font-semibold text-slate-900">Cookie utilizzati</h3>
+          <h2 className="text-lg font-semibold text-slate-900">Cookie utilizzati</h2>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
             {cookiePolicy.cookies.map((cookie) => (
               <div key={cookie.name} className="rounded-2xl border border-slate-200 p-4">
@@ -69,7 +69,7 @@ export default function CookiePolicyPage() {
         <div className="lux-panel rounded-3xl p-8">
           <div className="space-y-6 text-sm leading-7 text-slate-600">
             <section>
-              <h3 className="text-lg font-semibold text-slate-900">Gestione del consenso</h3>
+              <h2 className="text-lg font-semibold text-slate-900">Gestione del consenso</h2>
               <p className="mt-2">
                 I cookie tecnici necessari sono sempre attivi perché indispensabili al funzionamento
                 del sito. Le altre categorie vengono attivate solo dopo il consenso espresso
@@ -78,7 +78,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold text-slate-900">Come modificare le preferenze</h3>
+              <h2 className="text-lg font-semibold text-slate-900">Come modificare le preferenze</h2>
               <p className="mt-2">
                 L’utente può aggiornare, modificare o revocare il consenso in qualsiasi momento
                 attraverso il comando “Gestisci cookie” presente nel sito. È inoltre possibile
@@ -88,7 +88,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold text-slate-900">Cookie di terze parti</h3>
+              <h2 className="text-lg font-semibold text-slate-900">Cookie di terze parti</h2>
               <p className="mt-2">
                 Alcuni strumenti integrati nel sito possono coinvolgere servizi di terze parti,
                 come piattaforme di analisi, tracciamento, pagamenti o servizi operativi. In questi
@@ -97,7 +97,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold text-slate-900">Contatti</h3>
+              <h2 className="text-lg font-semibold text-slate-900">Contatti</h2>
               <p className="mt-2">
                 Per informazioni sul trattamento dei dati personali e sull’uso dei cookie, è
                 possibile fare riferimento anche alla{" "}

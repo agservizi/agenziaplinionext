@@ -50,10 +50,10 @@ function getServerEnv(key: string, fallback = "") {
 }
 
 const adminPortalUsername = getServerEnv("STORE_ADMIN_USER", "");
-const adminPortalSessionSecret = getServerEnv(
-  "ADMIN_PORTAL_SESSION_SECRET",
-  "ag-admin-portal-dev-secret",
-);
+const adminPortalSessionSecret = getServerEnv("ADMIN_PORTAL_SESSION_SECRET", "");
+if (!adminPortalSessionSecret) {
+  throw new Error("FATAL: ADMIN_PORTAL_SESSION_SECRET is not set");
+}
 const localPhpApiOrigin = String(process.env.LOCAL_PHP_API_ORIGIN || "http://localhost:8089").replace(
   /\/$/,
   "",

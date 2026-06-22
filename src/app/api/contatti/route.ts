@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getPool } from "@/lib/db";
+import { escapeHtml } from "@/lib/escape-html";
 
 export const runtime = "nodejs";
 
@@ -64,19 +65,19 @@ export async function POST(request: Request) {
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <tr>
               <td style="padding:8px 0;color:#64748b;width:140px;">Nome</td>
-              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${name}</td>
+              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(name)}</td>
             </tr>
             <tr>
               <td style="padding:8px 0;color:#64748b;">Email</td>
-              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${email}</td>
+              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(email)}</td>
             </tr>
             <tr>
               <td style="padding:8px 0;color:#64748b;">Servizio</td>
-              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${safeService}</td>
+              <td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(safeService)}</td>
             </tr>
           </table>
           <div style="margin:16px 0;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
-            <p style="margin:0;color:#0f172a;font-size:14px;white-space:pre-line;">${message}</p>
+            <p style="margin:0;color:#0f172a;font-size:14px;white-space:pre-line;">${escapeHtml(message)}</p>
           </div>
           <p style="margin:0;color:#94a3b8;font-size:12px;">Rispondi direttamente a questa email per contattare il cliente.</p>
         </div>

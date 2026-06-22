@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -11,11 +11,21 @@ interface Props {
 
 export default function TextCycle({ words, interval = 2200, className }: Props) {
   const [index, setIndex] = useState(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % words.length), interval);
     return () => clearInterval(id);
-  }, [words.length, interval]);
+  }, [words.length, interval, reduced]);
+
+  if (reduced) {
+    return (
+      <span className={`relative inline-flex overflow-hidden ${className ?? ""}`}>
+        <span className="inline-block">{words[0]}</span>
+      </span>
+    );
+  }
 
   return (
     <span className={`relative inline-flex overflow-hidden ${className ?? ""}`}>

@@ -96,6 +96,7 @@ export default function ContactForm({
           <option>F24</option>
           <option>PagoPA</option>
           <option>Tassa di possesso</option>
+          <option>Versamento passaporto</option>
           <option>Iliad Space</option>
           <option>WindTre</option>
           <option>Fastweb</option>
@@ -142,6 +143,7 @@ export default function ContactForm({
       </button>
       {message ? (
         <p
+          role="alert"
           className={
             state === "success"
               ? isDark

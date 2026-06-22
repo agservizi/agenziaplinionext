@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { getPool } from "@/lib/db";
+import { getPool, isTableEnsured, markTableEnsured } from "@/lib/db";
+import { escapeHtml } from "@/lib/escape-html";
 
 export const runtime = "nodejs";
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -17,6 +18,7 @@ function hasDatabaseConfig() {
 }
 
 async function ensureClientPortalRegistrationRequestsTable() {
+  if (isTableEnsured("client_portal_registration_requests")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_portal_registration_requests (
@@ -33,6 +35,7 @@ async function ensureClientPortalRegistrationRequestsTable() {
       KEY idx_client_portal_registration_email (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_portal_registration_requests");
 }
 
 export async function POST(request: Request) {
@@ -81,14 +84,14 @@ export async function POST(request: Request) {
           </div>
           <div style="padding:24px;">
             <table style="width:100%;border-collapse:collapse;font-size:14px;">
-              <tr><td style="padding:8px 0;color:#64748b;width:150px;">Nome</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${fullName}</td></tr>
-              <tr><td style="padding:8px 0;color:#64748b;">Email</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${email}</td></tr>
-              <tr><td style="padding:8px 0;color:#64748b;">Telefono</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${phone || "Non indicato"}</td></tr>
-              <tr><td style="padding:8px 0;color:#64748b;">Azienda</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${companyName || "Non indicata"}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b;width:150px;">Nome</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(fullName)}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b;">Email</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(email)}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b;">Telefono</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(phone || "Non indicato")}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b;">Azienda</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(companyName || "Non indicata")}</td></tr>
             </table>
             ${
               notes
-                ? `<div style="margin-top:16px;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;"><p style="margin:0;color:#0f172a;font-size:14px;white-space:pre-line;">${notes}</p></div>`
+                ? `<div style="margin-top:16px;padding:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;"><p style="margin:0;color:#0f172a;font-size:14px;white-space:pre-line;">${escapeHtml(notes)}</p></div>`
                 : ""
             }
           </div>

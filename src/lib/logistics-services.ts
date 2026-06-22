@@ -12,43 +12,43 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
   {
     slug: "spedizioni-nazionali",
     title: "Spedizioni nazionali",
-    shortDescription: "Gestione spedizioni in Italia con supporto operativo e tracciamento.",
+    shortDescription: "Spedisci in tutta Italia. Prepariamo l'etichetta e organizziamo il ritiro.",
     heroDescription:
-      "Ti assistiamo nella preparazione e nell'invio di spedizioni nazionali con controllo dati, etichette e supporto sul tracciamento.",
+      "Devi spedire un pacco in Italia? Vieni in sede o usa l'area clienti online. Ti prepariamo l'etichetta, organizziamo il ritiro e puoi seguire il tracking.",
     customerBenefits: [
-      "Assistenza in sede su compilazione spedizione e dati destinatario.",
-      "Supporto su scelta servizio in base a urgenza e tipologia collo.",
-      "Tracciamento disponibile con supporto locale in caso di anomalie.",
+      "Ti aiutiamo a compilare i dati della spedizione e del destinatario.",
+      "Scegliamo insieme il servizio giusto in base a urgenza e peso.",
+      "Se il pacco si blocca o c'e un problema, lo seguiamo noi.",
     ],
     requiredInfo: [
-      "Dati completi mittente e destinatario.",
-      "Peso e dimensioni indicative del collo.",
-      "Contenuto dichiarato e recapito telefonico.",
+      "Dati completi di chi spedisce e di chi riceve.",
+      "Peso e dimensioni del collo, anche approssimative.",
+      "Contenuto dichiarato e un numero di telefono.",
     ],
     notes: [
-      "Imballaggio corretto essenziale per evitare danni o ritardi.",
-      "Tempi di consegna variabili in base a zona e periodo.",
+      "Imballa bene il pacco. Se l'imballaggio e scarso, il corriere puo rifiutarlo.",
+      "I tempi di consegna cambiano in base alla zona e al periodo.",
     ],
   },
   {
     slug: "spedizioni-internazionali",
     title: "Spedizioni internazionali",
-    shortDescription: "Spedizioni estere con supporto documentale e gestione passaggi principali.",
+    shortDescription: "Spedizioni all'estero con documenti e tracking. Ci pensiamo noi.",
     heroDescription:
-      "Seguiamo spedizioni internazionali con assistenza su dati, documentazione e requisiti operativi per ridurre errori e blocchi.",
+      "Devi mandare un pacco all'estero? Ti aiutiamo con i dati, la documentazione e i passaggi necessari. Se il pacco si ferma in dogana, lo seguiamo.",
     customerBenefits: [
-      "Supporto pratico su compilazione dati per spedizioni extra-Italia.",
-      "Assistenza su documentazione richiesta dal vettore.",
-      "Monitoraggio e supporto in caso di stati tracking anomali.",
+      "Ti aiutiamo a compilare i dati per la spedizione internazionale.",
+      "Prepariamo la documentazione richiesta dal corriere.",
+      "Se il tracking mostra qualcosa di strano, ce ne occupiamo noi.",
     ],
     requiredInfo: [
-      "Dati completi destinatario estero (indirizzo, CAP, nazione).",
-      "Contenuto spedizione e valore dichiarato quando richiesto.",
+      "Indirizzo completo del destinatario (con CAP e nazione).",
+      "Contenuto della spedizione e valore dichiarato, se richiesto.",
       "Peso e dimensioni del collo.",
     ],
     notes: [
-      "Per alcune destinazioni possono essere richiesti documenti aggiuntivi.",
-      "Tempi e costi possono variare in base a paese di destinazione e periodo.",
+      "Per alcune destinazioni servono documenti aggiuntivi.",
+      "Tempi e costi cambiano in base al paese e al periodo.",
     ],
   },
 ];

@@ -132,6 +132,8 @@ export default function ConsulenzaContent() {
             loop
             muted
             playsInline
+            preload="none"
+            poster="/images/consulenza-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >

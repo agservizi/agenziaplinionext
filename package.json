@@ -13,11 +13,8 @@
     "test:chat-coherence": "node scripts/test-plinio-chat-coherence.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.89.0",
     "@iconify-icons/mdi": "^1.2.48",
     "@iconify/react": "^6.0.2",
-    "@stripe/react-stripe-js": "^3.9.1",
-    "@stripe/stripe-js": "^7.8.0",
     "framer-motion": "^12.38.0",
     "mysql2": "^3.16.3",
     "next": "16.1.6",

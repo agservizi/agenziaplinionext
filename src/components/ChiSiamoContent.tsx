@@ -147,6 +147,8 @@ export default function ChiSiamoContent() {
             loop
             muted
             playsInline
+            preload="none"
+            poster="/images/chi-siamo-poster.jpg"
             className="h-[120%] w-full object-cover"
             style={{ opacity: 0.35 }}
           >

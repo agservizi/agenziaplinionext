@@ -12,10 +12,10 @@ export default function Home() {
         stats={[
           { value: 500, label: "Clienti\nAttivi" },
           { value: 30, label: "Servizi\nGestiti" },
-          { value: getYearsActive(), label: "Anni\nEsperienza" },
+          { value: getYearsActive(), label: "Anni\nAperti" },
         ]}
-        tagline={"Un Punto Di\nRiferimento Per\nLe Tue Esigenze"}
-        description="Agenzia di servizi completa a Castellammare di Stabia. Pagamenti, telefonia, energia, logistica, SPID, PEC e siti web dal 2016."
+        tagline={"Ci Pensiamo\nNoi. Vieni\nE Basta."}
+        description="Pagamenti, telefonia, energia, spedizioni, SPID, PEC e siti web. In Via Plinio il Vecchio 72 a Castellammare di Stabia, dal 2016."
         ctaText="Contattaci"
         ctaHref="/contatti"
       />
@@ -29,7 +29,7 @@ export function generateMetadata() {
   return buildMetadata({
     title: "AG SERVIZI | Pagamenti, Telefonia, Luce e Gas a Castellammare di Stabia",
     description:
-      "AG SERVIZI a Castellammare di Stabia: pagamenti bollettini, SPID, PEC, telefonia, luce e gas. Consulenza professionale dal 2016.",
+      "AG SERVIZI a Castellammare di Stabia: bollettini, SPID, PEC, telefonia, luce e gas, spedizioni e siti web. In Via Plinio 72, dal 2016.",
     path: "/",
   });
 }

@@ -57,12 +57,10 @@ const clientPortalUsername = String(process.env.CLIENT_PORTAL_USERNAME || "").tr
 const clientPortalPassword = String(process.env.CLIENT_PORTAL_PASSWORD || "").trim();
 const adminPortalUsername = String(process.env.STORE_ADMIN_USER || "").trim();
 const adminPortalPassword = String(process.env.STORE_ADMIN_PASSWORD || "").trim();
-const clientPortalSessionSecret = String(
-  process.env.CLIENT_PORTAL_SESSION_SECRET || "ag-client-portal-dev-secret",
-).trim();
-const adminPortalSessionSecret = String(
-  process.env.ADMIN_PORTAL_SESSION_SECRET || "ag-admin-portal-dev-secret",
-).trim();
+const clientPortalSessionSecret = process.env.CLIENT_PORTAL_SESSION_SECRET;
+if (!clientPortalSessionSecret) { console.error("FATAL: CLIENT_PORTAL_SESSION_SECRET not set"); process.exit(1); }
+const adminPortalSessionSecret = process.env.ADMIN_PORTAL_SESSION_SECRET;
+if (!adminPortalSessionSecret) { console.error("FATAL: ADMIN_PORTAL_SESSION_SECRET not set"); process.exit(1); }
 
 let pool = null;
 function getPool() {
@@ -532,6 +530,21 @@ function verifyAdminPortalToken(token) {
   }
 }
 
+const loginRateLimitMap = new Map();
+const LOGIN_RATE_LIMIT_MAX = 5;
+const LOGIN_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+
+function isLoginRateLimited(ip) {
+  const now = Date.now();
+  const entry = loginRateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    loginRateLimitMap.set(ip, { count: 1, resetAt: now + LOGIN_RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > LOGIN_RATE_LIMIT_MAX;
+}
+
 function decodeCredentials() {
   const encoded = process.env.GOOGLE_CALENDAR_CREDENTIALS_JSON;
   if (!encoded) return null;
@@ -673,6 +686,11 @@ app.get("/api/payhip/health", (_req, res) => {
 });
 
 app.post("/api/client-auth/login", async (req, res) => {
+  const loginIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (isLoginRateLimited(loginIp)) {
+    return res.status(429).json({ message: "Troppi tentativi di accesso. Riprova tra 15 minuti." });
+  }
+
   const username = String(req.body?.username || "").trim();
   const password = String(req.body?.password || "").trim();
 
@@ -975,6 +993,11 @@ app.post("/api/client-auth/register", async (req, res) => {
 });
 
 app.post("/api/admin-auth/login", (req, res) => {
+  const adminLoginIp = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket?.remoteAddress || "unknown";
+  if (isLoginRateLimited(adminLoginIp)) {
+    return res.status(429).json({ message: "Troppi tentativi di accesso. Riprova tra 15 minuti." });
+  }
+
   if (!adminPortalUsername || !adminPortalPassword) {
     return res.status(503).json({ message: "Credenziali area admin non configurate" });
   }

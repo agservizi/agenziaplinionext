@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
-import { getPool } from "@/lib/db";
+import { getPool, isTableEnsured, markTableEnsured } from "@/lib/db";
 import {
   getStripeCheckoutSession,
   isStripeConfigured,
@@ -21,7 +21,7 @@ const VISURE_MAGIC_LINK_SECRET = String(
     process.env.CAF_PATRONATO_MAGIC_LINK_SECRET ||
     process.env.ADMIN_PORTAL_SESSION_SECRET ||
     process.env.CLIENT_PORTAL_SESSION_SECRET ||
-    "ag-visure-magic-link",
+    "",
 ).trim();
 const VISURE_MAGIC_LINK_TTL_HOURS = Number(process.env.VISURE_MAGIC_LINK_TTL_HOURS || 240);
 const VISURE_OPERATOR_EMAIL = String(
@@ -38,6 +38,7 @@ function hasDatabaseConfig() {
 }
 
 async function ensureClientAreaRequestsTable() {
+  if (isTableEnsured("client_area_requests")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_requests (
@@ -56,9 +57,11 @@ async function ensureClientAreaRequestsTable() {
       KEY idx_client_area_requests_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_requests");
 }
 
 async function ensureClientAreaVisureRequestsTable() {
+  if (isTableEnsured("client_area_visure_requests")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_visure_requests (
@@ -76,9 +79,11 @@ async function ensureClientAreaVisureRequestsTable() {
       KEY idx_client_area_visure_requests_provider_status (provider_status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_visure_requests");
 }
 
 async function ensureClientAreaVisureMagicLinksTable() {
+  if (isTableEnsured("client_area_visure_magic_links")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_visure_magic_links (
@@ -92,9 +97,11 @@ async function ensureClientAreaVisureMagicLinksTable() {
       UNIQUE KEY uq_client_area_visure_magic_token (token_hash)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_visure_magic_links");
 }
 
 async function ensureClientAreaPaymentsTable() {
+  if (isTableEnsured("client_area_payments")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_payments (
@@ -115,9 +122,11 @@ async function ensureClientAreaPaymentsTable() {
       KEY idx_client_area_payments_shipment (shipment_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_payments");
 }
 
 async function ensureClientAreaInvoicesTable() {
+  if (isTableEnsured("client_area_invoices")) return;
   const pool = getPool();
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS client_area_invoices (
@@ -138,6 +147,7 @@ async function ensureClientAreaInvoicesTable() {
       KEY idx_client_area_invoices_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  markTableEnsured("client_area_invoices");
 }
 
 function normalizeObject(value: unknown) {
@@ -283,6 +293,10 @@ async function sendVisuraMagicLinkEmail(input: {
 }
 
 export async function POST(request: Request) {
+  if (!VISURE_MAGIC_LINK_SECRET) {
+    return NextResponse.json({ message: "Magic link secret non configurato." }, { status: 503 });
+  }
+
   const body = await request.json();
   const action = String(body?.action || "request").trim();
 
@@ -410,11 +424,13 @@ export async function POST(request: Request) {
     let paymentId = 0;
 
     if (hasDatabaseConfig()) {
-      await ensureClientAreaRequestsTable();
-      await ensureClientAreaVisureRequestsTable();
-      await ensureClientAreaVisureMagicLinksTable();
-      await ensureClientAreaPaymentsTable();
-      await ensureClientAreaInvoicesTable();
+      await Promise.all([
+        ensureClientAreaRequestsTable(),
+        ensureClientAreaVisureRequestsTable(),
+        ensureClientAreaVisureMagicLinksTable(),
+        ensureClientAreaPaymentsTable(),
+        ensureClientAreaInvoicesTable(),
+      ]);
       const pool = getPool();
       const [requestResult] = await pool.execute(
         `INSERT INTO client_area_requests

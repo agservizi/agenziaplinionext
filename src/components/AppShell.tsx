@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GlobalParallaxLayer from "@/components/GlobalParallaxLayer";
 import PlatformFooter from "@/components/PlatformFooter";
-import PlinioAssistantChat from "@/components/PlinioAssistantChat";
+
+const PlinioAssistantChat = dynamic(() => import("@/components/PlinioAssistantChat"), { ssr: false });
 import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
 import { clearAdminPortalToken } from "@/lib/admin-portal-auth";
 
@@ -262,7 +264,7 @@ export default function AppShell({
               </div>
             </div>
           </div>
-          <main className={`flex-1 ${isAdminPlatform ? "bg-slate-50" : "bg-slate-950"}`}>{children}</main>
+          <main id="main-content" className={`flex-1 ${isAdminPlatform ? "bg-slate-50" : "bg-slate-950"}`}>{children}</main>
           <div className={
             isAdminDashboardRoute
               ? `transition-[padding] duration-300 ease-out ${adminSidebarCollapsed ? "lg:pl-22" : "lg:pl-72"}`
@@ -283,7 +285,7 @@ export default function AppShell({
     <>
       <Header />
       <GlobalParallaxLayer />
-      <main className="min-h-screen bg-slate-950">{children}</main>
+      <main id="main-content" className="min-h-screen bg-slate-950">{children}</main>
       <Footer />
       {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
       {scrollTopButton}

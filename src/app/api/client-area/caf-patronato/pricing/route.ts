@@ -5,7 +5,7 @@ import {
 } from "@/lib/caf-patronato-server";
 
 export const runtime = "nodejs";
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export async function POST() {
   if (!isCafPatronatoDatabaseConfigured()) {

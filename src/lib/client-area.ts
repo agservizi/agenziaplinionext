@@ -36,28 +36,28 @@ export type ClientAreaConfig = {
 export const clientAreas: ClientAreaConfig[] = [
   {
     key: "spedizioni",
-    title: "Spedizioni da casa in area dedicata",
-    subtitle: "Richiedi ritiro, acquista la spedizione e ricevi assistenza operativa.",
+    title: "Spedizioni senza passare in sede",
+    subtitle: "Inserisci i dati, paga online e ti organizziamo il ritiro.",
     description:
-      "Un flusso unico per preparare spedizioni nazionali e internazionali senza passare in sede. Inserisci i dati, invia la richiesta e ricevi il riepilogo operativo.",
+      "Puoi preparare una spedizione nazionale o internazionale direttamente da qui. Metti i dati, scegli il servizio e noi facciamo il resto.",
     path: "/area-clienti/spedizioni",
     eyebrow: "Spedizioni",
     cta: "Apri area spedizioni",
     highlights: [
-      "Richiesta ritiro a domicilio",
-      "Gestione colli e misure",
-      "Supporto su tracking e documentazione",
+      "Ritiro a domicilio o consegna in sede",
+      "Peso, misure e numero colli",
+      "Tracking e assistenza se qualcosa non va",
     ],
     serviceOptions: [
       {
         value: "ritiro-nazionale",
         label: "Spedizione nazionale",
-        description: "Ritiro in Italia con assistenza operativa e aggiornamento pratica.",
+        description: "Ritiro in Italia. Ti seguiamo fino alla consegna.",
       },
       {
         value: "ritiro-internazionale",
         label: "Spedizione internazionale",
-        description: "Gestione richieste con dati doganali e supporto documentale.",
+        description: "Estero, con documenti e tracking inclusi.",
       },
     ],
     fields: [
@@ -69,43 +69,43 @@ export const clientAreas: ClientAreaConfig[] = [
   },
   {
     key: "visure",
-    title: "Richiesta visure in area dedicata",
-    subtitle: "Apertura pratica, documenti richiesti e consegna in un unico spazio.",
+    title: "Richiedi una visura online",
+    subtitle: "Mandi i dati, apriamo la pratica e ti aggiorniamo sullo stato.",
     description:
-      "Gestiamo richieste di visure con presa in carico dedicata. Il cliente invia i dati, allega eventuali documenti e riceve aggiornamenti sullo stato pratica.",
+      "Puoi richiedere visure camerali, catastali, PRA e altre direttamente da qui. Ci mandi i dati, noi apriamo la pratica e ti avvisiamo quando e pronta.",
     path: "/area-clienti/visure",
     eyebrow: "Visure",
     cta: "Apri area visure",
     highlights: [
-      "Visure camerali e catastali",
-      "Visure PRA, CR e CRIF",
-      "Gestione documenti e stato richiesta",
+      "Camerali e catastali",
+      "PRA, CR e CRIF",
+      "Stato pratica sempre aggiornato",
     ],
     serviceOptions: [
       {
         value: "visura-camerale",
         label: "Visura camerale",
-        description: "Richiesta dati aziendali e documentazione camerale.",
+        description: "Dati aziendali e documentazione dalla Camera di Commercio.",
       },
       {
         value: "visura-catastale",
         label: "Visura catastale",
-        description: "Richiesta immobili, terreni e riferimenti catastali.",
+        description: "Dati su immobili, terreni e riferimenti catastali.",
       },
       {
         value: "visura-pra",
         label: "Visura PRA",
-        description: "Verifica intestazione e dati del veicolo.",
+        description: "Intestazione e dati del veicolo.",
       },
       {
         value: "visura-crif",
         label: "Visura CRIF",
-        description: "Richiesta soggetta a verifica documentale e consenso.",
+        description: "Serve il consenso e una verifica dei documenti.",
       },
       {
         value: "visura-cr",
         label: "Visura CR",
-        description: "Presa in carico con controllo preliminare dei dati.",
+        description: "Controlliamo i dati prima di procedere.",
       },
     ],
     fields: [
@@ -116,38 +116,38 @@ export const clientAreas: ClientAreaConfig[] = [
   },
   {
     key: "caf-patronato",
-    title: "Pratiche CAF e patronato in area dedicata",
-    subtitle: "Apri la richiesta, indica il servizio e ricevi checklist e assistenza.",
+    title: "Pratiche CAF e Patronato",
+    subtitle: "Dicci cosa ti serve, ti diciamo quali documenti portare.",
     description:
-      "Il cliente può avviare la pratica online, indicare la tipologia di servizio e ricevere supporto su documenti, integrazioni e appuntamenti.",
+      "Puoi avviare la pratica da qui: scegli il tipo di servizio e ti mandiamo la lista dei documenti necessari. Poi ci pensiamo noi.",
     path: "/area-clienti/caf-patronato",
     eyebrow: "CAF e Patronato",
     cta: "Apri area CAF e patronato",
     highlights: [
-      "ISEE, 730 e pratiche fiscali",
-      "Patronato e pratiche previdenziali",
-      "Checklist documenti e supporto dedicato",
+      "ISEE, 730 e dichiarazioni",
+      "Pensione, invalidita e patronato",
+      "Lista documenti e aggiornamenti sullo stato",
     ],
     serviceOptions: [
       {
         value: "isee",
         label: "ISEE",
-        description: "Apertura pratica con raccolta dati e documenti richiesti.",
+        description: "Ti diciamo cosa portare e apriamo la pratica.",
       },
       {
         value: "730",
         label: "730 / dichiarazione",
-        description: "Richiesta assistenza fiscale con presa in carico operativa.",
+        description: "Dichiarazione dei redditi con assistenza fiscale.",
       },
       {
         value: "invalidita-pensione",
         label: "Pensione / invalidita",
-        description: "Pratiche previdenziali e supporto patronato.",
+        description: "Pratiche previdenziali tramite patronato.",
       },
       {
         value: "bonus-agevolazioni",
         label: "Bonus e agevolazioni",
-        description: "Verifica preliminare e raccolta documentazione.",
+        description: "Vediamo a cosa hai diritto e raccogliamo i documenti.",
       },
     ],
     fields: [
@@ -158,10 +158,10 @@ export const clientAreas: ClientAreaConfig[] = [
   },
   {
     key: "fotocopie-online",
-    title: "Fotocopie online con ritiro in agenzia",
-    subtitle: "Carichi il PDF, paghi in base alle pagine e ritiri in sede.",
+    title: "Fotocopie online, ritiro in agenzia",
+    subtitle: "Carichi il PDF, paghi online e passi a ritirare.",
     description:
-      "Servizio riservato ai residenti di Castellammare di Stabia: carichi il file PDF da stampare, il sistema calcola automaticamente le pagine e paghi online con Stripe.",
+      "Solo per residenti a Castellammare di Stabia: carichi il PDF, il sistema conta le pagine e calcola il prezzo. Paghi online e ritiri in sede.",
     path: "/area-clienti/fotocopie",
     eyebrow: "Fotocopie Online",
     cta: "Apri modulo fotocopie",
@@ -200,33 +200,33 @@ export const clientAreas: ClientAreaConfig[] = [
   },
   {
     key: "consulenza-utenze",
-    title: "Consulenza telefonia, luce e gas in area dedicata",
-    subtitle: "Richiedi analisi personalizzata e trasforma la richiesta in lead tracciata.",
+    title: "Consulenza telefonia, luce e gas",
+    subtitle: "Dicci quanto spendi e con chi stai, vediamo se si puo fare meglio.",
     description:
-      "Compili un modulo unico, indichi operatore e spesa attuale e il team commerciale prende in carico la lead con priorità e stato aggiornato.",
+      "Compila il modulo con operatore e spesa attuale. Ti ricontattiamo per dirti se ci sono offerte migliori.",
     path: "/area-clienti/consulenza-utenze",
     eyebrow: "Consulenza Utenze",
     cta: "Apri area consulenza",
     highlights: [
       "Telefonia mobile e fissa",
       "Contratti luce e gas",
-      "Lead qualificate con storico dedicato",
+      "Ti ricontattiamo con la proposta",
     ],
     serviceOptions: [
       {
         value: "telefonia",
         label: "Consulenza telefonia",
-        description: "Analisi offerte mobile/fibra e ottimizzazione costi attuali.",
+        description: "Vediamo se c'e un'offerta migliore per come usi il telefono.",
       },
       {
         value: "luce",
         label: "Consulenza luce",
-        description: "Confronto fornitori e condizioni in base ai consumi reali.",
+        description: "Confrontiamo i fornitori partendo dai tuoi consumi.",
       },
       {
         value: "gas",
         label: "Consulenza gas",
-        description: "Supporto cambio fornitore e verifica costi di fornitura.",
+        description: "Vediamo se conviene cambiare fornitore.",
       },
     ],
     fields: [
@@ -250,43 +250,43 @@ export const clientAreas: ClientAreaConfig[] = [
   },
   {
     key: "web-agency",
-    title: "Web Agency e progetti digitali in area dedicata",
-    subtitle: "Invii il brief, ricevi proposta, segui lo stato e centralizzi i materiali.",
+    title: "Web Agency e progetti digitali",
+    subtitle: "Raccontaci il progetto, ti mandiamo la proposta e segui lo stato da qui.",
     description:
-      "Uno spazio operativo per richiedere siti web, e-commerce, SEO locale, landing page o gestionali su misura. Il cliente invia il brief, allega indicazioni chiave e riceve aggiornamenti ordinati.",
+      "Se ti serve un sito, un e-commerce, una landing page o un gestionale, parti da qui. Ci descrivi cosa vuoi, noi prepariamo la proposta.",
     path: "/area-clienti/web-agency",
     eyebrow: "Web Agency",
     cta: "Apri area web agency",
     highlights: [
-      "Brief progetto guidato e lead qualificata",
-      "Proposta commerciale allegata dal team",
-      "Storico richieste e stato progetto",
+      "Descrivi il progetto, ti guidiamo noi",
+      "Ricevi la proposta commerciale",
+      "Segui lo stato del progetto",
     ],
     serviceOptions: [
       {
         value: "sito-vetrina",
         label: "Sito vetrina",
-        description: "Presenza online chiara, professionale e orientata ai contatti.",
+        description: "Un sito per presentarti online e farti contattare.",
       },
       {
         value: "ecommerce",
         label: "E-commerce",
-        description: "Vendita online con struttura catalogo, checkout e supporto operativo.",
+        description: "Vendi online con catalogo, carrello e pagamento.",
       },
       {
         value: "seo-local",
         label: "SEO e posizionamento locale",
-        description: "Ottimizzazione visibilità locale e richieste da Google.",
+        description: "Fatti trovare su Google da chi cerca i tuoi servizi in zona.",
       },
       {
         value: "gestionale",
         label: "Gestionale su misura",
-        description: "Flussi operativi digitali costruiti sul lavoro reale dell'attività.",
+        description: "Software fatto su come lavori tu, non su un modello generico.",
       },
       {
         value: "landing-page",
         label: "Landing page",
-        description: "Pagina focalizzata su conversione, contatti o raccolta lead per un singolo obiettivo.",
+        description: "Una pagina sola, fatta per portarti contatti o vendite.",
       },
     ],
     fields: [

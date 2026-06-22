@@ -7,6 +7,10 @@ const localPhpApiOrigin = process.env.LOCAL_PHP_API_ORIGIN || "http://localhost:
 const nextConfig: NextConfig = {
   ...(staticExportEnabled ? { output: "export" as const } : {}),
   trailingSlash: staticExportEnabled,
+  serverExternalPackages: ["mysql2", "resend"],
+  experimental: {
+    optimizePackageImports: ["framer-motion", "@iconify/react"],
+  },
   async rewrites() {
     if (staticExportEnabled) {
       return [];

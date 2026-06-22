@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getPool } from "@/lib/db";
+import { escapeHtml } from "@/lib/escape-html";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,12 @@ function buildQuoteHtml(data: {
   summary: string;
 }) {
   const { name, plan, project, budget, timeline, summary } = data;
-  const firstName = name.split(" ")[0] || name;
+  const firstName = escapeHtml(name.split(" ")[0] || name);
+  const safePlan = escapeHtml(plan);
+  const safeProject = escapeHtml(project);
+  const safeBudget = escapeHtml(budget);
+  const safeTimeline = escapeHtml(timeline);
+  const safeSummary = escapeHtml(summary);
 
   return `
 <!DOCTYPE html>
@@ -47,7 +53,7 @@ function buildQuoteHtml(data: {
     <!-- Project Card -->
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin:0 0 24px;">
       <p style="margin:0 0 4px;color:#0084ff;font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Il tuo progetto</p>
-      <p style="margin:0;color:#0f172a;font-size:17px;font-weight:700;">${project}</p>
+      <p style="margin:0;color:#0f172a;font-size:17px;font-weight:700;">${safeProject}</p>
     </div>
 
     <!-- Details Grid -->
@@ -55,17 +61,17 @@ function buildQuoteHtml(data: {
       <tr>
         <td style="padding:16px;background:#f8fafc;border-radius:12px 0 0 0;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;width:50%;">
           <p style="margin:0 0 4px;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">Piano</p>
-          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${plan}</p>
+          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${safePlan}</p>
         </td>
         <td style="padding:16px;background:#f8fafc;border-radius:0 12px 0 0;border-bottom:1px solid #e2e8f0;">
           <p style="margin:0 0 4px;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">Budget</p>
-          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${budget}</p>
+          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${safeBudget}</p>
         </td>
       </tr>
       <tr>
         <td style="padding:16px;background:#f8fafc;border-radius:0 0 0 12px;border-right:1px solid #e2e8f0;">
           <p style="margin:0 0 4px;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">Tempistiche</p>
-          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${timeline}</p>
+          <p style="margin:0;color:#0f172a;font-size:16px;font-weight:700;">${safeTimeline}</p>
         </td>
         <td style="padding:16px;background:#f8fafc;border-radius:0 0 12px 0;">
           <p style="margin:0 0 4px;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">Consulente</p>
@@ -77,7 +83,7 @@ function buildQuoteHtml(data: {
     <!-- AI Summary -->
     <div style="background:linear-gradient(135deg,#0084ff08,#319AFF08);border:1px solid #0084ff20;border-radius:16px;padding:24px;margin:0 0 32px;">
       <p style="margin:0 0 8px;color:#0084ff;font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Riepilogo personalizzato</p>
-      <p style="margin:0;color:#334155;font-size:14px;line-height:1.8;">${summary}</p>
+      <p style="margin:0;color:#334155;font-size:14px;line-height:1.8;">${safeSummary}</p>
     </div>
 
     <!-- Next Steps -->

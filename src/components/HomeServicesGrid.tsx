@@ -209,7 +209,7 @@ export default function HomeServicesGrid() {
 
                 {/* Service pills */}
                 <div className="mt-5 flex flex-wrap gap-1.5">
-                  {cat.items.slice(0, isHero ? 5 : 3).map((item) => (
+                  {cat.items.slice(0, isHero ? 6 : 3).map((item) => (
                     <span
                       key={item.title}
                       className={`inline-block rounded-full px-2.5 py-0.75 text-[11px] font-medium ring-1 ${a.pill}`}
@@ -217,11 +217,11 @@ export default function HomeServicesGrid() {
                       {item.title}
                     </span>
                   ))}
-                  {cat.items.length > (isHero ? 5 : 3) && (
+                  {cat.items.length > (isHero ? 6 : 3) && (
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.75 text-[11px] font-semibold ${a.text}`}
                     >
-                      +{cat.items.length - (isHero ? 5 : 3)} altri
+                      +{cat.items.length - (isHero ? 6 : 3)} altri
                     </span>
                   )}
                 </div>

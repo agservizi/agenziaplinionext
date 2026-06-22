@@ -12,43 +12,43 @@ export const webAgencyServiceDetails: WebAgencyServiceDetail[] = [
   {
     slug: "realizzazione-siti-web",
     title: "Realizzazione siti web",
-    shortDescription: "Siti web su misura orientati a performance, conversione e posizionamento locale.",
+    shortDescription: "Ti facciamo il sito. Pensato per farti trovare dai clienti e farti contattare.",
     heroDescription:
-      "Progettiamo e sviluppiamo siti web moderni, veloci e orientati ai risultati, con supporto strategico e operativo continuativo.",
+      "Costruiamo siti web che funzionano: veloci, facili da trovare su Google e pensati per il tuo tipo di attivita. Ti diciamo i costi prima di iniziare.",
     customerBenefits: [
-      "Sito progettato su obiettivi reali di business.",
-      "Struttura SEO base e performance ottimizzate.",
-      "Supporto locale post-pubblicazione.",
+      "Il sito lo progettiamo partendo da cosa vuoi ottenere, non da un template.",
+      "Lo facciamo veloce e visibile su Google.",
+      "Dopo la pubblicazione ci siamo ancora, non spariscano.",
     ],
     requiredInfo: [
-      "Descrizione attività e obiettivi del sito.",
-      "Materiali disponibili (logo, testi, foto).",
-      "Riferimenti servizi/prodotti da valorizzare.",
+      "Raccontaci cosa fai e cosa vuoi ottenere col sito.",
+      "Se hai logo, testi o foto, portali. Altrimenti ci arrangiamo.",
+      "Dicci quali servizi o prodotti vuoi mettere in evidenza.",
     ],
     notes: [
-      "Tempistiche variabili in base a complessità e materiali forniti.",
-      "È consigliato prevedere aggiornamenti periodici contenuti e pagine.",
+      "I tempi dipendono dalla complessita e dai materiali che hai gia pronti.",
+      "Un sito va aggiornato ogni tanto. Ti spieghiamo come o lo facciamo noi.",
     ],
   },
   {
     slug: "gestionali-su-misura",
     title: "Gestionali su misura",
-    shortDescription: "Sviluppo strumenti gestionali personalizzati per flussi interni e operatività.",
+    shortDescription: "Software costruito sul tuo modo di lavorare, non il contrario.",
     heroDescription:
-      "Realizziamo soluzioni gestionali su misura per semplificare processi, centralizzare dati e migliorare l'efficienza operativa.",
+      "Se usi ancora fogli Excel, post-it o metodi che non funzionano, costruiamo uno strumento fatto apposta per la tua attivita. Ti semplifica il lavoro di tutti i giorni.",
     customerBenefits: [
-      "Processi adattati al tuo modo reale di lavorare.",
-      "Riduzione attività manuali ripetitive.",
-      "Scalabilità progressiva del progetto.",
+      "Funziona come lavori tu, non come dice il software.",
+      "Fai meno cose a mano e perdi meno tempo.",
+      "Si puo espandere nel tempo, un pezzo alla volta.",
     ],
     requiredInfo: [
-      "Mappa dei processi attuali da ottimizzare.",
-      "Utenti coinvolti e ruoli operativi.",
-      "Obiettivi principali del gestionale.",
+      "Spiegaci come lavori adesso e cosa non funziona.",
+      "Chi lo usera e con quale ruolo.",
+      "Cosa vorresti che il gestionale facesse, anche a grandi linee.",
     ],
     notes: [
-      "I progetti gestionali richiedono una fase iniziale di analisi dettagliata.",
-      "Evoluzioni e moduli aggiuntivi possono essere pianificati in step successivi.",
+      "Serve una fase iniziale dove capiamo bene come lavori. Non si salta.",
+      "Se in futuro servono funzioni nuove, le aggiungiamo senza rifare tutto.",
     ],
   },
 ];

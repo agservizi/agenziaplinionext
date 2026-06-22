@@ -42,6 +42,8 @@ const PRODUCTION_BOOKING_BASES = new Set([
   "https://www.agenziaplinio.it",
 ]);
 
+const PRODUCTION_BOOKING_OVERRIDE = "https://booking.agenziaplinio.it";
+
 export function resolveBookingApiBase(hostname?: string) {
   const configuredBase = String(process.env.NEXT_PUBLIC_BOOKING_API_BASE || "").replace(/\/$/, "");
   const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
@@ -69,6 +71,11 @@ export function resolveClientBookingApiBase() {
   if (hostname === "localhost" || hostname === "127.0.0.1") {
     const base = resolveBookingApiBase(hostname);
     return base || window.location.origin;
+  }
+
+  // In production, use the booking tunnel
+  if (PRODUCTION_BOOKING_BASES.has(`https://${hostname}`)) {
+    return PRODUCTION_BOOKING_OVERRIDE;
   }
 
   return resolveBookingApiBase(hostname);
