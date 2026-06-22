@@ -249,8 +249,8 @@ export default function PrenotaFlowClient() {
         customerEmail,
         bagCount: totalBags,
         bookingDate: checkin,
-        expectedCheckIn: checkinTime || undefined,
-        expectedCheckOut: checkout + (checkoutTime ? `T${checkoutTime}` : ""),
+        expectedCheckIn: checkinTime ? `${checkin}T${checkinTime}` : undefined,
+        expectedCheckOut: checkoutTime ? `${checkout}T${checkoutTime}` : undefined,
         notes: combinedNotes || undefined,
       };
       if (customerPhone) payload.customerPhone = customerPhone;
