@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useInView, useReducedMotion } from "framer-motion";
+import dayjs from "dayjs";
+import "dayjs/locale/it";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { itIT } from "@mui/x-date-pickers/locales";
 
 /* ──────────────────────────────────────────────────────────────
    Constants
@@ -16,6 +22,91 @@ for (let h = 8; h <= 18; h++) {
 }
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+dayjs.locale("it");
+
+const datePickerTextFieldSx = {
+  "& .MuiInputBase-root, & .MuiPickersInputBase-root": {
+    height: 38,
+    borderRadius: "0.5rem",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    color: "#fff",
+    fontSize: "0.875rem",
+  },
+  "& .MuiOutlinedInput-notchedOutline, & .MuiPickersOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  "& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline, & .MuiPickersInputBase-root:hover .MuiPickersOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255, 255, 255, 0.25)",
+  },
+  "& .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline, & .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
+    borderColor: "rgba(34, 211, 238, 0.5)",
+  },
+  "& .MuiInputBase-input, & .MuiPickersInputBase-input, & .MuiPickersSectionList-root": {
+    padding: "8px 10px",
+    color: "#fff",
+    WebkitTextFillColor: "#fff",
+  },
+  "& .MuiPickersSectionList-sectionContent, & .MuiPickersSectionList-sectionSeparator": {
+    color: "#fff",
+    WebkitTextFillColor: "#fff",
+  },
+  "& input::placeholder": {
+    color: "rgba(255, 255, 255, 0.65)",
+    opacity: 1,
+  },
+  "& .MuiSvgIcon-root": {
+    color: "rgba(255, 255, 255, 0.55)",
+  },
+};
+
+const datePickerPaperSx = {
+  backgroundColor: "#0f1d32",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  color: "#fff !important",
+  "& .MuiPickersLayout-root, & .MuiDateCalendar-root, & .MuiDayCalendar-root": {
+    color: "#fff !important",
+  },
+  "& .MuiPickersLayout-root *": {
+    color: "rgba(255, 255, 255, 0.88) !important",
+    WebkitTextFillColor: "rgba(255, 255, 255, 0.88) !important",
+  },
+  "& .MuiPickersCalendarHeader-label": { color: "#fff !important" },
+  "& .MuiPickersArrowSwitcher-button, & .MuiPickersCalendarHeader-switchViewButton": {
+    color: "rgba(255, 255, 255, 0.7) !important",
+    WebkitTextFillColor: "rgba(255, 255, 255, 0.7) !important",
+  },
+  "& .MuiDayCalendar-weekDayLabel": {
+    color: "rgba(255, 255, 255, 0.6) !important",
+    WebkitTextFillColor: "rgba(255, 255, 255, 0.6) !important",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root": {
+    color: "rgba(255, 255, 255, 0.9) !important",
+    WebkitTextFillColor: "rgba(255, 255, 255, 0.9) !important",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root:hover": {
+    backgroundColor: "rgba(34, 211, 238, 0.14)",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root.Mui-disabled": {
+    color: "rgba(255, 255, 255, 0.34) !important",
+    WebkitTextFillColor: "rgba(255, 255, 255, 0.34) !important",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root.Mui-selected": {
+    backgroundColor: "#22d3ee",
+    color: "#082033 !important",
+    WebkitTextFillColor: "#082033 !important",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root.Mui-selected:hover": {
+    backgroundColor: "#67e8f9",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root.Mui-selected.Mui-disabled": {
+    color: "#082033 !important",
+    WebkitTextFillColor: "#082033 !important",
+  },
+  "& .MuiPickersDay-root.MuiPickersDay-today": {
+    borderColor: "rgba(34, 211, 238, 0.7) !important",
+  },
+};
 
 /* ──────────────────────────────────────────────────────────────
    Types
@@ -397,6 +488,11 @@ export default function LuggageBookingWidget() {
       </div>
 
       {/* ── Content ── */}
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        adapterLocale="it"
+        localeText={itIT.components.MuiLocalizationProvider.defaultProps.localeText}
+      >
       <div className="relative z-10 px-4 py-20 sm:px-6 md:py-28 lg:py-32">
         <div className="mx-auto max-w-5xl">
           {/* ── Hero text ── */}
@@ -514,14 +610,24 @@ export default function LuggageBookingWidget() {
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label htmlFor="luggage-checkin-date" className="mb-1 block text-[10px] text-white/40">Data</label>
-                              <input
-                                id="luggage-checkin-date"
-                                type="date"
-                                value={checkinDate}
-                                min={today}
-                                onChange={(e) => handleCheckinDateChange(e.target.value)}
-                                aria-label="Data di check-in"
-                                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
+                              <DatePicker
+                                value={checkinDate ? dayjs(checkinDate) : null}
+                                minDate={dayjs(today)}
+                                onChange={(value) => {
+                                  handleCheckinDateChange(value?.isValid() ? value.format("YYYY-MM-DD") : "");
+                                }}
+                                format="DD/MM/YYYY"
+                                slotProps={{
+                                  textField: {
+                                    id: "luggage-checkin-date",
+                                    fullWidth: true,
+                                    size: "small",
+                                    sx: datePickerTextFieldSx,
+                                  },
+                                  popper: { disablePortal: true },
+                                  desktopPaper: { sx: datePickerPaperSx },
+                                  mobilePaper: { sx: datePickerPaperSx },
+                                }}
                               />
                             </div>
                             <div>
@@ -547,14 +653,24 @@ export default function LuggageBookingWidget() {
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label htmlFor="luggage-checkout-date" className="mb-1 block text-[10px] text-white/40">Data</label>
-                              <input
-                                id="luggage-checkout-date"
-                                type="date"
-                                value={checkoutDate}
-                                min={checkinDate || today}
-                                onChange={(e) => setCheckoutDate(e.target.value)}
-                                aria-label="Data di check-out"
-                                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
+                              <DatePicker
+                                value={checkoutDate ? dayjs(checkoutDate) : null}
+                                minDate={dayjs(checkinDate || today)}
+                                onChange={(value) => {
+                                  setCheckoutDate(value?.isValid() ? value.format("YYYY-MM-DD") : "");
+                                }}
+                                format="DD/MM/YYYY"
+                                slotProps={{
+                                  textField: {
+                                    id: "luggage-checkout-date",
+                                    fullWidth: true,
+                                    size: "small",
+                                    sx: datePickerTextFieldSx,
+                                  },
+                                  popper: { disablePortal: true },
+                                  desktopPaper: { sx: datePickerPaperSx },
+                                  mobilePaper: { sx: datePickerPaperSx },
+                                }}
                               />
                             </div>
                             <div>
@@ -703,6 +819,7 @@ export default function LuggageBookingWidget() {
           </FadeUp>
         </div>
       </div>
+      </LocalizationProvider>
     </section>
   );
 }
