@@ -4,3 +4,8 @@ deploy-out
 deploy-out.zip
 booking-backend/node_modules
 *.log
+.env
+.env.*
+BUILD-ISSUE-HANDOFF.md
+CLAUDE.md
+.claude

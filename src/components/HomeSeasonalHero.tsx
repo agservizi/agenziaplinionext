@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Container from "@/components/Container";
 import SeasonalHeroObject from "@/components/SeasonalHeroObject";
+import HomeSplinePanel from "@/components/spline/HomeSplinePanel";
 import TextCycle from "@/components/ui/TextCycle";
 import { googleReviewsCount } from "@/lib/google-reviews";
 import {
@@ -63,24 +64,15 @@ function resolvePreviewSeasonalHero() {
 }
 
 export default function HomeSeasonalHero() {
-  const [activeHero, setActiveHero] = useState<ResolvedSeasonalHeroConfig | null>(null);
+  const [activeHero] = useState<ResolvedSeasonalHeroConfig | null>(() => resolvePreviewSeasonalHero() || getActiveSeasonalHero());
   const [anniversaryPanelOpen, setAnniversaryPanelOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState<boolean | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean | null>(() => checkIsOpen());
   const anniversaryActive = activeHero?.key === "anniversary-june-2026";
 
   useEffect(() => {
-    setActiveHero(resolvePreviewSeasonalHero() || getActiveSeasonalHero());
-  }, []);
-
-  useEffect(() => {
-    setIsOpen(checkIsOpen());
     const id = setInterval(() => setIsOpen(checkIsOpen()), 60_000);
     return () => clearInterval(id);
   }, []);
-
-  useEffect(() => {
-    if (!anniversaryActive) setAnniversaryPanelOpen(false);
-  }, [anniversaryActive]);
 
   return (
     <section className="relative isolate flex min-h-[calc(100svh-3.25rem)] flex-col items-stretch justify-start overflow-hidden bg-slate-950 pb-12 pt-24 text-white md:justify-center md:py-12">
@@ -488,63 +480,7 @@ export default function HomeSeasonalHero() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">I nostri servizi</p>
-                {isOpen === null ? null : isOpen ? (
-                  <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-400">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-                    Aperto ora
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 rounded-full bg-slate-500/15 px-2.5 py-1 text-[11px] font-semibold text-slate-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
-                    Chiuso
-                  </span>
-                )}
-              </div>
-
-              {/* Services 3×2 grid */}
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  { label: "Telefonia", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                  { label: "Energia", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><path d="M13 2L4.5 13.5H11L10 22l9.5-12H13L13 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/></svg> },
-                  { label: "SPID · PEC", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><path d="M12 2l8 4v6c0 5.55-3.84 10.74-8 12-4.16-1.26-8-6.45-8-12V6l8-4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                  { label: "Spedizioni", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><path d="M20 7L12 3L4 7M20 7v10l-8 4M20 7l-8 4M4 7v10l8 4M12 11v10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                  { label: "Pagamenti", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M2 10h20" stroke="currentColor" strokeWidth="1.5"/></svg> },
-                  { label: "Web Agency", icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M12 2c-2.8 2.8-4 6.2-4 10s1.2 7.2 4 10M12 2c2.8 2.8 4 6.2 4 10s-1.2 7.2-4 10M2 12h20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> },
-                ].map((svc) => (
-                  <div
-                    key={svc.label}
-                    className="group rounded-2xl border border-white/8 bg-white/5 p-3.5 text-center transition hover:border-cyan-400/30 hover:bg-white/10"
-                  >
-                    <div className="flex justify-center text-cyan-400 transition duration-300 group-hover:scale-110">
-                      {svc.icon}
-                    </div>
-                    <p className="mt-2 text-[11px] font-medium text-slate-300">{svc.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Google rating */}
-              <div className="flex items-center gap-3 rounded-2xl border border-amber-300/20 bg-amber-400/8 p-4">
-                <span className="text-lg leading-none text-amber-400">★★★★★</span>
-                <div>
-                  <p className="text-sm font-bold text-white">5.0 su Google</p>
-                  <p className="text-xs text-slate-400">{googleReviewsCount} recensioni verificate</p>
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-slate-500" fill="none">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                  <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-                <span>Via Plinio il Vecchio 72, Castellammare di Stabia (NA)</span>
-              </div>
-            </div>
+            <HomeSplinePanel isOpen={isOpen} />
           )}
         </motion.div>
       </Container>

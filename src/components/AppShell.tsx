@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GlobalParallaxLayer from "@/components/GlobalParallaxLayer";
 import PlatformFooter from "@/components/PlatformFooter";
+import MotionOrchestrator from "@/components/motion/MotionOrchestrator";
 
 const PlinioAssistantChat = dynamic(() => import("@/components/PlinioAssistantChat"), { ssr: false });
 import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
@@ -53,7 +54,8 @@ export default function AppShell({
   const isPlatformRoute = isClientRoute || isAdminRoute || isOperatorRoute;
   const showPlinioAssistant = !isAdminRoute && !isOperatorRoute && !isClientRoute;
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [clientUserLabel, setClientUserLabel] = useState("");
+  const clientUserLabel =
+    isClientRoute && pathname !== "/login" ? readClientPortalTokenPayload()?.username || "" : "";
   const adminSidebarCollapsed = useSyncExternalStore(
     subscribeAdminSidebarCollapsed,
     readAdminSidebarCollapsedSnapshot,
@@ -73,15 +75,6 @@ export default function AppShell({
     };
   }, []);
 
-
-  useEffect(() => {
-    if (!isClientRoute || pathname === "/login") {
-      setClientUserLabel("");
-      return;
-    }
-
-    setClientUserLabel(readClientPortalTokenPayload()?.username || "");
-  }, [isClientRoute, pathname]);
 
   const scrollTopButton = showScrollTop ? (
     <button
@@ -284,13 +277,13 @@ export default function AppShell({
   }
 
   return (
-    <>
+    <MotionOrchestrator>
       <Header />
       <GlobalParallaxLayer />
       <main id="main-content" className="min-h-screen bg-slate-950">{children}</main>
       <Footer />
       {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
       {scrollTopButton}
-    </>
+    </MotionOrchestrator>
   );
 }
