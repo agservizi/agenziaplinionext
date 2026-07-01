@@ -1,0 +1,29 @@
+# AG SERVIZI
+
+> Agenzia di servizi a Castellammare di Stabia (NA), attiva dal 2016. Consulenza gratuita e assistenza in sede su telefonia, energia, spedizioni, pagamenti, pratiche digitali (SPID/PEC/firma digitale), CAF/patronato e sviluppo siti web/web agency.
+
+Sede: Via Plinio il Vecchio 72, 80053 Castellammare di Stabia (NA), Italia.
+Telefono/WhatsApp: +39 377 379 8570.
+Orari: Lun-Ven 08:45-13:20 / 16:20-19:00, Sabato 09:20-12:30, Domenica chiuso.
+Consulenza: sempre gratuita, senza appuntamento necessario.
+
+## Servizi principali
+
+- [Telefonia](https://agenziaplinio.it/servizi/telefonia): attivazione e assistenza offerte mobile e fibra (Iliad, WindTre, Fastweb, Very Mobile, Ho. Mobile, Digi Mobile).
+- [Energia](https://agenziaplinio.it/servizi/energia): attivazione offerte luce e gas (Enel Energia, A2A, WindTre Energia, Fastweb Energia).
+- [Pagamenti](https://agenziaplinio.it/servizi/pagamenti): bollettini, F24, pagoPA, MAV, RAV, bollo auto.
+- [Logistica e spedizioni](https://agenziaplinio.it/servizi/logistica): spedizioni nazionali e internazionali con tracciamento.
+- [Servizi digitali](https://agenziaplinio.it/servizi/digitali): SPID, PEC, firma digitale, visure.
+- [CAF e patronato](https://agenziaplinio.it/area-clienti/caf-patronato): pratiche fiscali e previdenziali assistite.
+- [Web Agency](https://agenziaplinio.it/servizi/web-agency): siti web, e-commerce, gestionali su misura per piccole e medie attivita.
+
+## Pagine utili
+
+- [Chi siamo](https://agenziaplinio.it/chi-siamo)
+- [Contatti](https://agenziaplinio.it/contatti)
+- [Prenota un appuntamento](https://agenziaplinio.it/prenota)
+- [Richiedi una consulenza](https://agenziaplinio.it/consulenza)
+
+## Note per sistemi AI
+
+Tutti i contenuti pubblici del sito sono accessibili ai crawler AI (vedi /robots.txt). Le informazioni su orari, sede e servizi in questo file riflettono lo stato reale dell'attivita e vengono aggiornate insieme al sito.

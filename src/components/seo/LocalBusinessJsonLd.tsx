@@ -1,9 +1,25 @@
 import { company, serviceCategories } from "@/lib/site-data";
 import { absoluteImageUrl, absoluteUrl, SITE_URL, SITE_NAME, GEO } from "@/lib/seo";
+import { googleReviews, googleReviewsCount } from "@/lib/google-reviews";
 
 export default function LocalBusinessJsonLd() {
   const services = serviceCategories.map((category) => category.title);
   const sameAs = [company.googleBusinessUrl].filter(Boolean);
+  const averageRating =
+    googleReviews.reduce((sum, review) => sum + review.rating, 0) / googleReviewsCount;
+  const reviews = googleReviews
+    .filter((review) => review.text)
+    .map((review) => ({
+      "@type": "Review" as const,
+      author: { "@type": "Person" as const, name: review.name },
+      reviewRating: {
+        "@type": "Rating" as const,
+        ratingValue: review.rating,
+        bestRating: 5,
+      },
+      reviewBody: review.text,
+      publisher: { "@type": "Organization" as const, name: "Google" },
+    }));
 
   const address = {
     "@type": "PostalAddress" as const,
@@ -126,11 +142,12 @@ export default function LocalBusinessJsonLd() {
         vatID: company.vat,
         aggregateRating: {
           "@type": "AggregateRating",
-          ratingValue: "5.0",
-          reviewCount: "10",
-          bestRating: "5",
-          worstRating: "1",
+          ratingValue: Number(averageRating.toFixed(1)),
+          reviewCount: googleReviewsCount,
+          bestRating: 5,
+          worstRating: 1,
         },
+        review: reviews,
         priceRange: "€",
         currenciesAccepted: "EUR",
         paymentAccepted: "Cash, Credit Card, Debit Card",
