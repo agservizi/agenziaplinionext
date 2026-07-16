@@ -73,6 +73,29 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
       "La tariffa e giornaliera, per borsa.",
     ],
   },
+  {
+    slug: "fermo-deposito",
+    title: "Fermo deposito pacchi",
+    shortDescription:
+      "Custodia pacchi in agenzia da 0,50€ al giorno. Prenota online e ritira con codice LP.",
+    heroDescription:
+      "Hai un pacco in arrivo e non puoi ritirarlo? Prenota il fermo deposito: lo custodiamo in Via Plinio il Vecchio 72 fino al ritiro. Da 0,50 euro al giorno.",
+    customerBenefits: [
+      "Prenoti online e ricevi subito il codice LP.",
+      "Custodiamo il pacco in agenzia fino al ritiro.",
+      "Tariffa giornaliera chiara, a partire da 0,50€.",
+    ],
+    requiredInfo: [
+      "Nome e cognome del destinatario.",
+      "Data di ritiro prevista.",
+      "Telefono o email (consigliati).",
+      "Corriere e tracking, se li hai.",
+    ],
+    notes: [
+      "Il servizio e disponibile negli orari di apertura dell'agenzia.",
+      "La tariffa e giornaliera, per pacco.",
+    ],
+  },
 ];
 
 export function getLogisticsServiceBySlug(slug: string) {
@@ -83,6 +106,7 @@ const logisticsSlugByCatalogTitle: Record<string, string> = {
   "Spedizioni nazionali": "spedizioni-nazionali",
   "Spedizioni internazionali": "spedizioni-internazionali",
   "Deposito bagagli": "deposito-bagagli",
+  "Fermo deposito pacchi": "fermo-deposito",
 };
 
 export function getLogisticsServiceSlugByCatalogTitle(title: string) {

@@ -21,6 +21,7 @@ export default function LogisticaPage() {
       logisticsServiceDetails.map((service) => [service.title, `/servizi/logistica/${service.slug}`]),
     ),
     "Deposito bagagli": "/deposito-bagagli",
+    "Fermo deposito pacchi": "/fermo-deposito",
   };
 
   return (

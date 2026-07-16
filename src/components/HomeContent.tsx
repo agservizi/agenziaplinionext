@@ -8,6 +8,7 @@ import HomeServicesGrid from "./HomeServicesGrid";
 import HomeReviews from "./HomeReviews";
 import ClientAreaInteractiveHero from "./ClientAreaInteractiveHero";
 import LuggageBookingWidget from "./LuggageBookingWidget";
+import LockerPointBookingWidget from "./LockerPointBookingWidget";
 import { values } from "@/lib/site-data";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -397,6 +398,11 @@ export default function HomeContent() {
           Deposito Bagagli
       ═══════════════════════════════════════ */}
       <LuggageBookingWidget />
+
+      {/* ═══════════════════════════════════════
+          Fermo deposito pacchi (Locker Point)
+      ═══════════════════════════════════════ */}
+      <LockerPointBookingWidget />
 
       {/* ═══════════════════════════════════════
           CTA FINALE — white premium

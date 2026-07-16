@@ -115,6 +115,7 @@ export const serviceCategories: ServiceCategory[] = [
       { title: "Spedizioni nazionali", description: "Italia, con ritiro a domicilio o in sede." },
       { title: "Spedizioni internazionali", description: "Estero, con documentazione e tracking." },
       { title: "Deposito bagagli", description: "Prenota online, deposita in agenzia." },
+      { title: "Fermo deposito pacchi", description: "Custodia pacchi da 0,50€ al giorno." },
     ],
   },
   {

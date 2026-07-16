@@ -53,7 +53,19 @@ export default async function LogisticsServiceDetailPage({ params }: LogisticsSe
           <h1 className="text-4xl font-semibold text-white md:text-5xl">{service.title}</h1>
           <p className="max-w-3xl text-base text-slate-300 md:text-lg">{service.heroDescription}</p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/consulenza?service=logistica" className="cta-glass cta-glass-md cta-glass-primary-light">Richiedi supporto</Link>
+            {service.slug === "fermo-deposito" ? (
+              <Link href="/fermo-deposito" className="cta-glass cta-glass-md cta-glass-primary-light">
+                Prenota fermo deposito
+              </Link>
+            ) : service.slug === "deposito-bagagli" ? (
+              <Link href="/deposito-bagagli" className="cta-glass cta-glass-md cta-glass-primary-light">
+                Prenota deposito bagagli
+              </Link>
+            ) : (
+              <Link href="/consulenza?service=logistica" className="cta-glass cta-glass-md cta-glass-primary-light">
+                Richiedi supporto
+              </Link>
+            )}
             <Link href="/servizi/logistica" className="cta-glass cta-glass-md cta-glass-secondary">Torna a logistica</Link>
           </div>
         </Container>

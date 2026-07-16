@@ -111,6 +111,7 @@ export default function ContactForm({
           <option>Spedizioni nazionali</option>
           <option>Spedizioni internazionali</option>
           <option>Deposito bagagli</option>
+          <option>Fermo deposito pacchi</option>
           <option>SPID</option>
           <option>PEC</option>
           <option>Firma Digitale</option>
