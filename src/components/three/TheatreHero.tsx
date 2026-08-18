@@ -1,5 +1,6 @@
 "use client";
 
+import { Canvas } from "@react-three/fiber";
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useState } from "react";
 import { supportsImmersive3D } from "@/lib/motion/preferences";
@@ -10,7 +11,7 @@ type TheatreHeroProps = {
   className?: string;
 };
 
-/** Theatre.js timeline hook for hero — desktop only */
+/** Hero accent rings — desktop only, must render inside Canvas for R3F hooks */
 export default function TheatreHero({ className = "" }: TheatreHeroProps) {
   const [enabled, setEnabled] = useState(false);
 
@@ -23,7 +24,14 @@ export default function TheatreHero({ className = "" }: TheatreHeroProps) {
   return (
     <div aria-hidden="true" className={className}>
       <Suspense fallback={null}>
-        <TheatreHeroInner />
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 0, 4], fov: 50 }}
+          gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <TheatreHeroInner />
+        </Canvas>
       </Suspense>
     </div>
   );
