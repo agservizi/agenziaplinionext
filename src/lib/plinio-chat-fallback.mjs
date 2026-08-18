@@ -129,7 +129,7 @@ export function detectConversationScope(history = [], latestQuestion = "") {
 
 export function scopeStickyReply(scope) {
   if (scope === "telefonia") {
-    return "Restiamo sulla telefonia: posso aiutarti a confrontare WindTre, Fastweb e Iliad, verificare portabilita e documenti necessari. Dimmi se ti interessa mobile o internet casa.";
+    return "Restiamo sulla telefonia: posso aiutarti a confrontare Fastweb e Iliad, verificare portabilita e documenti necessari. Dimmi se ti interessa mobile o internet casa.";
   }
   if (scope === "energia") {
     return "Restiamo su luce e gas: posso aiutarti su attivazione, cambio fornitore e documenti utili (POD/PDR e bolletta).";
@@ -157,7 +157,7 @@ function scopeCapabilitiesReply(scope) {
     return "Sui pagamenti posso aiutarti con PagoPA, F24, bollettini, MAV/RAV, bonifici e bollo auto. Dimmi quale pratica devi fare e ti dico subito cosa portare.";
   }
   if (scope === "telefonia") {
-    return "Sulla telefonia posso aiutarti a confrontare WindTre, Fastweb e Iliad, valutare portabilita e scegliere tra mobile o internet casa.";
+    return "Sulla telefonia posso aiutarti a confrontare Fastweb e Iliad, valutare portabilita e scegliere tra mobile o internet casa.";
   }
   if (scope === "energia") {
     return "Su luce e gas posso guidarti su cambio fornitore, verifica documenti (POD/PDR) e stima indicativa della bolletta.";
@@ -207,7 +207,7 @@ function paymentsOverviewReply() {
 }
 
 function rechargeOverviewReply() {
-  return "Certo. In agenzia possiamo supportarti su ricariche telefoniche dei principali operatori (TIM, Vodafone, WindTre, Iliad, Fastweb e ho.), ricariche per contenuti digitali e gift card, Pay TV/streaming (es. DAZN, Netflix, SKY), console gaming e conti gioco. Dimmi quale ricarica ti serve e ti confermo subito cosa possiamo gestire operativamente.";
+  return "Certo. In agenzia possiamo supportarti su ricariche telefoniche dei principali operatori (TIM, Vodafone, Iliad, Fastweb e ho.), ricariche per contenuti digitali e gift card, Pay TV/streaming (es. DAZN, Netflix, SKY), console gaming e conti gioco. Dimmi quale ricarica ti serve e ti confermo subito cosa possiamo gestire operativamente.";
 }
 
 function ticketingOverviewReply() {
@@ -395,27 +395,27 @@ export function clientFallbackReply(question, history = []) {
   }
 
   if (effectiveScope === "telefonia" && includesAny(q, ["mobile", "sim", "solo mobile"])) {
-    return "Perfetto, andiamo sul mobile. Possiamo confrontare WindTre, Fastweb e Iliad su copertura nella tua zona, giga/minuti che usi e budget mensile. In genere servono documento, codice fiscale e numero da migrare (se vuoi portabilita). Vuoi mantenere il tuo numero attuale?";
+    return "Perfetto, andiamo sul mobile. Possiamo confrontare Fastweb e Iliad su copertura nella tua zona, giga/minuti che usi e budget mensile. In genere servono documento, codice fiscale e numero da migrare (se vuoi portabilita). Vuoi mantenere il tuo numero attuale?";
   }
 
   if (effectiveScope === "telefonia" && includesAny(q, ["casa", "internet casa", "fibra", "fisso", "solo casa"])) {
-    return "Perfetto, parliamo di internet casa. Possiamo confrontare WindTre, Fastweb e Iliad su copertura fibra/FWA, velocita disponibile e budget. In genere servono documento, codice fiscale e indirizzo di attivazione. Hai gia una linea attiva da migrare?";
+    return "Perfetto, parliamo di internet casa. Possiamo confrontare Fastweb e Iliad su copertura fibra/FWA, velocita disponibile e budget. In genere servono documento, codice fiscale e indirizzo di attivazione. Hai gia una linea attiva da migrare?";
   }
 
   if (effectiveScope === "telefonia" && assistantAskedPortabilityQuestion && confirms) {
-    return "Perfetto, procediamo con portabilita mobile. Per avviare la pratica in genere servono: documento, codice fiscale, numero da migrare e ICCID della SIM attuale. Se vuoi, nel prossimo passo ti preparo una checklist rapida per confronto WindTre/Fastweb/Iliad in base al tuo uso (giga/minuti) e budget.";
+    return "Perfetto, procediamo con portabilita mobile. Per avviare la pratica in genere servono: documento, codice fiscale, numero da migrare e ICCID della SIM attuale. Se vuoi, nel prossimo passo ti preparo una checklist rapida per confronto Fastweb/Iliad in base al tuo uso (giga/minuti) e budget.";
   }
 
   if (effectiveScope === "telefonia" && assistantAskedPortabilityQuestion && denies) {
-    return "Perfetto, allora valutiamo una nuova numerazione mobile. Per procedere in genere servono documento e codice fiscale. Se vuoi, ti aiuto a scegliere tra WindTre, Fastweb e Iliad partendo da giga/minuti e budget mensile.";
+    return "Perfetto, allora valutiamo una nuova numerazione mobile. Per procedere in genere servono documento e codice fiscale. Se vuoi, ti aiuto a scegliere tra Fastweb e Iliad partendo da giga/minuti e budget mensile.";
   }
 
   if (effectiveScope === "telefonia" && assistantAskedHomeMigrationQuestion && confirms) {
-    return "Perfetto, procediamo con migrazione internet casa. In genere servono documento, codice fiscale, codice migrazione della linea attuale e indirizzo di attivazione. Se vuoi, ti aiuto a confrontare WindTre/Fastweb/Iliad su copertura e velocita disponibile nel tuo indirizzo.";
+    return "Perfetto, procediamo con migrazione internet casa. In genere servono documento, codice fiscale, codice migrazione della linea attuale e indirizzo di attivazione. Se vuoi, ti aiuto a confrontare Fastweb/Iliad su copertura e velocita disponibile nel tuo indirizzo.";
   }
 
   if (effectiveScope === "telefonia" && assistantAskedHomeMigrationQuestion && denies) {
-    return "Perfetto, allora valutiamo una nuova attivazione internet casa. In genere servono documento, codice fiscale e indirizzo completo di attivazione. Se vuoi, partiamo da copertura e budget per confrontare WindTre, Fastweb e Iliad.";
+    return "Perfetto, allora valutiamo una nuova attivazione internet casa. In genere servono documento, codice fiscale e indirizzo completo di attivazione. Se vuoi, partiamo da copertura e budget per confrontare Fastweb e Iliad.";
   }
 
   if (effectiveScope && confirms && assistantAskedDocs) {
@@ -510,11 +510,17 @@ export function clientFallbackReply(question, history = []) {
   if (includesAny(q, ["firma digitale", "firma elettronica"])) {
     return "Per la firma digitale in genere servono documento valido, tessera sanitaria/codice fiscale, email e cellulare attivi, con smartphone per OTP e riconoscimento.";
   }
-  if (includesAny(q, ["windtre", "fastweb", "iliad", "cambio operatore", "migrazione", "confront", "quale operatore", "scegliere"])) {
-    return "Certo. Possiamo aiutarti a confrontare WindTre, Fastweb e Iliad in base a copertura, uso (voce/dati/fibra) e budget. In genere servono documento, codice fiscale e numero da migrare (se presente). Se vuoi, dimmi se ti interessa mobile o casa.";
+  if (includesAny(q, ["windtre luce", "windtre energia", "luce e gas windtre"])) {
+    return "Non gestiamo più WindTre Luce e Gas. Per luce e gas possiamo aiutarti con Enel Energia, A2A e Fastweb Energia. In genere servono documento, codice fiscale e ultima bolletta.";
+  }
+  if (includesAny(q, ["windtre"])) {
+    return "Non gestiamo più attivazioni WindTre. Per telefonia possiamo confrontare Fastweb e Iliad in base a copertura, uso e budget. Dimmi se ti interessa mobile o internet casa.";
+  }
+  if (includesAny(q, ["fastweb", "iliad", "cambio operatore", "migrazione", "confront", "quale operatore", "scegliere"])) {
+    return "Certo. Possiamo aiutarti a confrontare Fastweb e Iliad in base a copertura, uso (voce/dati/fibra) e budget. In genere servono documento, codice fiscale e numero da migrare (se presente). Se vuoi, dimmi se ti interessa mobile o casa.";
   }
   if (scope === "telefonia" && includesAny(q, ["quali gestori", "gestori", "operatori"])) {
-    return "Per telefonia possiamo supportarti su WindTre, Fastweb e Iliad. Possiamo confrontarli in base a copertura, budget e tipo di utilizzo.";
+    return "Per telefonia possiamo supportarti su Fastweb e Iliad. Possiamo confrontarli in base a copertura, budget e tipo di utilizzo.";
   }
   if (includesAny(q, ["luce", "gas", "energia", "bolletta"])) {
     return "Si, offriamo consulenza luce e gas. In genere servono documento, codice fiscale e ultima bolletta utile.";

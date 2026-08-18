@@ -198,7 +198,7 @@ export default function UtilityConsultingWorkspace({ area }: WorkspaceProps) {
           title: "Dettagli servizio telefonia",
           description: "Con questi dati possiamo proporti un piano più adatto a consumo e copertura.",
           providerLabel: "Operatore telefonico attuale",
-          providerPlaceholder: "Es. TIM, WindTre, Vodafone, Iliad",
+          providerPlaceholder: "Es. TIM, Vodafone, Iliad, Fastweb",
           monthlySpendLabel: "Spesa media mensile linea (€)",
           cityLabel: "Comune utilizzo principale",
           cityPlaceholder: "Comune dove utilizzi prevalentemente il servizio",

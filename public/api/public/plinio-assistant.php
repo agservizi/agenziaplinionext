@@ -390,7 +390,7 @@ function plinio_detect_intents_from_knowledge(string $text, ?string $scope = nul
 function plinio_scope_sticky_followup_reply(string $scope): string
 {
     return match ($scope) {
-        'telefonia' => "Restiamo sulla telefonia. Posso aiutarti su confronto tra WindTre/Fastweb/Iliad, copertura, portabilita e documenti necessari. Dimmi se ti interessa mobile o internet casa.",
+        'telefonia' => "Restiamo sulla telefonia. Posso aiutarti su confronto tra Fastweb/Iliad, copertura, portabilita e documenti necessari. Dimmi se ti interessa mobile o internet casa.",
         'energia' => "Restiamo su luce e gas. Posso aiutarti su nuova attivazione, cambio fornitore e documenti necessari (POD/PDR e bolletta). Dimmi se parliamo di luce, gas o entrambe.",
         'pagamenti' => "Restiamo sui pagamenti. Posso guidarti su pagoPA, F24, bollettini, MAV/RAV e bollo auto. Dimmi quale pratica devi completare.",
         'spid' => "Restiamo sullo SPID. Posso guidarti sui documenti necessari e sui prossimi passi per l'attivazione.",
@@ -423,7 +423,7 @@ function plinio_scope_capabilities_reply(string $scope): ?string
 {
     return match ($scope) {
         'pagamenti' => "Sui pagamenti posso aiutarti con PagoPA, F24, bollettini, MAV/RAV, bonifici e bollo auto. Dimmi quale pratica devi fare e ti dico subito cosa portare.",
-        'telefonia' => "Sulla telefonia posso aiutarti a confrontare WindTre, Fastweb e Iliad, valutare portabilita e scegliere tra mobile o internet casa.",
+        'telefonia' => "Sulla telefonia posso aiutarti a confrontare Fastweb e Iliad, valutare portabilita e scegliere tra mobile o internet casa.",
         'energia' => "Su luce e gas posso guidarti su cambio fornitore, verifica documenti (POD/PDR) e stima indicativa della bolletta.",
         'spedizioni' => "Sulle spedizioni posso aiutarti con preventivo indicativo nazionale/internazionale, tracking e documenti utili per spedire.",
         'spid' => "Per SPID posso spiegarti requisiti, documenti necessari, livello di accesso e costi indicativi.",
@@ -461,27 +461,27 @@ function plinio_scope_guided_followup_reply(string $scope, string $lastUserRaw =
         $assistantAskedHomeMigration = plinio_contains_any($lastAssistant, ['hai gia una linea attiva da migrare']) > 0;
 
         if ($assistantAskedPortability && $isYes) {
-            return "Perfetto, procediamo con portabilita mobile. Per avviare la pratica in genere servono: documento, codice fiscale, numero da migrare e ICCID della SIM attuale. Se vuoi, nel prossimo passo ti preparo una checklist rapida per confronto WindTre/Fastweb/Iliad in base al tuo uso (giga/minuti) e budget.";
+            return "Perfetto, procediamo con portabilita mobile. Per avviare la pratica in genere servono: documento, codice fiscale, numero da migrare e ICCID della SIM attuale. Se vuoi, nel prossimo passo ti preparo una checklist rapida per confronto Fastweb/Iliad in base al tuo uso (giga/minuti) e budget.";
         }
 
         if ($assistantAskedPortability && $isNo) {
-            return "Perfetto, allora valutiamo una nuova numerazione mobile. Per procedere in genere servono documento e codice fiscale. Se vuoi, ti aiuto a scegliere tra WindTre, Fastweb e Iliad partendo da giga/minuti e budget mensile.";
+            return "Perfetto, allora valutiamo una nuova numerazione mobile. Per procedere in genere servono documento e codice fiscale. Se vuoi, ti aiuto a scegliere tra Fastweb e Iliad partendo da giga/minuti e budget mensile.";
         }
 
         if ($assistantAskedHomeMigration && $isYes) {
-            return "Perfetto, procediamo con migrazione internet casa. In genere servono documento, codice fiscale, codice migrazione della linea attuale e indirizzo di attivazione. Se vuoi, ti aiuto a confrontare WindTre/Fastweb/Iliad su copertura e velocita disponibile nel tuo indirizzo.";
+            return "Perfetto, procediamo con migrazione internet casa. In genere servono documento, codice fiscale, codice migrazione della linea attuale e indirizzo di attivazione. Se vuoi, ti aiuto a confrontare Fastweb/Iliad su copertura e velocita disponibile nel tuo indirizzo.";
         }
 
         if ($assistantAskedHomeMigration && $isNo) {
-            return "Perfetto, allora valutiamo una nuova attivazione internet casa. In genere servono documento, codice fiscale e indirizzo completo di attivazione. Se vuoi, partiamo da copertura e budget per confrontare WindTre, Fastweb e Iliad.";
+            return "Perfetto, allora valutiamo una nuova attivazione internet casa. In genere servono documento, codice fiscale e indirizzo completo di attivazione. Se vuoi, partiamo da copertura e budget per confrontare Fastweb e Iliad.";
         }
 
         if ($mobileIntent) {
-            return "Perfetto, andiamo sul mobile. Possiamo confrontare WindTre, Fastweb e Iliad su copertura nella tua zona, giga/minuti che usi e budget mensile. Per procedere in genere servono documento, codice fiscale e numero da migrare (se vuoi portabilita). Vuoi mantenere il tuo numero attuale?";
+            return "Perfetto, andiamo sul mobile. Possiamo confrontare Fastweb e Iliad su copertura nella tua zona, giga/minuti che usi e budget mensile. Per procedere in genere servono documento, codice fiscale e numero da migrare (se vuoi portabilita). Vuoi mantenere il tuo numero attuale?";
         }
 
         if ($homeIntent) {
-            return "Perfetto, parliamo di internet casa. Possiamo confrontare WindTre, Fastweb e Iliad su copertura fibra/FWA, velocita disponibile e budget. In genere servono documento, codice fiscale e indirizzo di attivazione. Hai gia una linea attiva da migrare?";
+            return "Perfetto, parliamo di internet casa. Possiamo confrontare Fastweb e Iliad su copertura fibra/FWA, velocita disponibile e budget. In genere servono documento, codice fiscale e indirizzo di attivazione. Hai gia una linea attiva da migrare?";
         }
     }
 
@@ -799,7 +799,7 @@ function plinio_pagamenti_customer_overview_reply(): string
 
 function plinio_ricariche_customer_overview_reply(): string
 {
-    return "Certo. In agenzia possiamo supportarti su ricariche telefoniche dei principali operatori (TIM, Vodafone, WindTre, Iliad, Fastweb e ho.), ricariche per contenuti digitali e gift card, Pay TV/streaming (es. DAZN, Netflix, SKY), console gaming e conti gioco. Dimmi quale ricarica ti serve e ti confermo subito cosa possiamo gestire operativamente.";
+    return "Certo. In agenzia possiamo supportarti su ricariche telefoniche dei principali operatori (TIM, Vodafone, Iliad, Fastweb e ho.), ricariche per contenuti digitali e gift card, Pay TV/streaming (es. DAZN, Netflix, SKY), console gaming e conti gioco. Dimmi quale ricarica ti serve e ti confermo subito cosa possiamo gestire operativamente.";
 }
 
 function plinio_biglietteria_customer_overview_reply(): string
@@ -2497,7 +2497,7 @@ function plinio_suggested_prompts(?string $scope, string $question): array
 
     $byScope = [
         'telefonia' => [
-            'Mi aiuti a scegliere tra WindTre, Fastweb e Iliad?',
+            'Mi aiuti a scegliere tra Fastweb e Iliad?',
             'Che documenti servono per la portabilita?',
             'Meglio mobile o internet casa nel mio caso?',
             'Posso mantenere il mio numero?',
@@ -3237,7 +3237,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
     $indecisionIntent = plinio_contains_any($last, ['non so', 'indeciso', 'non sono sicuro', 'non so cosa scegliere']) > 0;
     if ($indecisionIntent) {
         if ($scope === 'telefonia') {
-            return "Ti aiuto io a scegliere in modo pratico tra WindTre, Fastweb e Iliad. Per guidarti bene, partiamo da tre punti: uso principale (chiamate/dati), copertura nella tua zona e budget mensile. Se mi dici se ti interessa mobile o internet casa, ti preparo un confronto chiaro passo per passo.";
+            return "Ti aiuto io a scegliere in modo pratico tra Fastweb e Iliad. Per guidarti bene, partiamo da tre punti: uso principale (chiamate/dati), copertura nella tua zona e budget mensile. Se mi dici se ti interessa mobile o internet casa, ti preparo un confronto chiaro passo per passo.";
         }
         return "Certo, ti aiuto volentieri. Hai bisogno di assistenza per pagamenti, SPID, PEC, telefonia, luce e gas oppure spedizioni?";
     }
@@ -3307,7 +3307,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
     $phoneComparisonIntent = $scope === 'telefonia'
         && plinio_contains_any($last, ['scegli', 'scegliere', 'confront', 'migliore', 'quale operatore', 'quale conviene', 'gestori', 'operatori']) > 0;
     if ($phoneComparisonIntent) {
-        return "Certo. Possiamo aiutarti a confrontare WindTre, Fastweb e Iliad in base a copertura, uso (mobile o casa) e budget. In genere servono documento, codice fiscale e numero da migrare se presente. Dimmi se ti interessa mobile o internet casa.";
+        return "Certo. Possiamo aiutarti a confrontare Fastweb e Iliad in base a copertura, uso (mobile o casa) e budget. In genere servono documento, codice fiscale e numero da migrare se presente. Dimmi se ti interessa mobile o internet casa.";
     }
 
     if ($scope === 'energia' && plinio_contains_any($last, ['gestori', 'operatori', 'fornitori']) > 0) {
@@ -3422,7 +3422,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
     $asksServices = plinio_contains_any($last, ['servizi', 'cosa fate', 'fate', 'offrite']) > 0;
     if ($asksServices) {
         if ($scope === 'telefonia') {
-            return "Per la telefonia possiamo supportarti su nuove attivazioni, cambio operatore e confronto offerte tra WindTre, Fastweb e Iliad. Possiamo valutare insieme se conviene una soluzione mobile o internet casa, in base a copertura e utilizzo reale. Se vuoi, iniziamo subito dal tuo profilo d'uso e dal numero da mantenere (se hai portabilita).";
+            return "Per la telefonia possiamo supportarti su nuove attivazioni, cambio operatore e confronto offerte tra Fastweb e Iliad. Possiamo valutare insieme se conviene una soluzione mobile o internet casa, in base a copertura e utilizzo reale. Se vuoi, iniziamo subito dal tuo profilo d'uso e dal numero da mantenere (se hai portabilita).";
         }
         if ($scope === 'pagamenti') {
             if (plinio_contains_any($last, ['biglietti', 'biglietto', 'biglietteria', 'treno', 'bus', 'metro', 'abbonamento', 'sosta', 'parcheggio', 'parchi', 'musei']) > 0) {
@@ -3433,7 +3433,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
             }
             return plinio_pagamenti_customer_overview_reply();
         }
-        return "Offriamo supporto su: pagamenti (PagoPA, F24, bollettini, MAV/RAV, bonifici), SPID/PEC/firma digitale, telefonia (WindTre, Fastweb, Iliad), consulenza luce e gas, spedizioni nazionali e internazionali. Dimmi l'ambito e ti guido sul servizio giusto.";
+        return "Offriamo supporto su: pagamenti (PagoPA, F24, bollettini, MAV/RAV, bonifici), SPID/PEC/firma digitale, telefonia (Fastweb, Iliad), consulenza luce e gas, spedizioni nazionali e internazionali. Dimmi l'ambito e ti guido sul servizio giusto.";
     }
 
     $asksDocs = plinio_contains_any($last, ['document', 'cosa serve', 'che serve', 'necessari', 'necessario', 'cosa occorre', 'che occorre', 'occorre']) > 0;
@@ -3455,7 +3455,7 @@ function plinio_rule_based_response(array $messages, ?string $focusScope = null)
             'windtre', 'fastweb', 'iliad', 'offerta', 'tariffa', 'sim', 'fibra'
         ]) > 0;
     if ($telephonyDeepDiveIntent) {
-        return "Perfetto, restiamo sulla telefonia. Per consigliarti bene tra WindTre, Fastweb e Iliad valutiamo: copertura nella tua zona, quanti giga o minuti usi, se vuoi mantenere il numero e se ti serve solo mobile o anche internet casa. In genere per partire servono documento, codice fiscale e numero da migrare (se fai portabilita). Se vuoi, iniziamo dal tuo obiettivo principale e ti accompagno fino alla scelta più adatta.";
+        return "Perfetto, restiamo sulla telefonia. Per consigliarti bene tra Fastweb e Iliad valutiamo: copertura nella tua zona, quanti giga o minuti usi, se vuoi mantenere il numero e se ti serve solo mobile o anche internet casa. In genere per partire servono documento, codice fiscale e numero da migrare (se fai portabilita). Se vuoi, iniziamo dal tuo obiettivo principale e ti accompagno fino alla scelta più adatta.";
     }
 
     $complexIntent = plinio_contains_any($last, [
@@ -3479,7 +3479,7 @@ function plinio_local_fallback(array $messages, ?string $focusScope = null): str
     $question = plinio_normalize($questionRaw);
     if ($question === '') {
         if ($focusScope === 'telefonia') {
-            return "Continuiamo pure sulla telefonia. Posso aiutarti a scegliere tra WindTre, Fastweb e Iliad in base a uso, copertura e budget, e poi indicarti i documenti utili per procedere.";
+            return "Continuiamo pure sulla telefonia. Posso aiutarti a scegliere tra Fastweb e Iliad in base a uso, copertura e budget, e poi indicarti i documenti utili per procedere.";
         }
         return "Posso aiutarti su pagamenti, SPID/PEC, telefonia, spedizioni e servizi digitali. Dimmi pure cosa ti serve.";
     }

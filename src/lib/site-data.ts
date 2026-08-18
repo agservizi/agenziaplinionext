@@ -87,7 +87,6 @@ export const serviceCategories: ServiceCategory[] = [
     icon: "phone",
     items: [
       { title: "Iliad Space", description: "Mobile e fibra, ti spieghiamo le differenze." },
-      { title: "WindTre", description: "Casa, mobile e business." },
       { title: "Fastweb", description: "Fibra e mobile, verifica copertura inclusa." },
       { title: "Very Mobile", description: "Poche complicazioni, prezzo fisso." },
       { title: "Ho. Mobile", description: "Attivazione e portabilita in sede." },
@@ -102,7 +101,6 @@ export const serviceCategories: ServiceCategory[] = [
     items: [
       { title: "Enel Energia", description: "Luce e gas, ti seguiamo nel cambio." },
       { title: "A2A Energia", description: "Confrontiamo i costi con la tua bolletta." },
-      { title: "WindTre Luce e Gas", description: "Se hai gia WindTre, vediamo il pacchetto." },
       { title: "Fastweb Energia", description: "Luce e gas con gestione da app." },
     ],
   },

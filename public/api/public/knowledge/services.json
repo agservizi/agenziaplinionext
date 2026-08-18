@@ -93,7 +93,6 @@
       "name": "Telefonia",
       "description": "Attivazione nuove linee, cambio operatore, portabilita numero e consulenza offerte.",
       "operators": [
-        "WindTre",
         "Fastweb",
         "Iliad"
       ],

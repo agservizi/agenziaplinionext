@@ -258,6 +258,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    if (staticExportEnabled) {
+      return [];
+    }
+    return [
+      { source: "/servizi/telefonia/windtre", destination: "/servizi/telefonia", permanent: true },
+      { source: "/servizi/energia/windtre-luce-gas", destination: "/servizi/energia", permanent: true },
+    ];
+  },
   turbopack: {
     root: __dirname,
   },

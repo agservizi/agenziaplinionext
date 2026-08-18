@@ -98,14 +98,12 @@ export default function ContactForm({
           <option>Tassa di possesso</option>
           <option>Versamento passaporto</option>
           <option>Iliad Space</option>
-          <option>WindTre</option>
           <option>Fastweb</option>
           <option>Very Mobile</option>
           <option>Ho. Mobile</option>
           <option>Digi Mobile</option>
           <option>Enel Energia</option>
           <option>A2A Energia</option>
-          <option>WindTre Luce e Gas</option>
           <option>Fastweb Energia</option>
           <option>Altri operatori energia</option>
           <option>Spedizioni nazionali</option>

@@ -26,12 +26,12 @@ run("energia follow-up non devia su tracking", () => {
 run("telefonia follow-up resta in telefonia", () => {
   const history = [
     { role: "assistant", content: "Ciao, sono Plinio Assistant." },
-    { role: "user", content: "Mi aiuti a scegliere tra WindTre, Fastweb e Iliad?" },
+    { role: "user", content: "Mi aiuti a scegliere tra Fastweb e Iliad?" },
     { role: "assistant", content: "Certo, possiamo confrontare gli operatori in base a copertura e budget." },
   ];
   const reply = clientFallbackReply("quali gestori?", history);
 
-  assert.match(reply, /(WindTre|Fastweb|Iliad)/);
+  assert.match(reply, /(Fastweb|Iliad)/);
   assert.doesNotMatch(reply.toLowerCase(), /(tracking|corriere|spedizion)/);
 });
 

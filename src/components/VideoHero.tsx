@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { Link as ViewLink } from "next-view-transitions";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
@@ -10,7 +10,10 @@ import { ShimmerButton } from "@/components/ui/21st/shimmer-button";
 const ACCENT = "#5E0ED7";
 const ACCENT_LIGHT = "#a855f7";
 const CYAN = "#22d3ee";
-const VIDEO_URL =
+const HERO_VIDEO_WEBM = "/video/hero-ag-servizi.webm";
+const HERO_VIDEO_MP4 = "/video/hero-ag-servizi.mp4";
+const HERO_POSTER = "/video/hero-ag-servizi-poster.webp";
+const LEGACY_VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260517_222138_3e3205be-3364-417b-a64a-bfe087acbec4.mp4";
 
 const SPRING_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -97,6 +100,7 @@ export default function VideoHero({
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [useLegacyVideo, setUseLegacyVideo] = useState(false);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -155,23 +159,41 @@ export default function VideoHero({
         className="pointer-events-none absolute inset-0"
         style={{ y: reduced ? 0 : videoY }}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="h-[120%] w-full object-cover"
-          style={{ opacity: 0.45 }}
-        >
-          <source src={VIDEO_URL} type="video/mp4" />
-        </video>
+        {reduced ? (
+          <div
+            className="h-[120%] w-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${HERO_POSTER})`, opacity: 0.7 }}
+            aria-hidden="true"
+          />
+        ) : (
+          <video
+            key={useLegacyVideo ? "legacy" : "local"}
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            poster={HERO_POSTER}
+            onError={() => setUseLegacyVideo(true)}
+            className="h-[120%] w-full object-cover"
+            style={{ opacity: 0.72 }}
+          >
+            {useLegacyVideo ? (
+              <source src={LEGACY_VIDEO_URL} type="video/mp4" />
+            ) : (
+              <>
+                <source src={HERO_VIDEO_WEBM} type="video/webm" />
+                <source src={HERO_VIDEO_MP4} type="video/mp4" />
+              </>
+            )}
+          </video>
+        )}
       </motion.div>
 
-      {/* ── Cinematic dark overlay ── */}
-      <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80" />
-      <div className="absolute inset-0 bg-linear-to-r from-black/50 via-transparent to-transparent" />
+      {/* ── Cinematic dark overlay (left only, so the nexus stays visible) ── */}
+      <div className="absolute inset-0 bg-linear-to-b from-black/35 via-transparent to-black/50" />
+      <div className="absolute inset-0 bg-linear-to-r from-black/55 via-black/15 to-transparent" />
 
       {/* ── Film grain texture ── */}
       <div
@@ -301,7 +323,7 @@ export default function VideoHero({
             if (isPlaying) {
               videoRef.current.pause();
             } else {
-              videoRef.current.play();
+              void videoRef.current.play();
             }
             setIsPlaying(!isPlaying);
           }

@@ -9,7 +9,7 @@ export function generateMetadata() {
   return buildMetadata({
     title: "Telefonia Mobile e Fibra",
     description:
-      "AG SERVIZI a Castellammare di Stabia: attivazioni Iliad, WindTre, Fastweb e operatori mobile con consulenza dedicata.",
+      "AG SERVIZI a Castellammare di Stabia: attivazioni Iliad, Fastweb e operatori mobile con consulenza dedicata.",
     path: "/servizi/telefonia",
   });
 }
@@ -18,7 +18,6 @@ export default function TelefoniaPage() {
   const category = serviceCategories.find((item) => item.id === "telefonia");
   const cardLinksByTitle: Record<string, string> = {
     "Iliad Space": "/servizi/telefonia/iliad-space",
-    WindTre: "/servizi/telefonia/windtre",
     Fastweb: "/servizi/telefonia/fastweb",
     "Very Mobile": "/servizi/telefonia/very-mobile",
     "Ho. Mobile": "/servizi/telefonia/ho-mobile",
@@ -65,7 +64,7 @@ export default function TelefoniaPage() {
               Partner selezionati
             </p>
             <p className="mt-3 text-base text-slate-200">
-              Supporto dedicato per offerte Iliad, WindTre, Fastweb e operatori
+              Supporto dedicato per offerte Iliad, Fastweb e operatori
               mobile con assistenza in sede.
             </p>
           </div>

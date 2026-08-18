@@ -52,27 +52,6 @@ export const energyServiceDetails: EnergyServiceDetail[] = [
     ],
   },
   {
-    slug: "windtre-luce-gas",
-    title: "WindTre Luce e Gas",
-    shortDescription: "Luce e gas WindTre. Se hai gia WindTre mobile, vediamo se conviene il pacchetto.",
-    heroDescription:
-      "Ti aiutiamo con le offerte WindTre per luce e gas. Se hai gia la linea mobile, controlliamo se ci sono vantaggi ad avere tutto insieme.",
-    customerBenefits: [
-      "Se hai gia WindTre, vediamo se il pacchetto integrato ti fa risparmiare.",
-      "Controlliamo i passaggi contrattuali prima di procedere.",
-      "Ti seguiamo dall'inizio alla fine dell'attivazione.",
-    ],
-    requiredInfo: [
-      "Documento di identita e codice fiscale.",
-      "Indirizzo di fornitura e recapiti aggiornati.",
-      "Bolletta precedente con dati POD/PDR.",
-    ],
-    notes: [
-      "Promozioni e condizioni possono cambiare nel tempo.",
-      "Controlla se ci sono servizi opzionali inclusi nell'offerta.",
-    ],
-  },
-  {
     slug: "fastweb-energia",
     title: "Fastweb Energia",
     shortDescription: "Fastweb Energia per luce e gas. Vediamo i costi e gestiamo la pratica.",
@@ -102,7 +81,6 @@ export function getEnergyServiceBySlug(slug: string) {
 const energySlugByCatalogTitle: Record<string, string> = {
   "Enel Energia": "enel-energia",
   "A2A Energia": "a2a-energia",
-  "WindTre Luce e Gas": "windtre-luce-gas",
   "Fastweb Energia": "fastweb-energia",
 };
 

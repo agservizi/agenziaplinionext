@@ -43,7 +43,7 @@ const MAPS_PLACE_QUERY = "AG SERVIZI VIA PLINIO 72 DI CAVALIERE CARMINE";
 const QUICK_PROMPT_POOL = [
   "Come faccio ad attivare lo SPID?",
   "Che documenti servono per la PEC?",
-  "Mi aiuti a scegliere tra WindTre, Fastweb e Iliad?",
+  "Mi aiuti a scegliere tra Fastweb e Iliad?",
   "Fate attivazioni luce e gas?",
   "Fate pagamenti pagoPA, F24 o bollettini?",
   "Cosa serve per una spedizione nazionale?",

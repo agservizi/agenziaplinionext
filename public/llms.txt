@@ -9,8 +9,8 @@ Consulenza: sempre gratuita, senza appuntamento necessario.
 
 ## Servizi principali
 
-- [Telefonia](https://agenziaplinio.it/servizi/telefonia): attivazione e assistenza offerte mobile e fibra (Iliad, WindTre, Fastweb, Very Mobile, Ho. Mobile, Digi Mobile).
-- [Energia](https://agenziaplinio.it/servizi/energia): attivazione offerte luce e gas (Enel Energia, A2A, WindTre Energia, Fastweb Energia).
+- [Telefonia](https://agenziaplinio.it/servizi/telefonia): attivazione e assistenza offerte mobile e fibra (Iliad, Fastweb, Very Mobile, Ho. Mobile, Digi Mobile).
+- [Energia](https://agenziaplinio.it/servizi/energia): attivazione offerte luce e gas (Enel Energia, A2A, Fastweb Energia).
 - [Pagamenti](https://agenziaplinio.it/servizi/pagamenti): bollettini, F24, pagoPA, MAV, RAV, bollo auto.
 - [Logistica e spedizioni](https://agenziaplinio.it/servizi/logistica): spedizioni nazionali e internazionali con tracciamento.
 - [Servizi digitali](https://agenziaplinio.it/servizi/digitali): SPID, PEC, firma digitale, visure.

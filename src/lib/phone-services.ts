@@ -57,50 +57,6 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     ],
   },
   {
-    slug: "windtre",
-    title: "WindTre",
-    shortDescription:
-      "Mobile, casa e fibra WindTre. Ti aiutiamo a scegliere e gestiamo tutto noi.",
-    heroDescription:
-      "Ci dici come usi il telefono e internet, noi ti facciamo vedere le offerte WindTre che hanno senso. Poi gestiamo portabilita, documenti e attivazione.",
-    customerBenefits: [
-      "Confrontiamo le offerte mobile in base a quanto navighi e chiami.",
-      "Controlliamo la copertura fibra al tuo indirizzo prima di partire.",
-      "Ci occupiamo noi della portabilita e della migrazione della linea fissa.",
-      "Ti diciamo i tempi reali e seguiamo la pratica fino all'attivazione.",
-    ],
-    requiredInfo: [
-      "Documento di identità valido.",
-      "Codice fiscale.",
-      "Numero da portare e dati intestatario in caso di portabilità mobile.",
-      "Per linea casa: indirizzo completo e, se disponibile, codice migrazione operatore attuale.",
-    ],
-    notes: [
-      "Per le offerte mobili, copertura 5G soggetta a disponibilità area e dispositivo compatibile.",
-      "Per il fisso, l'attivazione dipende dalla tecnologia disponibile all'indirizzo (FTTH/FTTC/FWA).",
-      "Le condizioni economiche possono variare in base al periodo e alle campagne commerciali attive.",
-      "In caso di migrazione, dati anagrafici e linea devono risultare coerenti per evitare ritardi.",
-    ],
-    officialSources: [
-      {
-        label: "Offerte mobile WindTre",
-        url: "https://www.windtre.it/offerte-mobile/",
-      },
-      {
-        label: "Offerte internet casa WindTre",
-        url: "https://www.windtre.it/offerte-internet-casa/",
-      },
-      {
-        label: "Verifica copertura rete fissa",
-        url: "https://www.windtre.it/verifica-copertura/",
-      },
-      {
-        label: "Copertura rete mobile",
-        url: "https://www.windtre.it/copertura/",
-      },
-    ],
-  },
-  {
     slug: "fastweb",
     title: "Fastweb",
     shortDescription:
@@ -257,7 +213,6 @@ export function getPhoneServiceBySlug(slug: string) {
 
 const phoneSlugByCatalogTitle: Record<string, string> = {
   "Iliad Space": "iliad-space",
-  WindTre: "windtre",
   Fastweb: "fastweb",
   "Very Mobile": "very-mobile",
   "Ho. Mobile": "ho-mobile",

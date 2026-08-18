@@ -33,7 +33,6 @@ AG SERVIZI è aperta dal 1 giugno 2016. Offre oltre 30 servizi a privati e azien
 ## SERVIZI OFFERTI
 
 ### TELEFONIA
-- WindTre: offerte mobile e internet casa (fibra/FTTC/FWA)
 - Fastweb Mobile e Fastweb Casa
 - Iliad: offerte sim e Iliad Space (fibra)
 - Portabilità numerica assistita
@@ -41,7 +40,7 @@ AG SERVIZI è aperta dal 1 giugno 2016. Offre oltre 30 servizi a privati e azien
 
 ### ENERGIA — LUCE E GAS
 - Attivazione e cambio fornitore luce e gas
-- Operatori gestiti: Enel Energia, A2A Energia, WindTre Luce&Gas, Fastweb Energia
+- Operatori gestiti: Enel Energia, A2A Energia, Fastweb Energia
 - Documenti richiesti: bolletta recente con POD (luce) e/o PDR (gas) + documento d'identità + codice fiscale + IBAN
 - Tempi attivazione: 2–5 giorni lavorativi
 
