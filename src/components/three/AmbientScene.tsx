@@ -41,9 +41,10 @@ function BrandOrbs() {
   const group = useRef<Group>(null);
   const progress = useScrollProgress();
 
-  useFrame(({ clock, pointer }) => {
+  useFrame((state) => {
     if (!group.current) return;
-    const t = clock.getElapsedTime();
+    const { pointer } = state;
+    const t = state.clock.elapsedTime;
     const velocity = getScrollVelocity();
     group.current.rotation.y = t * 0.09 + progress * Math.PI * 0.42 + pointer.x * 0.18;
     group.current.rotation.x = Math.sin(t * 0.22) * 0.07 + pointer.y * 0.12;

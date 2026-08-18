@@ -22,43 +22,47 @@ const DEFAULTS: RingValues = {
   glow: 0.22,
 };
 
+const RINGS_CONFIG = {
+  rotationY: types.number(DEFAULTS.rotationY, { range: [0, Math.PI * 2] }),
+  y: types.number(DEFAULTS.y, { range: [-2, 2] }),
+  scale: types.number(DEFAULTS.scale, { range: [0.4, 1.6] }),
+  glow: types.number(DEFAULTS.glow, { range: [0, 1] }),
+} as const;
+
+function createHeroTheatre() {
+  const project = getProject("AG Hero", { state: homeHeroTheatreState });
+  const sheet = project.sheet("Hero");
+  const rings = sheet.object("Rings", RINGS_CONFIG);
+  return { sheet, rings };
+}
+
+let heroTheatre: ReturnType<typeof createHeroTheatre> | undefined;
+
+function getHeroTheatre() {
+  if (!heroTheatre) heroTheatre = createHeroTheatre();
+  return heroTheatre;
+}
+
 export default function TheatreHeroInner() {
   const group = useRef<Group>(null);
   const core = useRef<Mesh>(null);
   const values = useRef<RingValues>({ ...DEFAULTS });
   const progress = useScrollProgress();
-
-  const sheet = useMemo(() => {
-    const project = getProject("AG Hero", { state: homeHeroTheatreState });
-    const next = project.sheet("Hero");
-    next.object("Rings", {
-      rotationY: types.number(DEFAULTS.rotationY, { range: [0, Math.PI * 2] }),
-      y: types.number(DEFAULTS.y, { range: [-2, 2] }),
-      scale: types.number(DEFAULTS.scale, { range: [0.4, 1.6] }),
-      glow: types.number(DEFAULTS.glow, { range: [0, 1] }),
-    });
-    return next;
-  }, []);
+  const { sheet, rings } = useMemo(() => getHeroTheatre(), []);
 
   useEffect(() => {
-    const object = sheet.object("Rings", {
-      rotationY: types.number(DEFAULTS.rotationY, { range: [0, Math.PI * 2] }),
-      y: types.number(DEFAULTS.y, { range: [-2, 2] }),
-      scale: types.number(DEFAULTS.scale, { range: [0.4, 1.6] }),
-      glow: types.number(DEFAULTS.glow, { range: [0, 1] }),
-    });
-    const unsubscribe = object.onValuesChange((next) => {
+    const unsubscribe = rings.onValuesChange((next) => {
       values.current = next as RingValues;
     });
     return () => {
       unsubscribe();
     };
-  }, [sheet]);
+  }, [rings]);
 
-  useFrame(({ clock }) => {
+  useFrame((state) => {
     sheet.sequence.position = progress * 2;
     if (!group.current) return;
-    const t = clock.getElapsedTime();
+    const t = state.clock.elapsedTime;
     const { rotationY, y, scale, glow } = values.current;
     group.current.rotation.y = rotationY + Math.sin(t * 0.2) * 0.08;
     group.current.rotation.z = progress * 0.08;

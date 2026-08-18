@@ -33,3 +33,21 @@ export function missingApiKeyResponse() {
     },
   };
 }
+
+/** Public fallback when Gestiio is unreachable or misconfigured. */
+export const LOCKER_POINT_FALLBACK_PRICING = {
+  dailyRate: 0.5,
+  currency: "EUR",
+  onlineIntakeEnabled: true,
+  bookingInstructions:
+    "Prenota online o passa in agenzia in Via Plinio il Vecchio 72.",
+  pricingNote: "Tariffa indicativa da 0,50 € al giorno.",
+} as const;
+
+export function lockerPointFallbackPricingResponse() {
+  return {
+    success: true as const,
+    data: LOCKER_POINT_FALLBACK_PRICING,
+    fallback: true as const,
+  };
+}

@@ -4,11 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Link as ViewLink } from "next-view-transitions";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import dynamic from "next/dynamic";
 import { NumberTicker } from "@/components/ui/21st/number-ticker";
 import { ShimmerButton } from "@/components/ui/21st/shimmer-button";
-
-const TheatreHero = dynamic(() => import("@/components/three/TheatreHero"), { ssr: false });
 
 const ACCENT = "#5E0ED7";
 const ACCENT_LIGHT = "#a855f7";
@@ -174,11 +171,6 @@ export default function VideoHero({
           <source src={VIDEO_URL} type="video/mp4" />
         </video>
       </motion.div>
-
-      {/* ── R3F accent layer (desktop) ── */}
-      <div className="pointer-events-none absolute inset-0 z-[1] opacity-70">
-        <TheatreHero className="h-full w-full" />
-      </div>
 
       {/* ── Cinematic dark overlay ── */}
       <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80" data-gsap-hero-veil />

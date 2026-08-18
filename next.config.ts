@@ -264,6 +264,7 @@ const nextConfig: NextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
+      three: path.resolve(__dirname, "node_modules/three"),
       "@splinetool/react-spline": path.resolve(
         __dirname,
         "node_modules/@splinetool/react-spline/dist/react-spline.js",

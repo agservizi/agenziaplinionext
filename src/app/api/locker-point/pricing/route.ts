@@ -2,15 +2,15 @@ import { NextResponse } from "next/server";
 import {
   LOCKER_POINT_API_BASE,
   getLockerPointApiKey,
+  lockerPointFallbackPricingResponse,
   lockerPointHeaders,
-  missingApiKeyResponse,
 } from "@/lib/locker-point-api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!getLockerPointApiKey()) {
-    return NextResponse.json(missingApiKeyResponse(), { status: 503 });
+    return NextResponse.json(lockerPointFallbackPricingResponse());
   }
 
   try {
@@ -18,18 +18,14 @@ export async function GET() {
       headers: lockerPointHeaders(),
       cache: "no-store",
     });
+
+    if (!res.ok) {
+      return NextResponse.json(lockerPointFallbackPricingResponse());
+    }
+
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(data);
   } catch {
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "PROXY_ERROR",
-          message: "Servizio non disponibile.",
-        },
-      },
-      { status: 502 },
-    );
+    return NextResponse.json(lockerPointFallbackPricingResponse());
   }
 }

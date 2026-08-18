@@ -12,7 +12,6 @@ import GlobalParallaxLayer from "@/components/GlobalParallaxLayer";
 import PlatformFooter from "@/components/PlatformFooter";
 import MotionProvider from "@/components/motion/MotionProvider";
 import ViewTransitionsShell from "@/components/motion/ViewTransitionsShell";
-import ExperienceCanvas from "@/components/three/ExperienceCanvas";
 
 const PlinioAssistantChat = dynamic(() => import("@/components/PlinioAssistantChat"), { ssr: false });
 import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
@@ -281,7 +280,6 @@ export default function AppShell({
   return (
     <ViewTransitionsShell>
       <MotionProvider>
-        <ExperienceCanvas />
         <Header />
         <GlobalParallaxLayer />
         <main id="main-content" className="relative z-10 min-h-screen bg-slate-950">{children}</main>
