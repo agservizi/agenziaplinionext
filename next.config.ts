@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const staticExportEnabled =
   String(process.env.NEXT_STATIC_EXPORT || "false").trim().toLowerCase() === "true";
@@ -8,8 +9,21 @@ const nextConfig: NextConfig = {
   ...(staticExportEnabled ? { output: "export" as const } : {}),
   trailingSlash: staticExportEnabled,
   serverExternalPackages: ["mysql2", "resend"],
+  transpilePackages: [
+    "three",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "@react-three/postprocessing",
+    "@splinetool/react-spline",
+    "@splinetool/runtime",
+  ],
   experimental: {
-    optimizePackageImports: ["framer-motion", "@iconify/react"],
+    optimizePackageImports: [
+      "framer-motion",
+      "@iconify/react",
+      "@react-three/drei",
+      "lottie-react",
+    ],
   },
   async headers() {
     return [
@@ -246,6 +260,16 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     root: __dirname,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@splinetool/react-spline": path.resolve(
+        __dirname,
+        "node_modules/@splinetool/react-spline/dist/react-spline.js",
+      ),
+    };
+    return config;
   },
 };
 

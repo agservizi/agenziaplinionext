@@ -74,6 +74,28 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
     ],
   },
   {
+    slug: "invio-pratiche-send",
+    title: "Invio pratiche SEND",
+    shortDescription:
+      "Leggiamo l'avviso, prepariamo i documenti e inviamo la pratica per te. Pagamento online.",
+    heroDescription:
+      "Hai ricevuto un avviso con IUN o scadenze da rispettare? Carica i documenti, paghi online e seguiamo la pratica fino all'invio.",
+    customerBenefits: [
+      "Controlliamo IUN, scadenze e documenti richiesti.",
+      "Verifichiamo identità e deleghe prima dell'invio.",
+      "Tracciamento della richiesta fino alla chiusura.",
+    ],
+    requiredInfo: [
+      "Avviso o documento con codice IUN.",
+      "Documento di identità del richiedente.",
+      "Eventuali deleghe o allegati richiesti.",
+    ],
+    notes: [
+      "Puoi procedere come ospite o dall'area clienti.",
+      "Il pagamento avviene online prima dell'invio definitivo.",
+    ],
+  },
+  {
     slug: "fermo-deposito",
     title: "Fermo deposito pacchi",
     shortDescription:
@@ -107,6 +129,7 @@ const logisticsSlugByCatalogTitle: Record<string, string> = {
   "Spedizioni internazionali": "spedizioni-internazionali",
   "Deposito bagagli": "deposito-bagagli",
   "Fermo deposito pacchi": "fermo-deposito",
+  "Invio pratiche SEND": "invio-pratiche-send",
 };
 
 export function getLogisticsServiceSlugByCatalogTitle(title: string) {

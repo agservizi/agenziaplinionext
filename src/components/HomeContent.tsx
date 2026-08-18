@@ -9,84 +9,14 @@ import HomeReviews from "./HomeReviews";
 import ClientAreaInteractiveHero from "./ClientAreaInteractiveHero";
 import LuggageBookingWidget from "./LuggageBookingWidget";
 import LockerPointBookingWidget from "./LockerPointBookingWidget";
+import HomeSendSection from "./HomeSendSection";
 import { values } from "@/lib/site-data";
+import { TextReveal } from "@/components/motion/TextReveal";
+import { FadeUp } from "@/components/motion/FadeUp";
+import { ScaleCard } from "@/components/motion/ScaleCard";
+import { RevealSection } from "@/components/motion/RevealSection";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-function TextReveal({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-  const reduced = useReducedMotion();
-  return (
-    <div ref={ref} className={`overflow-hidden pb-4 ${className}`}>
-      <motion.div
-        initial={reduced ? false : { y: "110%" }}
-        animate={isInView || reduced ? { y: 0 } : undefined}
-        transition={{ duration: 0.9, ease: EASE, delay }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-function FadeUp({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 36 }}
-      animate={isInView || reduced ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.75, ease: EASE, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function ScaleCard({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 40, scale: 0.96 }}
-      animate={isInView || reduced ? { opacity: 1, y: 0, scale: 1 } : undefined}
-      transition={{ type: "spring", stiffness: 80, damping: 20, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 function GradientDraw({ delay = 0, className = "" }: { delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -219,6 +149,8 @@ export default function HomeContent() {
           </FadeUp>
         </Container>
       </section>
+
+      <HomeSendSection />
 
       {/* ═══════════════════════════════════════
           COME LAVORIAMO — off-white

@@ -3,10 +3,17 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 
-const Spline = dynamic(() => import("@splinetool/react-spline"), {
-  ssr: false,
-  loading: () => <SplineFallback state="loading" />,
-});
+const Spline = dynamic(
+  () =>
+    import("@splinetool/react-spline").then((mod) => {
+      const component = mod.default ?? mod;
+      return component;
+    }),
+  {
+    ssr: false,
+    loading: () => <SplineFallback state="loading" />,
+  },
+);
 
 const DEFAULT_SCENE = "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode";
 

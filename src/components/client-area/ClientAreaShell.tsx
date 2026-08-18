@@ -96,6 +96,16 @@ function IconChat() {
   );
 }
 
+function IconSend() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.7" />
+      <path d="m4.5 7 7.5 6 7.5-6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 3v4M15 5h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function IconUser() {
   return (
     <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" aria-hidden="true">
@@ -133,6 +143,7 @@ function IconClose() {
 
 const SERVICE_NAV: NavItem[] = [
   { href: "/area-clienti", label: "Dashboard", shortLabel: "Home", icon: <IconGrid />, exact: true },
+  { href: "/area-clienti/send", label: "Notifiche SEND", shortLabel: "SEND", icon: <IconSend /> },
   { href: "/area-clienti/spedizioni", label: "Spedizioni", shortLabel: "Spedizioni", icon: <IconBox /> },
   { href: "/area-clienti/visure", label: "Visure", shortLabel: "Visure", icon: <IconDoc /> },
   { href: "/area-clienti/caf-patronato", label: "CAF & Patronato", shortLabel: "CAF", icon: <IconClipboard /> },

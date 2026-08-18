@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Link as ViewLink } from "next-view-transitions";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import dynamic from "next/dynamic";
+import { NumberTicker } from "@/components/ui/21st/number-ticker";
+import { ShimmerButton } from "@/components/ui/21st/shimmer-button";
+
+const TheatreHero = dynamic(() => import("@/components/three/TheatreHero"), { ssr: false });
 
 const ACCENT = "#5E0ED7";
 const ACCENT_LIGHT = "#a855f7";
@@ -30,35 +36,7 @@ export interface VideoHeroProps {
   onCtaClick?: () => void;
 }
 
-function useCountUp(target: number, durationMs: number, delayMs: number) {
-  const [count, setCount] = useState(0);
-  const reduced = useReducedMotion();
-
-  useEffect(() => {
-    if (reduced) {
-      setCount(target);
-      return;
-    }
-    const timeout = setTimeout(() => {
-      const startTime = performance.now();
-      const tick = (now: number) => {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / durationMs, 1);
-        const eased = 1 - Math.pow(1 - progress, 4);
-        setCount(Math.round(target * eased));
-        if (progress < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }, delayMs);
-    return () => clearTimeout(timeout);
-  }, [target, durationMs, delayMs, reduced]);
-
-  return count;
-}
-
 function CounterStat({ stat, index }: { stat: StatItem; index: number }) {
-  const count = useCountUp(stat.value, 1800, 1200 + index * 200);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,8 +45,7 @@ function CounterStat({ stat, index }: { stat: StatItem; index: number }) {
       className="text-center sm:text-left"
     >
       <p className="font-black leading-none text-white" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>
-        <span style={{ color: ACCENT }}>+</span>
-        {count}
+        <NumberTicker value={stat.value} delayMs={1200 + index * 200} />
       </p>
       <p className="mt-1 whitespace-pre-line text-[10px] font-semibold uppercase leading-tight tracking-[0.2em] text-white/40 sm:text-xs">
         {stat.label}
@@ -165,10 +142,9 @@ export default function VideoHero({
       {ctaArrow}
     </a>
   ) : (
-    <Link href={ctaHref!} className={ctaClassName}>
-      {ctaText}
-      {ctaArrow}
-    </Link>
+    <ViewLink href={ctaHref!} className="inline-flex">
+      <ShimmerButton className="uppercase tracking-[0.2em]">{ctaText}</ShimmerButton>
+    </ViewLink>
   );
 
   return (
@@ -195,6 +171,11 @@ export default function VideoHero({
           <source src={VIDEO_URL} type="video/mp4" />
         </video>
       </motion.div>
+
+      {/* ── R3F accent layer (desktop) ── */}
+      <div className="pointer-events-none absolute inset-0 z-[1] opacity-40">
+        <TheatreHero className="h-full w-full" />
+      </div>
 
       {/* ── Cinematic dark overlay ── */}
       <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80" />

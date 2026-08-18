@@ -10,7 +10,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import GlobalParallaxLayer from "@/components/GlobalParallaxLayer";
 import PlatformFooter from "@/components/PlatformFooter";
-import MotionOrchestrator from "@/components/motion/MotionOrchestrator";
+import MotionProvider from "@/components/motion/MotionProvider";
+import ViewTransitionsShell from "@/components/motion/ViewTransitionsShell";
+import ExperienceCanvas from "@/components/three/ExperienceCanvas";
 
 const PlinioAssistantChat = dynamic(() => import("@/components/PlinioAssistantChat"), { ssr: false });
 import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
@@ -277,13 +279,16 @@ export default function AppShell({
   }
 
   return (
-    <MotionOrchestrator>
-      <Header />
-      <GlobalParallaxLayer />
-      <main id="main-content" className="min-h-screen bg-slate-950">{children}</main>
-      <Footer />
-      {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
-      {scrollTopButton}
-    </MotionOrchestrator>
+    <ViewTransitionsShell>
+      <MotionProvider>
+        <ExperienceCanvas />
+        <Header />
+        <GlobalParallaxLayer />
+        <main id="main-content" className="relative z-10 min-h-screen bg-slate-950">{children}</main>
+        <Footer />
+        {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
+        {scrollTopButton}
+      </MotionProvider>
+    </ViewTransitionsShell>
   );
 }

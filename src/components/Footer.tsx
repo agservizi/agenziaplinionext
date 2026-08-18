@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 import Container from "./Container";
 import { company, navigation, getYearsActive } from "@/lib/site-data";

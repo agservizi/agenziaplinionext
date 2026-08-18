@@ -23,6 +23,7 @@ type StripeCheckoutSessionDetails = {
   invoiceId: string;
   invoicePdf: string;
   hostedInvoiceUrl: string;
+  metadata: Record<string, string>;
 };
 
 function getStripeSecretKey() {
@@ -49,7 +50,7 @@ async function callStripeApi(path: string, init?: RequestInit) {
   });
 
   const text = await response.text();
-  let payload: any = null;
+  let payload: unknown = null;
 
   try {
     payload = text ? JSON.parse(text) : null;
@@ -57,15 +58,24 @@ async function callStripeApi(path: string, init?: RequestInit) {
     payload = null;
   }
 
+  const responsePayload =
+    payload && typeof payload === "object"
+      ? (payload as Record<string, unknown>)
+      : {};
+  const responseError =
+    responsePayload.error && typeof responsePayload.error === "object"
+      ? (responsePayload.error as Record<string, unknown>)
+      : {};
+
   if (!response.ok) {
     const message =
-      payload?.error?.message ||
-      payload?.message ||
+      responseError.message ||
+      responsePayload.message ||
       `Stripe HTTP ${response.status} ${response.statusText}`;
-    throw new Error(message);
+    throw new Error(String(message));
   }
 
-  return payload;
+  return responsePayload;
 }
 
 export async function createStripeCheckoutSession({
@@ -116,7 +126,10 @@ export async function getStripeCheckoutSession(sessionId: string): Promise<Strip
   const payload = await callStripeApi(
     `/v1/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=invoice`,
   );
-  const invoice = payload?.invoice || {};
+  const invoice =
+    payload.invoice && typeof payload.invoice === "object"
+      ? (payload.invoice as Record<string, unknown>)
+      : {};
 
   return {
     id: String(payload?.id || ""),
@@ -127,5 +140,11 @@ export async function getStripeCheckoutSession(sessionId: string): Promise<Strip
     invoiceId: String(invoice?.id || ""),
     invoicePdf: String(invoice?.invoice_pdf || ""),
     hostedInvoiceUrl: String(invoice?.hosted_invoice_url || ""),
+    metadata:
+      payload.metadata && typeof payload.metadata === "object"
+        ? Object.fromEntries(
+            Object.entries(payload.metadata).map(([key, value]) => [key, String(value)]),
+          )
+        : {},
   };
 }

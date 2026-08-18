@@ -116,6 +116,7 @@ export const serviceCategories: ServiceCategory[] = [
       { title: "Spedizioni internazionali", description: "Estero, con documentazione e tracking." },
       { title: "Deposito bagagli", description: "Prenota online, deposita in agenzia." },
       { title: "Fermo deposito pacchi", description: "Custodia pacchi da 0,50€ al giorno." },
+      { title: "Invio pratiche SEND", description: "Invio pratiche con lettura avviso e checkout online." },
     ],
   },
   {

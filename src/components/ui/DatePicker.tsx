@@ -60,13 +60,6 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
     };
   }, [open]);
 
-  useEffect(() => {
-    if (selected) {
-      setViewYear(selected.getFullYear());
-      setViewMonth(selected.getMonth());
-    }
-  }, [value]);
-
   const prevMonth = useCallback(() => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
     else setViewMonth((m) => m - 1);
@@ -94,17 +87,23 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
   return (
     <div ref={containerRef} className="relative">
       {label && (
-        <label htmlFor={id} className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-white/40">
+        <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-slate-400">
           {label}
         </label>
       )}
       <button
         id={id}
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          if (!open && selected) {
+            setViewYear(selected.getFullYear());
+            setViewMonth(selected.getMonth());
+          }
+          setOpen(!open);
+        }}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="flex w-full items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-left text-sm text-white outline-none transition hover:border-white/25 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+        className="flex h-12 w-full items-center gap-3 rounded-[0.9rem] bg-white/[0.045] px-4 text-left text-sm text-white outline-none ring-1 ring-inset ring-white/[0.09] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/[0.06] hover:ring-white/[0.14] focus:ring-cyan-300/35"
       >
         <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-white/40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" />

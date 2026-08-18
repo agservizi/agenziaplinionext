@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "next-view-transitions";
 import type { MouseEvent } from "react";
 import { startTransition, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";

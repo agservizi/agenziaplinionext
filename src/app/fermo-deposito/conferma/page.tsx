@@ -94,6 +94,12 @@ function ConfermaContent() {
               </a>
             )}
             <Link
+              href={`/fermo-deposito/pacco/${encodeURIComponent(code)}`}
+              className="inline-flex items-center gap-2 rounded-full bg-[#5E0ED7] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#6d22e8]"
+            >
+              Dettaglio prenotazione
+            </Link>
+            <Link
               href="/fermo-deposito"
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
             >

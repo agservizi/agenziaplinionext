@@ -75,7 +75,29 @@ function IconChat() {
   );
 }
 
+function IconSend() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m4.5 7 7.5 6 7.5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M17 3v4M15 5h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const SERVICE_TILES: ServiceTile[] = [
+  {
+    href: "/area-clienti/send",
+    eyebrow: "SEND",
+    title: "Notifiche digitali SEND",
+    description: "Apri la pratica, allega avviso e documenti e segui ogni aggiornamento fino all’esito.",
+    cta: "Apri SEND",
+    accentClass: "border-purple-500/15 bg-linear-to-br from-purple-500/10 to-transparent hover:border-purple-400/30",
+    dotClass: "bg-purple-400",
+    iconColorClass: "text-purple-300",
+    iconBgClass: "border-purple-500/20 bg-purple-500/10",
+    icon: <IconSend />,
+  },
   {
     href: "/area-clienti/spedizioni",
     eyebrow: "Spedizioni",

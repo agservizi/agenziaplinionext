@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  gestiioSendRequest,
+  markSendCheckoutPaid,
+} from "@/lib/gestiio-send";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +34,12 @@ export async function POST(request: NextRequest) {
     .update(signedPayload)
     .digest("hex");
 
-  if (!crypto.timingSafeEqual(Buffer.from(v1Signature), Buffer.from(expectedSignature))) {
+  const actualSignature = Buffer.from(v1Signature);
+  const expectedSignatureBuffer = Buffer.from(expectedSignature);
+  if (
+    actualSignature.length !== expectedSignatureBuffer.length ||
+    !crypto.timingSafeEqual(actualSignature, expectedSignatureBuffer)
+  ) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -45,7 +54,31 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object;
-      console.log(`[Stripe Webhook] checkout.session.completed: ${session.id}, status: ${session.payment_status}`);
+      if (
+        session?.payment_status === "paid" &&
+        session?.metadata?.service === "send" &&
+        session?.metadata?.send_uuid
+      ) {
+        const amountCents = Number(session.amount_total);
+        const expectedAmount = Number(session.metadata.amount_cents);
+        if (
+          Number.isInteger(amountCents) &&
+          amountCents > 0 &&
+          amountCents === expectedAmount &&
+          String(session.currency || "").toLowerCase() === "eur"
+        ) {
+          await markSendCheckoutPaid({
+            uuid: String(session.metadata.send_uuid),
+            sessionId: String(session.id),
+            amountCents,
+            currency: String(session.currency),
+          });
+          await gestiioSendRequest(
+            `/richieste/${encodeURIComponent(String(session.metadata.send_uuid))}/invia`,
+            { method: "POST" },
+          ).catch(() => undefined);
+        }
+      }
       break;
     }
     case "payment_intent.payment_failed": {

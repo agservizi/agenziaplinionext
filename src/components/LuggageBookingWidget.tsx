@@ -458,6 +458,7 @@ export default function LuggageBookingWidget() {
   return (
     <section
       ref={sectionRef}
+      data-gsap-reveal
       className="relative overflow-hidden"
       style={{ fontFamily: "var(--font-inter, 'Inter'), sans-serif" }}
     >

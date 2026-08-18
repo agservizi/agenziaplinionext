@@ -11,87 +11,12 @@ import {
 import Container from "@/components/Container";
 import PublicBookingDrawer from "@/components/PublicBookingDrawer";
 import { getYearsActive } from "@/lib/site-data";
+import { TextReveal } from "@/components/motion/TextReveal";
+import { FadeUp } from "@/components/motion/FadeUp";
+import { ScaleCard } from "@/components/motion/ScaleCard";
 
 /* ─── Shared ease ───────────────────────────────────────────────────── */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-/* ─── Animation wrappers ────────────────────────────────────────────── */
-function TextReveal({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-  const reduced = useReducedMotion();
-  return (
-    <div ref={ref} className={`overflow-hidden pb-4 ${className}`}>
-      <motion.div
-        initial={reduced ? false : { y: "110%" }}
-        animate={isInView || reduced ? { y: 0 } : undefined}
-        transition={{ duration: 0.9, ease: EASE, delay }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-function FadeUp({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 36 }}
-      animate={isInView || reduced ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.75, ease: EASE, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function ScaleCard({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 40, scale: 0.96 }}
-      animate={
-        isInView || reduced ? { opacity: 1, y: 0, scale: 1 } : undefined
-      }
-      transition={{ type: "spring", stiffness: 80, damping: 20, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 /* ─── Constants ─────────────────────────────────────────────────────── */
 const NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`;

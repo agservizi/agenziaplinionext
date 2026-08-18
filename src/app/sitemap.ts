@@ -33,6 +33,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/deposito-bagagli/i-miei-depositi",
     "/deposito-bagagli/verifica",
     "/fermo-deposito",
+    "/fermo-deposito/i-miei-pacchi",
+    "/send",
   ];
 
   const paymentRoutes = paymentServiceDetails.map(
@@ -84,6 +86,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       "/deposito-bagagli/i-miei-depositi": 0.5,
       "/deposito-bagagli/verifica": 0.3,
       "/fermo-deposito": 0.8,
+      "/fermo-deposito/i-miei-pacchi": 0.5,
+      "/send": 0.8,
     };
 
     return {
