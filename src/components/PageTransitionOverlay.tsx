@@ -15,6 +15,12 @@ export default function PageTransitionOverlay() {
   const previousPathnameRef = useRef(pathname);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const hasViewTransitions =
+      typeof document !== "undefined" && "startViewTransition" in document;
+    if (hasViewTransitions) return;
+
     const clearTimers = () => {
       if (hideTimerRef.current) { window.clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
       if (progressTimerRef.current) { window.clearInterval(progressTimerRef.current); progressTimerRef.current = null; }

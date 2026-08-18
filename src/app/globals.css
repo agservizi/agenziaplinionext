@@ -886,8 +886,87 @@ html.lenis body {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.45s;
+  animation-duration: 0.55s;
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: vt-page-out;
+}
+
+::view-transition-new(root) {
+  animation-name: vt-page-in;
+}
+
+@keyframes vt-page-out {
+  from {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    clip-path: inset(0 0 35% 0);
+    filter: blur(8px);
+  }
+}
+
+@keyframes vt-page-in {
+  from {
+    opacity: 0;
+    clip-path: inset(28% 0 0 0);
+    filter: blur(10px);
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+.site-logo {
+  view-transition-name: site-logo;
+}
+
+.site-header {
+  view-transition-name: site-header;
+}
+
+::view-transition-group(site-logo) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation-duration: 0.4s;
+}
+
+html {
+  --ag-scroll: 0;
+  --ag-velocity: 0;
+  --ag-direction: 0;
+}
+
+[data-experience-canvas] {
+  will-change: opacity;
+}
+
+[data-gsap-scrub],
+[data-gsap-horizontal] {
+  will-change: transform;
+}
+
+[data-gsap-stack-item]:not(:first-child),
+[data-gsap-stack-copy]:not(:first-child) {
+  opacity: 0;
+}
+
+.gsap-split-word-inner,
+.gsap-split-char {
+  will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

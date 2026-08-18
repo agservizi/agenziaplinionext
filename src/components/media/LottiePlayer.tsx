@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { prefersReducedMotion } from "@/lib/motion/preferences";
 
 type LottiePlayerProps = {
-  src: string;
+  src?: string;
+  animationData?: object;
   className?: string;
   loop?: boolean;
   ariaLabel?: string;
@@ -13,6 +14,7 @@ type LottiePlayerProps = {
 
 export default function LottiePlayer({
   src,
+  animationData,
   className = "h-10 w-10",
   loop = true,
   ariaLabel,
@@ -33,9 +35,20 @@ export default function LottiePlayer({
     );
   }
 
+  const source = animationData ?? src;
+  if (!source) {
+    return (
+      <span
+        className={`inline-block rounded-full bg-cyan-500/20 ${className}`}
+        aria-hidden={ariaLabel ? undefined : true}
+        aria-label={ariaLabel}
+      />
+    );
+  }
+
   return (
     <Lottie
-      src={src}
+      src={source}
       loop={loop}
       autoplay
       className={className}

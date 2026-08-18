@@ -1,8 +1,8 @@
 import VideoHero from "@/components/VideoHero";
 import MarqueeStrip from "@/components/ui/MarqueeStrip";
 import HomeContent from "@/components/HomeContent";
-import HomeSplinePanel from "@/components/spline/HomeSplinePanel";
-import Container from "@/components/Container";
+import HomeOnlineBento from "@/components/ui/21st/home-online-bento";
+import CinematicChapter from "@/components/motion/CinematicChapter";
 import { buildMetadata } from "@/lib/seo";
 import { getYearsActive } from "@/lib/site-data";
 
@@ -22,11 +22,8 @@ export default function Home() {
         ctaHref="/contatti"
       />
       <MarqueeStrip />
-      <section className="relative bg-slate-950 py-16 md:py-20" data-gsap-reveal>
-        <Container>
-          <HomeSplinePanel isOpen={null} />
-        </Container>
-      </section>
+      <CinematicChapter />
+      <HomeOnlineBento />
       <HomeContent />
     </div>
   );

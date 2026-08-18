@@ -230,19 +230,20 @@ export default function Header() {
           color: useDarkText ? "#0f172a" : "#ffffff",
         }}
         transition={{ duration: reduced ? 0 : 0.35, ease: EASE }}
-        className="fixed top-0 left-0 z-30 w-full border-b"
+        className="fixed top-0 left-0 z-30 w-full border-b site-header"
         style={{ WebkitBackdropFilter: scrolled ? "blur(16px) saturate(180%)" : "none" }}
       >
         <Container className="flex items-center justify-between py-3 sm:py-4 xl:py-5">
           {/* Logo */}
-          <Link href="/" className="inline-flex items-center">
+          <Link href="/" className="inline-flex items-center" data-flip-share="logo">
             <Image
               src="/logo.png"
               alt="AG SERVIZI"
               width={155}
               height={32}
-              className="h-8 w-auto"
+              className="h-8 w-auto site-logo"
               priority
+              style={{ viewTransitionName: "site-logo" }}
             />
             <span className="sr-only">AG SERVIZI</span>
           </Link>

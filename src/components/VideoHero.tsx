@@ -152,11 +152,14 @@ export default function VideoHero({
       ref={sectionRef}
       className="relative flex min-h-dvh flex-col overflow-hidden bg-black"
       style={{ fontFamily: "var(--font-inter, 'Inter'), sans-serif" }}
+      data-gsap-hero
+      data-gsap-progress
     >
       {/* ── Video background with parallax ── */}
       <motion.div
         className="pointer-events-none absolute inset-0"
         style={{ y: reduced ? 0 : videoY }}
+        data-gsap-hero-media
       >
         <video
           ref={videoRef}
@@ -173,12 +176,12 @@ export default function VideoHero({
       </motion.div>
 
       {/* ── R3F accent layer (desktop) ── */}
-      <div className="pointer-events-none absolute inset-0 z-[1] opacity-40">
+      <div className="pointer-events-none absolute inset-0 z-[1] opacity-70">
         <TheatreHero className="h-full w-full" />
       </div>
 
       {/* ── Cinematic dark overlay ── */}
-      <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80" />
+      <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/80" data-gsap-hero-veil />
       <div className="absolute inset-0 bg-linear-to-r from-black/50 via-transparent to-transparent" />
 
       {/* ── Film grain texture ── */}
@@ -277,6 +280,7 @@ export default function VideoHero({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: textDelay, duration: dur * 0.7, ease: SPRING_EASE }}
               className="mt-5 max-w-md text-sm leading-relaxed text-white/50 sm:mt-6 sm:text-base"
+              data-gsap-text-split
             >
               {description}
             </motion.p>
@@ -293,7 +297,7 @@ export default function VideoHero({
           </div>
 
           {/* Right column: stats */}
-          <div className="flex gap-6 sm:gap-8 lg:flex-col lg:gap-6 lg:pb-4">
+          <div className="flex gap-6 sm:gap-8 lg:flex-col lg:gap-6 lg:pb-4" data-gsap-scrub-item>
             {stats.map((stat, i) => (
               <CounterStat key={stat.label} stat={stat} index={i} />
             ))}

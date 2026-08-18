@@ -186,7 +186,7 @@ export default function HomeServicesGrid() {
                       <Icon />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-slate-900">{cat.title}</p>
+                      <p className="text-[15px] font-semibold text-slate-900" data-gsap-scramble>{cat.title}</p>
                       <p className="mt-0.5 text-[13px] leading-snug text-slate-500">
                         {cat.subtitle}
                       </p>

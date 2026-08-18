@@ -8,8 +8,12 @@ import ServiziFilterGrid from "@/components/ServiziFilterGrid";
 import { getYearsActive } from "@/lib/site-data";
 import { TextReveal } from "@/components/motion/TextReveal";
 import { FadeUp } from "@/components/motion/FadeUp";
+import { GsapSplitText } from "@/components/motion/GsapSplitText";
 import { ScaleCard } from "@/components/motion/ScaleCard";
 import { RevealSection } from "@/components/motion/RevealSection";
+import dynamic from "next/dynamic";
+
+const SplineScene = dynamic(() => import("@/components/spline/SplineScene"), { ssr: false });
 
 /* ─── Shared ease ───────────────────────────────────────────────────── */
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -133,6 +137,14 @@ export default function ServiziContent() {
         <div className="pointer-events-none absolute inset-0">
           <div className="orb-float-1 absolute -left-40 top-1/4 h-[350px] w-[350px] rounded-full bg-[#5E0ED7]/20 opacity-20 blur-[120px]" />
           <div className="orb-float-2 absolute -right-24 bottom-1/3 h-[280px] w-[280px] rounded-full bg-[#22d3ee]/15 opacity-15 blur-[100px]" />
+        </div>
+
+        <div
+          className="pointer-events-none absolute right-6 top-[28%] hidden w-[min(360px,30vw)] opacity-90 xl:block"
+          data-gsap-parallax="48"
+          data-gsap-scale
+        >
+          <SplineScene className="shadow-[0_40px_120px_rgba(94,14,215,0.2)]" />
         </div>
 
         {/* Header spacer */}
