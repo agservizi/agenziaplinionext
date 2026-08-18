@@ -165,7 +165,7 @@ export default function HomeContent() {
                 </p>
               </FadeUp>
               <TextReveal>
-                <h2 className="text-slate-900" data-gsap-chars style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+                <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
                   Tre passi.
                 </h2>
               </TextReveal>
@@ -182,9 +182,13 @@ export default function HomeContent() {
             </FadeUp>
           </div>
 
-          {/* Timeline connector — desktop */}
-          <div className="relative md:hidden">
-            <div className="grid gap-10">
+          <div className="relative">
+            <GradientDraw
+              delay={0.2}
+              className="absolute left-[16.67%] right-[16.67%] top-1.5 hidden h-px bg-linear-to-r from-[#5E0ED7]/20 via-[#22d3ee]/20 to-emerald-400/20 md:block"
+            />
+
+            <div className="grid gap-10 md:grid-cols-3 md:gap-6">
               {STEPS.map((step, i) => (
                 <ScaleCard key={step.n} delay={0.15 + i * 0.12}>
                   <div className="flex flex-col items-center text-center">
@@ -197,24 +201,6 @@ export default function HomeContent() {
                     </div>
                   </div>
                 </ScaleCard>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative hidden overflow-hidden md:block" data-gsap-horizontal>
-            <div className="flex">
-              {STEPS.map((step) => (
-                <div
-                  key={step.n}
-                  data-gsap-horizontal-panel
-                  className="min-w-full px-2"
-                >
-                  <div className={`group relative overflow-hidden rounded-3xl border p-12 ${step.border}`}>
-                    <p className={`text-8xl font-black leading-none ${step.accent} opacity-20`}>{step.n}</p>
-                    <h3 className="mt-4 text-3xl font-black text-slate-900">{step.title}</h3>
-                    <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">{step.desc}</p>
-                  </div>
-                </div>
               ))}
             </div>
           </div>
@@ -261,10 +247,10 @@ export default function HomeContent() {
           </div>
 
           {/* Value cards */}
-          <div className="grid gap-5 md:grid-cols-3" data-gsap-stagger>
+          <div className="grid gap-5 md:grid-cols-3">
             {values.map((val, i) => (
               <ScaleCard key={val.title} delay={0.1 + i * 0.12}>
-                <div data-gsap-stagger-item className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#5E0ED7]/20 hover:shadow-xl">
+                <div className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#5E0ED7]/20 hover:shadow-xl">
                   <div className="h-[2px] absolute inset-x-0 top-0 w-full rounded-t-2xl bg-linear-to-r from-[#5E0ED7] via-purple-400 to-[#22d3ee] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   <div className={`mb-5 inline-flex rounded-xl p-3 ${ICON_COLORS[i].bg} ${ICON_COLORS[i].text}`}>
                     {VALUE_ICONS[i]}

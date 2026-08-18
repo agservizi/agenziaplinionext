@@ -111,7 +111,6 @@ export default function LockerPointBookingWidget() {
   return (
     <section
       ref={sectionRef}
-      data-gsap-reveal
       className="relative overflow-hidden"
       aria-labelledby="locker-point-heading"
     >

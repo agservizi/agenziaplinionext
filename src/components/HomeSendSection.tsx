@@ -83,7 +83,6 @@ export default function HomeSendSection() {
 
   return (
     <section
-      data-gsap-reveal
       ref={ref}
       aria-labelledby="send-home-title"
       className="relative overflow-hidden bg-[#11102a] py-24 text-white md:py-32"
