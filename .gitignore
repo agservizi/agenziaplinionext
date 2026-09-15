@@ -2,6 +2,9 @@
 
 # dependencies
 /node_modules
+/storefront/node_modules
+/storefront/.next
+/storefront/pnpm-lock.yaml
 /.pnp
 .pnp.*
 .yarn/*

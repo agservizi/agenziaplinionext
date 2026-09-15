@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "deploy-out/**",
     "booking-backend/**",
+    "storefront/**",
+    "docker/**",
     "brt/**",
     "*.zip",
     "next-env.d.ts",

@@ -143,6 +143,12 @@ function IconClose() {
 
 const SERVICE_NAV: NavItem[] = [
   { href: "/area-clienti", label: "Dashboard", shortLabel: "Home", icon: <IconGrid />, exact: true },
+  { href: "/area-clienti/acquisti", label: "I miei acquisti", shortLabel: "Acquisti", icon: <IconBox /> },
+  { href: "/area-clienti/ordini", label: "Ordini shop", shortLabel: "Ordini", icon: <IconDoc /> },
+  { href: "/area-clienti/download", label: "Download", shortLabel: "Download", icon: <IconClipboard /> },
+  { href: "/area-clienti/spedizioni-ordini", label: "Spedizioni shop", shortLabel: "Ship shop", icon: <IconBox /> },
+  { href: "/area-clienti/servizi-acquistati", label: "Servizi shop", shortLabel: "Svc shop", icon: <IconBolt /> },
+  { href: "/area-clienti/indirizzi", label: "Indirizzi", shortLabel: "Indirizzi", icon: <IconUser /> },
   { href: "/area-clienti/send", label: "Notifiche SEND", shortLabel: "SEND", icon: <IconSend /> },
   { href: "/area-clienti/spedizioni", label: "Spedizioni", shortLabel: "Spedizioni", icon: <IconBox /> },
   { href: "/area-clienti/visure", label: "Visure", shortLabel: "Visure", icon: <IconDoc /> },
@@ -150,6 +156,11 @@ const SERVICE_NAV: NavItem[] = [
   { href: "/area-clienti/consulenza-utenze", label: "Consulenza Utenze", shortLabel: "Utenze", icon: <IconBolt /> },
   { href: "/area-clienti/fotocopie", label: "Fotocopie", shortLabel: "Fotocopie", icon: <IconPrinter /> },
   { href: "/area-clienti/web-agency", label: "Web Agency", shortLabel: "Web", icon: <IconGlobe /> },
+  { href: "/area-clienti/pagamenti", label: "Pagamenti", shortLabel: "Pagamenti", icon: <IconBolt /> },
+  { href: "/area-clienti/fatture", label: "Fatture", shortLabel: "Fatture", icon: <IconDoc /> },
+  { href: "/area-clienti/documenti", label: "Documenti", shortLabel: "Docs", icon: <IconClipboard /> },
+  { href: "/area-clienti/prenotazioni", label: "Prenotazioni", shortLabel: "Prenota", icon: <IconGlobe /> },
+  { href: "/area-clienti/notifiche", label: "Notifiche", shortLabel: "Alert", icon: <IconChat /> },
   { href: "/area-clienti/ticket-pratiche-documenti", label: "Ticket", shortLabel: "Ticket", icon: <IconChat /> },
 ];
 

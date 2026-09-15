@@ -13,6 +13,12 @@
 :root {
   --background: #0b1120;
   --foreground: #f8fafc;
+  --ag-primary: #5e0ed7;
+  --ag-primary-light: #a855f7;
+  --ag-accent: #22d3ee;
+  --ag-radius: 1rem;
+  --ag-card: rgba(255, 255, 255, 0.03);
+  --ag-border: rgba(255, 255, 255, 0.1);
   --font-geist-sans:
     "Segoe UI", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
   --font-geist-mono:
@@ -22,6 +28,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ag-primary: var(--ag-primary);
+  --color-ag-accent: var(--ag-accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

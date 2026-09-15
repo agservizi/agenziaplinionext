@@ -11,7 +11,12 @@
     "lint": "eslint",
     "export": "node scripts/static-export.mjs",
     "test:chat-coherence": "node scripts/test-plinio-chat-coherence.mjs",
-    "test:smoke-integrations": "node scripts/smoke-integrations.mjs"
+    "test:smoke-integrations": "node scripts/smoke-integrations.mjs",
+    "test:smoke-authz": "node scripts/smoke-authz.mjs",
+    "saleor:bootstrap": "node scripts/saleor-bootstrap.mjs",
+    "test:smoke-saleor": "node --env-file=.env.local scripts/smoke-saleor.mjs",
+    "storefront:install": "pnpm -C storefront install --ignore-scripts",
+    "storefront:dev": "pnpm -C storefront dev"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -2,6 +2,14 @@
 
 Sito istituzionale professionale per AG SERVIZI, sviluppato con Next.js (App Router), UI moderna e palette dark con accento professionale.
 
+## Architecture (Dashboard + Commerce)
+
+Vedi [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) e [`docs/saleor-nas.md`](docs/saleor-nas.md).
+
+- Area Clienti / Admin: shell portale + sessione httpOnly
+- Shop: Saleor Paper in `storefront/` (basePath `/shop`) + Saleor self-host Docker sul NAS
+- Home widget shop: visibile solo se esiste almeno un prodotto pubblicato
+
 ## Stack
 - Next.js (App Router)
 - Tailwind CSS

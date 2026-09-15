@@ -27,9 +27,11 @@ npm run test:chat-coherence  # Test Plinio AI chat responses
 - **PHP API layer** (legacy, port 8089) proxied via 50+ rewrites in `next.config.ts`
 
 **Authentication has two separate portals:**
-- Client portal (`/area-clienti`): JWT tokens in localStorage (`ag:client-portal-token`), backed by `client_portal_users` MySQL table. Auth logic in `src/lib/client-portal-auth.ts`. Route protection via `ClientPortalGuard` component.
-- Admin portal (`/area-admin`): environment-only credentials (`STORE_ADMIN_USER`/`STORE_ADMIN_PASSWORD`), token in localStorage (`ag:admin-portal-token`). Auth logic in `src/lib/admin-portal-auth.ts`. Route protection via `AdminPortalGuard` component.
-- Neither portal uses NextAuth for actual session management; NextAuth (`src/auth.ts`) is configured but secondary.
+- Client portal (`/area-clienti`): migrating to httpOnly cookie `ag_customer_session` (dual-read via `/auth/bridge` from legacy localStorage JWT). Auth helpers in `src/lib/client-portal-auth.ts` + `src/lib/auth/session.ts`. Middleware in `src/proxy.ts`.
+- Admin portal (`/area-admin`): httpOnly cookie `ag_staff_session` + legacy localStorage during cutover. RBAC: OPERATOR/ADMIN/SUPERADMIN.
+- Shop: Saleor Paper in `storefront/` + Saleor self-host NAS (`docker/saleor`, `docs/saleor-nas.md`). Home widget hides when catalog empty.
+
+**Architecture docs:** `docs/ARCHITECTURE.md`
 
 **Service catalog pattern:** Each service category (phone, energy, digital, payment, logistics, web-agency) has a catalog file in `src/lib/` exporting typed arrays with slugs, descriptions, benefits, and required docs. These feed into dynamic route pages at `src/app/servizi/[category]/[slug]/page.tsx`.
 

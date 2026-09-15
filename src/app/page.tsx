@@ -1,6 +1,7 @@
 import VideoHero from "@/components/VideoHero";
 import MarqueeStrip from "@/components/ui/MarqueeStrip";
 import HomeContent from "@/components/HomeContent";
+import ShopHomeSection from "@/components/home/ShopHomeSection";
 import { buildMetadata } from "@/lib/seo";
 import { getYearsActive } from "@/lib/site-data";
 
@@ -21,6 +22,7 @@ export default function Home() {
       />
       <MarqueeStrip />
       <HomeContent />
+      <ShopHomeSection />
     </div>
   );
 }

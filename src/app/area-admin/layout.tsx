@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AdminPortalGuard from "@/components/admin-area/AdminPortalGuard";
 import AdminSidebarShell from "@/components/admin-area/AdminSidebarShell";
+import SessionCookieBridge from "@/components/auth/SessionCookieBridge";
 import { PRIVATE_AREA_ROBOTS } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -13,8 +14,11 @@ export default function AreaAdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AdminPortalGuard>
-      <AdminSidebarShell>{children}</AdminSidebarShell>
-    </AdminPortalGuard>
+    <>
+      <SessionCookieBridge kind="staff" />
+      <AdminPortalGuard>
+        <AdminSidebarShell>{children}</AdminSidebarShell>
+      </AdminPortalGuard>
+    </>
   );
 }

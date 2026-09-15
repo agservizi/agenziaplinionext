@@ -120,6 +120,85 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    title: "Shop (Saleor)",
+    items: [
+      {
+        href: "/area-admin/prodotti",
+        label: "Prodotti",
+        description: "Catalogo Saleor PHYSICAL/DIGITAL/SERVICE",
+        icon: "tag",
+        badge: "shop",
+      },
+      {
+        href: "/area-admin/categorie",
+        label: "Categorie",
+        description: "Categorie e collezioni shop",
+        icon: "list",
+      },
+      {
+        href: "/area-admin/inventario",
+        label: "Inventario",
+        description: "Stock e movimenti warehouse",
+        icon: "scale",
+      },
+      {
+        href: "/area-admin/coupon",
+        label: "Coupon",
+        description: "Voucher e promozioni",
+        icon: "tag",
+      },
+      {
+        href: "/area-admin/ordini-shop",
+        label: "Ordini shop",
+        description: "Ordini, pagamenti e fulfillment",
+        icon: "wallet",
+        badge: "shop",
+      },
+      {
+        href: "/area-admin/spedizioni-shop",
+        label: "Spedizioni shop",
+        description: "Coda PHYSICAL",
+        icon: "shipments",
+      },
+      {
+        href: "/area-admin/pagamenti-shop",
+        label: "Pagamenti shop",
+        description: "Riconciliazione Stripe/Saleor",
+        icon: "wallet",
+      },
+      {
+        href: "/area-admin/rimborsi",
+        label: "Rimborsi",
+        description: "Refund ADMIN+",
+        icon: "wallet",
+      },
+      {
+        href: "/area-admin/prodotti-digitali",
+        label: "Digitali",
+        description: "Asset protetti",
+        icon: "documents",
+      },
+      {
+        href: "/area-admin/entitlement",
+        label: "Entitlement",
+        description: "Download e revoke",
+        icon: "briefcase",
+      },
+      {
+        href: "/area-admin/servizi-shop",
+        label: "Servizi shop",
+        description: "Fulfillment SERVICE",
+        icon: "spark",
+      },
+      {
+        href: "/area-admin/clienti",
+        label: "Clienti",
+        description: "Account portale e bridge Saleor",
+        icon: "spark",
+      },
+    ],
+  },
+  {
     title: "Cataloghi",
     items: [
       {
@@ -146,10 +225,64 @@ const NAV_GROUPS: NavGroup[] = [
     title: "Sistema",
     items: [
       {
+        href: "/area-admin/registrazioni",
+        label: "Registrazioni",
+        description: "Approve richieste account",
+        icon: "requests",
+      },
+      {
+        href: "/area-admin/fatture",
+        label: "Fatture",
+        description: "Ricevute servizi e shop",
+        icon: "documents",
+      },
+      {
+        href: "/area-admin/documenti",
+        label: "Documenti",
+        description: "File pratiche unificati",
+        icon: "briefcase",
+      },
+      {
+        href: "/area-admin/prenotazioni",
+        label: "Prenotazioni",
+        description: "Booking Calendar",
+        icon: "layout",
+      },
+      {
+        href: "/area-admin/payhip",
+        label: "PayHip",
+        description: "Ordini digitali legacy",
+        icon: "tag",
+      },
+      {
+        href: "/area-admin/send",
+        label: "SEND",
+        description: "Bridge Gestiio",
+        icon: "mail",
+      },
+      {
         href: "/area-admin/notifiche-email",
         label: "Notifiche Email",
         description: "Storico invii e audit Resend",
         icon: "mail",
+      },
+      {
+        href: "/area-admin/utenti",
+        label: "Staff",
+        description: "Utenti backoffice",
+        icon: "spark",
+      },
+      {
+        href: "/area-admin/ruoli",
+        label: "Ruoli",
+        description: "Matrice RBAC",
+        icon: "list",
+      },
+      {
+        href: "/area-admin/impostazioni",
+        label: "Impostazioni",
+        description: "Shop flags e valuta",
+        icon: "layout",
       },
     ],
   },

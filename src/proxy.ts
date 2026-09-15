@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { enforcePortalAuth } from "@/lib/auth/portal-guard";
 
-// Auth is handled client-side via localStorage token.
-// This proxy layer is intentionally a pass-through.
-export default function proxy() {
-  return NextResponse.next();
+export default function proxy(request: NextRequest) {
+  return enforcePortalAuth(request);
 }
 
 export const config = {
-  matcher: [],
+  matcher: ["/area-clienti/:path*", "/area-admin/:path*"],
 };
