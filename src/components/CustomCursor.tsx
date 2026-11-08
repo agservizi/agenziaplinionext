@@ -1,53 +1,98 @@
 "use client";
 
+/**
+ * Callers: root layout.
+ * API: pointer overlay tip + trailing square frame.
+ * Schema: luminance sample under cursor → ink/paper contrast; dual ring always visible on dark/light.
+ * User: "il puntatore su fondo scuro scompare non è visibile"
+ */
 import { useEffect, useRef, useState } from "react";
 
-const LIGHT_INDICATORS = ["lux-surface", "bg-white", "bg-slate-50", "bg-slate-100"];
-const DARK_INDICATORS = ["bg-slate-950", "bg-slate-900", "bg-black", "hero-gradient"];
+const PAPER = "#e8e2d6";
+const INK = "#0b1120";
+const ACCENT = "#5E0ED7";
+
+const LIGHT_CLASS = [
+  "lux-surface",
+  "bg-white",
+  "bg-slate-50",
+  "bg-slate-100",
+  "bg-[var(--paper)]",
+  "bg-[color-mix(in_srgb,var(--paper)",
+];
+
+const DARK_CLASS = [
+  "bg-slate-950",
+  "bg-slate-900",
+  "bg-slate-800",
+  "bg-black",
+  "bg-[var(--ink)]",
+  "hero-gradient",
+  "bg-[#11102a]",
+  "bg-[#171334]",
+  "bg-[#0f1d32]",
+  "bg-[#0b1120]",
+  "from-slate-950",
+  "from-slate-900",
+  "text-white",
+];
+
+function parseRgba(bg: string): { r: number; g: number; b: number; a: number } | null {
+  const m = bg.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+  if (!m) return null;
+  return {
+    r: Number(m[1]),
+    g: Number(m[2]),
+    b: Number(m[3]),
+    a: m[4] !== undefined ? Number(m[4]) : 1,
+  };
+}
+
+function luminance(r: number, g: number, b: number) {
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
 
 function isOnLightBackground(x: number, y: number): boolean {
   let el: Element | null = document.elementFromPoint(x, y);
+
   while (el && el !== document.documentElement) {
-    const cls = el.className;
-    if (typeof cls === "string") {
-      for (const light of LIGHT_INDICATORS) {
+    if (el instanceof HTMLElement) {
+      const cls = typeof el.className === "string" ? el.className : "";
+
+      for (const light of LIGHT_CLASS) {
         if (cls.includes(light)) return true;
       }
-      for (const dark of DARK_INDICATORS) {
+      for (const dark of DARK_CLASS) {
         if (cls.includes(dark)) return false;
       }
-    }
-    // Check inline background style
-    if (el instanceof HTMLElement && el.style.backgroundColor) {
-      const bg = el.style.backgroundColor;
-      if (bg.includes("255") || bg.includes("white") || bg.includes("#f")) return true;
-      if (bg.includes("0, 0, 0") || bg.includes("black") || bg.includes("#0")) return false;
+
+      const bg = window.getComputedStyle(el).backgroundColor;
+      const rgba = parseRgba(bg);
+      if (rgba && rgba.a >= 0.72) {
+        return luminance(rgba.r, rgba.g, rgba.b) >= 0.48;
+      }
     }
     el = el.parentElement;
   }
-  // Fallback: check if page is light (header has dark text = light page)
-  const header = document.querySelector("header");
-  if (header) {
-    const color = window.getComputedStyle(header).color;
-    const match = color.match(/\d+/g);
-    if (match) {
-      const lum = (Number(match[0]) + Number(match[1]) + Number(match[2])) / 3;
-      return lum < 128;
-    }
+
+  const bodyBg = parseRgba(window.getComputedStyle(document.body).backgroundColor);
+  if (bodyBg && bodyBg.a >= 0.72) {
+    return luminance(bodyBg.r, bodyBg.g, bodyBg.b) >= 0.48;
   }
-  return false;
+
+  return true;
 }
 
 export default function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const tipRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
   const [clicking, setClicking] = useState(false);
   const [visible, setVisible] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const mouse = useRef({ x: 0, y: 0 });
-  const ring = useRef({ x: 0, y: 0 });
+  const box = useRef({ x: 0, y: 0 });
   const toastPos = useRef({ x: 0, y: 0 });
   const raf = useRef(0);
   const toastTimer = useRef(0);
@@ -71,8 +116,8 @@ export default function CustomCursor() {
 
     const onMove = (e: MouseEvent) => {
       mouse.current = { x: e.clientX, y: e.clientY };
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      if (tipRef.current) {
+        tipRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
       }
     };
 
@@ -105,14 +150,14 @@ export default function CustomCursor() {
     };
 
     const animate = () => {
-      ring.current.x += (mouse.current.x - ring.current.x) * 0.15;
-      ring.current.y += (mouse.current.y - ring.current.y) * 0.15;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate(${ring.current.x}px, ${ring.current.y}px)`;
+      box.current.x += (mouse.current.x - box.current.x) * 0.22;
+      box.current.y += (mouse.current.y - box.current.y) * 0.22;
+      if (boxRef.current) {
+        boxRef.current.style.transform = `translate(${box.current.x}px, ${box.current.y}px)`;
       }
 
       luminanceCheck.current++;
-      if (luminanceCheck.current % 6 === 0) {
+      if (luminanceCheck.current % 4 === 0) {
         const light = isOnLightBackground(mouse.current.x, mouse.current.y);
         setIsDark(!light);
       }
@@ -147,72 +192,70 @@ export default function CustomCursor() {
   if (prefersReducedMotion) return null;
   if (!visible) return null;
 
-  const dotColor = isDark ? "#ffffff" : "#5E0ED7";
-  const ringBorder = isDark
-    ? hovering ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.3)"
-    : hovering ? "rgba(94,14,215,0.5)" : "rgba(94,14,215,0.25)";
-  const ringBg = hovering
-    ? isDark ? "rgba(255,255,255,0.08)" : "rgba(94,14,215,0.06)"
-    : "transparent";
+  // Fill adapts to surface; dual ring (ink + paper) keeps tip/frame readable on both.
+  const fill = hovering ? ACCENT : isDark ? PAPER : INK;
+  const ringOuter = isDark ? INK : PAPER;
+  const ringInner = isDark ? PAPER : INK;
+  const boxSize = clicking ? (hovering ? 28 : 18) : hovering ? 36 : 22;
+  const tipSize = clicking ? 5 : hovering ? 7 : 6;
+  const dualRing = `0 0 0 1px ${ringOuter}, 0 0 0 2.5px ${ringInner}`;
 
   return (
     <>
-      {/* Toast — right click protection */}
-      {showToast && (
+      {showToast ? (
         <div
           className="pointer-events-none fixed z-9999"
           style={{
             left: toastPos.current.x,
-            top: toastPos.current.y - 40,
+            top: toastPos.current.y - 44,
             transform: "translateX(-50%)",
-            animation: "cursorToastIn 0.3s cubic-bezier(0.16,1,0.3,1)",
+            animation: "cursorToastIn 0.25s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          <div className="flex items-center gap-2 rounded-full border border-white/15 bg-slate-900/95 px-4 py-2 shadow-xl backdrop-blur-xl">
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[#5E0ED7]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2l8 4v6c0 5.55-3.84 10.74-8 12-4.16-1.26-8-6.45-8-12V6l8-4z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-            <span className="text-xs font-semibold text-white/80">Contenuto protetto</span>
+          <div className="flex items-center gap-2 border border-[var(--ink)] bg-[var(--paper)] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
+            Contenuto protetto
           </div>
         </div>
-      )}
+      ) : null}
 
       <style>{`
         @keyframes cursorToastIn {
-          from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.9); }
-          to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
       `}</style>
 
-      {/* Dot */}
       <div
-        ref={dotRef}
+        ref={tipRef}
         className="pointer-events-none fixed left-0 top-0 z-9999"
         style={{
-          width: clicking ? 6 : 8,
-          height: clicking ? 6 : 8,
-          marginLeft: clicking ? -3 : -4,
-          marginTop: clicking ? -3 : -4,
-          borderRadius: "50%",
-          background: dotColor,
-          transition: "background 0.25s, width 0.15s, height 0.15s",
+          width: tipSize,
+          height: tipSize,
+          marginLeft: -tipSize / 2,
+          marginTop: -tipSize / 2,
+          background: fill,
+          boxShadow: dualRing,
+          transition: "background 0.15s, width 0.12s, height 0.12s, margin 0.12s, box-shadow 0.15s",
         }}
       />
 
-      {/* Ring */}
       <div
-        ref={ringRef}
+        ref={boxRef}
         className="pointer-events-none fixed left-0 top-0 z-9998"
         style={{
-          width: clicking ? (hovering ? 40 : 26) : (hovering ? 48 : 32),
-          height: clicking ? (hovering ? 40 : 26) : (hovering ? 48 : 32),
-          marginLeft: clicking ? (hovering ? -20 : -13) : (hovering ? -24 : -16),
-          marginTop: clicking ? (hovering ? -20 : -13) : (hovering ? -24 : -16),
-          borderRadius: "50%",
-          border: `1.5px solid ${ringBorder}`,
-          background: ringBg,
-          transition: "width 0.3s cubic-bezier(0.16,1,0.3,1), height 0.3s cubic-bezier(0.16,1,0.3,1), margin 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.25s, background 0.25s",
+          width: boxSize,
+          height: boxSize,
+          marginLeft: -boxSize / 2,
+          marginTop: -boxSize / 2,
+          border: `1.5px solid ${hovering ? ACCENT : ringInner}`,
+          boxShadow: `0 0 0 1.5px ${ringOuter}`,
+          background: hovering
+            ? isDark
+              ? "rgba(94,14,215,0.18)"
+              : "rgba(94,14,215,0.08)"
+            : "transparent",
+          transition:
+            "width 0.2s cubic-bezier(0.16,1,0.3,1), height 0.2s cubic-bezier(0.16,1,0.3,1), margin 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.15s, background 0.15s, box-shadow 0.15s",
         }}
       />
     </>

@@ -117,30 +117,30 @@ export default function HomeServicesGrid() {
               <StaggerItem key={cat.id} className="sm:col-span-2 lg:col-span-3">
                 <Link
                   href="/web-agency"
-                  className="group relative flex overflow-hidden rounded-2xl bg-linear-to-r from-rose-50 via-white to-pink-50 ring-1 ring-rose-200/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-400/10"
+                  className="group relative flex overflow-hidden rounded-none bg-linear-to-r from-rose-50 via-white to-pink-50 ring-1 ring-rose-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-rose-300"
                 >
                   <div className="flex w-full flex-col items-center gap-4 p-6 md:flex-row md:gap-8 md:p-8">
                     <div
-                      className={`shrink-0 rounded-2xl ${a.bg} p-4 ${a.text} ring-1 ${a.ring} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                      className={`shrink-0 rounded-none ${a.bg} p-4 ${a.text} ring-1 ${a.ring} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
                     >
                       <Icon />
                     </div>
                     <div className="flex-1 text-center md:text-left">
-                      <p className="text-lg font-semibold text-slate-900">{cat.title}</p>
-                      <p className="mt-1 text-sm text-slate-500">{cat.subtitle}</p>
+                      <p className="text-lg font-semibold text-[var(--ink)]">{cat.title}</p>
+                      <p className="mt-1 text-sm text-[var(--ink)]/55">{cat.subtitle}</p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-1.5">
                       {cat.items.map((item) => (
                         <span
                           key={item.title}
-                          className={`inline-block rounded-full px-2.5 py-0.75 text-[11px] font-medium ring-1 ${a.pill}`}
+                          className={`inline-block rounded-none px-2.5 py-0.75 text-[11px] font-medium ring-1 ${a.pill}`}
                         >
                           {item.title}
                         </span>
                       ))}
                     </div>
                     <span
-                      className={`inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold ${a.text} ring-1 ${a.ring} shadow-sm transition-all duration-300 group-hover:gap-3 group-hover:shadow-md`}
+                      className={`inline-flex shrink-0 items-center gap-2 border border-[var(--ink)]/15 bg-[var(--paper)] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] ${a.text} transition-colors duration-300 group-hover:border-[#5E0ED7] group-hover:text-[#5E0ED7]`}
                     >
                       Scopri
                       <svg
@@ -170,24 +170,24 @@ export default function HomeServicesGrid() {
               <button
                 type="button"
                 onClick={() => setSelected(cat)}
-                className={`lux-card group relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_rgba(15,23,42,0.14)] ${a.glow}`}
+                className={`lux-card group relative block h-full w-full cursor-pointer overflow-hidden rounded-none p-6 text-left transition-all duration-300 hover:border-[var(--ink)]/25 ${a.glow}`}
               >
                 {/* Gradient accent bar */}
                 <div
-                  className={`absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-linear-to-b ${a.border} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                  className={`absolute left-0 top-0 h-full w-1 rounded-none bg-linear-to-b ${a.border} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
                 />
 
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-4">
                     <div
-                      className={`shrink-0 rounded-xl ${a.bg} p-3 ${a.text} ring-1 ${a.ring} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                      className={`shrink-0 rounded-none ${a.bg} p-3 ${a.text} ring-1 ${a.ring} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}
                     >
                       <Icon />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-slate-900" data-gsap-scramble>{cat.title}</p>
-                      <p className="mt-0.5 text-[13px] leading-snug text-slate-500">
+                      <p className="text-[15px] font-semibold text-[var(--ink)]" data-gsap-scramble>{cat.title}</p>
+                      <p className="mt-0.5 text-[13px] leading-snug text-[var(--ink)]/55">
                         {cat.subtitle}
                       </p>
                     </div>
@@ -213,14 +213,14 @@ export default function HomeServicesGrid() {
                   {cat.items.slice(0, isHero ? 6 : 3).map((item) => (
                     <span
                       key={item.title}
-                      className={`inline-block rounded-full px-2.5 py-0.75 text-[11px] font-medium ring-1 ${a.pill}`}
+                      className={`inline-block rounded-none px-2.5 py-0.75 text-[11px] font-medium ring-1 ${a.pill}`}
                     >
                       {item.title}
                     </span>
                   ))}
                   {cat.items.length > (isHero ? 6 : 3) && (
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.75 text-[11px] font-semibold ${a.text}`}
+                      className={`inline-flex items-center rounded-none px-2.5 py-0.75 text-[11px] font-semibold ${a.text}`}
                     >
                       +{cat.items.length - (isHero ? 6 : 3)} altri
                     </span>
@@ -228,8 +228,8 @@ export default function HomeServicesGrid() {
                 </div>
 
                 {/* Service count footer */}
-                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                  <span className="text-xs text-slate-400">
+                <div className="mt-5 flex items-center justify-between border-t border-[var(--ink)]/10 pt-4">
+                  <span className="text-xs text-[var(--ink)]/40">
                     <span className={`font-semibold ${a.text}`}>{cat.items.length}</span> servizi
                     disponibili
                   </span>
@@ -293,18 +293,18 @@ export default function HomeServicesGrid() {
               }}
             >
               <div
-                className="pointer-events-auto relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/50"
+                className="pointer-events-auto relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-none bg-white border border-[var(--ink)]/15 ring-1 ring-[var(--ink)]/10"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Gradient accent bar */}
-                <div className={`h-1.5 w-full rounded-t-3xl bg-linear-to-r ${a.border}`} />
+                <div className={`h-1.5 w-full rounded-none bg-linear-to-r ${a.border}`} />
 
                 <div className="p-7 md:p-10">
                   {/* Close button */}
                   <button
                     type="button"
                     onClick={close}
-                    className="absolute right-4 top-5 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+                    className="absolute right-4 top-5 flex h-9 w-9 items-center justify-center rounded-none text-[var(--ink)]/40 transition-colors hover:bg-[color-mix(in_srgb,var(--paper)_88%,white)] hover:text-[var(--ink)]/65"
                     aria-label="Chiudi"
                   >
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
@@ -320,18 +320,18 @@ export default function HomeServicesGrid() {
                   {/* Header */}
                   <div className="flex items-center gap-4">
                     <div
-                      className={`shrink-0 rounded-xl ${a.bg} p-3.5 ${a.text} ring-1 ${a.ring}`}
+                      className={`shrink-0 rounded-none ${a.bg} p-3.5 ${a.text} ring-1 ${a.ring}`}
                     >
                       <Icon />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900">{selected.title}</h3>
-                      <p className="mt-0.5 text-sm text-slate-500">{selected.subtitle}</p>
+                      <h3 className="text-xl font-bold text-[var(--ink)]">{selected.title}</h3>
+                      <p className="mt-0.5 text-sm text-[var(--ink)]/55">{selected.subtitle}</p>
                     </div>
                   </div>
 
                   {/* Divider */}
-                  <div className="my-6 h-px bg-slate-100" />
+                  <div className="my-6 h-px bg-[color-mix(in_srgb,var(--paper)_88%,white)]" />
 
                   {/* Services grid */}
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -341,17 +341,17 @@ export default function HomeServicesGrid() {
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.08 + i * 0.05, duration: 0.35 }}
-                        className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 transition-colors hover:border-slate-200 hover:bg-slate-50"
+                        className="rounded-none border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)]/70 p-4 transition-colors hover:border-[var(--ink)]/15 hover:bg-[color-mix(in_srgb,var(--paper)_88%,white)]"
                       >
                         <div className="flex items-start gap-3">
                           <span
-                            className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${a.bg} ${a.text}`}
+                            className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-none text-[11px] font-bold ${a.bg} ${a.text}`}
                           >
                             {i + 1}
                           </span>
                           <div>
-                            <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                            <p className="mt-0.5 text-[13px] leading-relaxed text-slate-500">
+                            <p className="text-sm font-semibold text-[var(--ink)]">{item.title}</p>
+                            <p className="mt-0.5 text-[13px] leading-relaxed text-[var(--ink)]/55">
                               {item.description}
                             </p>
                           </div>
@@ -364,7 +364,7 @@ export default function HomeServicesGrid() {
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <Link
                       href={href}
-                      className={`inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md bg-linear-to-r ${a.border}`}
+                      className="brutal-cta-ink inline-flex items-center gap-2 bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#5E0ED7]"
                     >
                       Scopri di più
                       <svg
@@ -385,7 +385,7 @@ export default function HomeServicesGrid() {
                     <button
                       type="button"
                       onClick={close}
-                      className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                      className="inline-flex items-center justify-center border border-[var(--ink)]/25 bg-transparent px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                     >
                       Chiudi
                     </button>

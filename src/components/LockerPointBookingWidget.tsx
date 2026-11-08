@@ -209,15 +209,15 @@ export default function LockerPointBookingWidget() {
               <FadeUp delay={0.38}>
                 <ul className="mt-8 space-y-3 text-sm text-white/50">
                   <li className="flex items-start gap-3">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#22d3ee]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-none bg-[#22d3ee]" />
                     Prenotazione immediata con codice LP
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#22d3ee]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-none bg-[#22d3ee]" />
                     Ritiro in Via Plinio il Vecchio 72
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#22d3ee]" />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-none bg-[#22d3ee]" />
                     Ideale per Amazon, BRT, GLS e altri corrieri
                   </li>
                 </ul>
@@ -253,7 +253,7 @@ export default function LockerPointBookingWidget() {
             </div>
 
             <FadeUp delay={0.25}>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl sm:p-7">
+              <div className="rounded-none border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl sm:p-7">
                 <div className="mb-5 flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
@@ -263,7 +263,7 @@ export default function LockerPointBookingWidget() {
                       Compila e ricevi subito il codice
                     </p>
                   </div>
-                  <div className="rounded-xl border border-[#22d3ee]/25 bg-[#22d3ee]/10 px-3 py-2 text-center">
+                  <div className="rounded-none border border-[#22d3ee]/25 bg-[#22d3ee]/10 px-3 py-2 text-center">
                     <p className="text-lg font-bold leading-none text-[#22d3ee]">
                       &euro;{dailyRateLabel}
                     </p>

@@ -10,7 +10,7 @@ function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
       viewBox="0 0 20 20"
-      className={`h-4 w-4 ${filled ? "text-amber-400" : "text-slate-200"}`}
+      className={`h-4 w-4 ${filled ? "text-amber-400" : "text-[var(--ink)]/55"}`}
       fill="currentColor"
       aria-hidden="true"
     >
@@ -126,8 +126,8 @@ export default function HomeReviews() {
                 <StarIcon key={i} filled={true} />
               ))}
             </div>
-            <p className="text-2xl font-bold text-slate-900">5.0</p>
-            <p className="flex items-center gap-1.5 text-sm text-slate-600">
+            <p className="text-2xl font-bold text-[var(--ink)]">5.0</p>
+            <p className="flex items-center gap-1.5 text-sm text-[var(--ink)]/65">
               <GoogleLogo />
               su Google · {reviews.length} recensioni verificate
             </p>
@@ -150,17 +150,17 @@ export default function HomeReviews() {
               {reviews.map((review) => (
                 <div
                   key={review.name}
-                  className="flex w-72 shrink-0 flex-col gap-3 rounded-2xl border border-slate-200/70 bg-white/60 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300/80 hover:shadow-md"
+                  className="flex w-72 shrink-0 flex-col gap-3 rounded-none border border-[var(--ink)]/15/70 bg-white/60 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--ink)]/15/80 hover:shadow-md"
                   style={{ scrollSnapAlign: "start" }}
                 >
                   {/* Header */}
                   <div className="flex items-center gap-3">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${review.color} text-xs font-bold text-white`}>
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-none ${review.color} text-xs font-bold text-white`}>
                       {review.initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-800">{review.name}</p>
-                      <p className="flex items-center gap-1 text-xs text-slate-400">
+                      <p className="truncate text-sm font-semibold text-[var(--ink)]">{review.name}</p>
+                      <p className="flex items-center gap-1 text-xs text-[var(--ink)]/40">
                         <GoogleLogo />
                         Google
                       </p>
@@ -175,9 +175,9 @@ export default function HomeReviews() {
                   </div>
 
                   {/* Text */}
-                  <p className="flex-1 text-sm leading-relaxed text-slate-600">
+                  <p className="flex-1 text-sm leading-relaxed text-[var(--ink)]/65">
                     {review.text ? `"${review.text}"` : (
-                      <span className="italic text-slate-400">Recensione con 5 stelle.</span>
+                      <span className="italic text-[var(--ink)]/40">Recensione con 5 stelle.</span>
                     )}
                   </p>
                 </div>
@@ -189,7 +189,7 @@ export default function HomeReviews() {
               <button
                 onClick={() => scroll("left")}
                 aria-label="Recensioni precedenti"
-                className="flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-400 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
+                className="flex items-center justify-center rounded-none border border-[var(--ink)]/15 bg-white p-2 text-[var(--ink)]/40 shadow-sm transition hover:border-[var(--ink)]/15 hover:text-[var(--ink)]/65"
               >
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
                   <path d="M13 15l-5-5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -198,7 +198,7 @@ export default function HomeReviews() {
               <button
                 onClick={() => scroll("right")}
                 aria-label="Recensioni successive"
-                className="flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-400 shadow-sm transition hover:border-slate-300 hover:text-slate-700"
+                className="flex items-center justify-center rounded-none border border-[var(--ink)]/15 bg-white p-2 text-[var(--ink)]/40 shadow-sm transition hover:border-[var(--ink)]/15 hover:text-[var(--ink)]/65"
               >
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
                   <path d="M7 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -211,14 +211,14 @@ export default function HomeReviews() {
         {/* CTA */}
         <Reveal delay={0.1}>
           <div className="flex flex-col items-center gap-3 text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-[var(--ink)]/65">
               Sei stato da noi? Raccontalo su Google.
             </p>
             <a
               href="https://www.google.com/maps/place/AG+SERVIZI+VIA+PLINIO+72+DI+CAVALIERE+CARMINE/@40.7004667,14.4853708,17z/data=!3m1!5s0x133bbd4640846007:0x127e51d71a00ab80!4m6!3m5!1s0x133bbd463f76daab:0xcb56bc8d70daedc5!8m2!3d40.7004667!4d14.4853708!16s%2Fg%2F11cn8yvt32?entry=ttu&g_ep=EgoyMDI2MDQxMi4wIKXMDSoASAFQAw%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-slate-800 hover:shadow-lg"
+              className="brutal-cta-ink group inline-flex items-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
             >
               <GoogleLogo />
               Lascia una recensione su Google

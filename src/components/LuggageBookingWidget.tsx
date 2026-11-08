@@ -273,7 +273,7 @@ function BagCounter({
           onClick={() => onChange(Math.max(0, value - 1))}
           disabled={value === 0}
           aria-label={`Rimuovi ${label}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-white/60 transition hover:border-white/40 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex h-8 w-8 items-center justify-center rounded-none border border-white/20 text-white/60 transition hover:border-white/40 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
         >
           <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 8h10" /></svg>
         </button>
@@ -282,7 +282,7 @@ function BagCounter({
           type="button"
           onClick={() => onChange(value + 1)}
           aria-label={`Aggiungi ${label}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 text-white/60 transition hover:border-white/40 hover:text-white"
+          className="flex h-8 w-8 items-center justify-center rounded-none border border-white/20 text-white/60 transition hover:border-white/40 hover:text-white"
         >
           <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 8h10M8 3v10" /></svg>
         </button>
@@ -540,10 +540,10 @@ export default function LuggageBookingWidget() {
 
           {/* ── Search card ── */}
           <FadeUp delay={0.35}>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:p-6">
+            <div className="rounded-none border border-white/15 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:p-6">
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
                 {/* ── Field 1: Location ── */}
-                <div className="flex h-[72px] items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4">
+                <div className="flex h-[72px] items-center gap-3 rounded-none border border-white/10 bg-white/5 px-4">
                   <SearchIcon className="h-5 w-5 shrink-0 text-white/40" />
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">Dove</p>
@@ -571,7 +571,7 @@ export default function LuggageBookingWidget() {
                     aria-expanded={dateOpen}
                     aria-haspopup="dialog"
                     aria-label="Seleziona date e orari di check-in e check-out"
-                    className="flex h-[72px] w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
+                    className="flex h-[72px] w-full items-center gap-3 rounded-none border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
                   >
                     <CalendarIcon className="h-5 w-5 shrink-0 text-white/40" />
                     <div className="min-w-0 flex-1">
@@ -583,12 +583,12 @@ export default function LuggageBookingWidget() {
                     {/* Availability indicator */}
                     {checkinDate && !loadingAvailability && availability && (
                       <span
-                        className={`h-2.5 w-2.5 shrink-0 rounded-full ${availability.available ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)]"}`}
+                        className={`h-2.5 w-2.5 shrink-0 rounded-none ${availability.available ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" : "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.5)]"}`}
                         title={availability.available ? "Disponibile" : "Non disponibile"}
                       />
                     )}
                     {loadingAvailability && (
-                      <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-white/30" />
+                      <span className="h-2.5 w-2.5 shrink-0 animate-pulse rounded-none bg-white/30" />
                     )}
                     <svg className={`h-4 w-4 shrink-0 text-white/30 transition-transform ${dateOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
@@ -601,7 +601,7 @@ export default function LuggageBookingWidget() {
                       ref={datePopoverRef}
                       role="dialog"
                       aria-label="Seleziona date e orari"
-                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[340px] md:left-auto md:right-auto md:w-[360px]"
+                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-none border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[340px] md:left-auto md:right-auto md:w-[360px]"
                     >
                       <div className="space-y-4">
                         {/* Check-in */}
@@ -637,7 +637,7 @@ export default function LuggageBookingWidget() {
                                 value={checkinTime}
                                 onChange={(e) => setCheckinTime(e.target.value)}
                                 aria-label="Orario di check-in"
-                                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
+                                className="w-full rounded-none border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
                               >
                                 {TIME_OPTIONS.map((t) => (
                                   <option key={`ci-${t}`} value={t} className="bg-[#0f1d32] text-white">{t}</option>
@@ -680,7 +680,7 @@ export default function LuggageBookingWidget() {
                                 value={checkoutTime}
                                 onChange={(e) => setCheckoutTime(e.target.value)}
                                 aria-label="Orario di check-out"
-                                className="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
+                                className="w-full rounded-none border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30 [color-scheme:dark]"
                               >
                                 {TIME_OPTIONS.map((t) => (
                                   <option key={`co-${t}`} value={t} className="bg-[#0f1d32] text-white">{t}</option>
@@ -692,8 +692,8 @@ export default function LuggageBookingWidget() {
 
                         {/* Availability notice */}
                         {checkinDate && availability && (
-                          <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs ${availability.available ? "bg-emerald-500/10 text-emerald-300" : "bg-red-500/10 text-red-300"}`}>
-                            <span className={`h-2 w-2 rounded-full ${availability.available ? "bg-emerald-400" : "bg-red-400"}`} />
+                          <div className={`flex items-center gap-2 rounded-none px-3 py-2 text-xs ${availability.available ? "bg-emerald-500/10 text-emerald-300" : "bg-red-500/10 text-red-300"}`}>
+                            <span className={`h-2 w-2 rounded-none ${availability.available ? "bg-emerald-400" : "bg-red-400"}`} />
                             {availability.available
                               ? `Disponibile${availability.spotsLeft ? ` (${availability.spotsLeft} posti)` : ""}`
                               : "Non disponibile per questa data"}
@@ -704,7 +704,7 @@ export default function LuggageBookingWidget() {
                         <button
                           type="button"
                           onClick={() => { setDateOpen(false); dateButtonRef.current?.focus(); }}
-                          className="w-full rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                          className="w-full rounded-none bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
                         >
                           Conferma
                         </button>
@@ -722,7 +722,7 @@ export default function LuggageBookingWidget() {
                     aria-expanded={bagsOpen}
                     aria-haspopup="dialog"
                     aria-label="Seleziona numero e tipo di bagagli"
-                    className="flex h-[72px] w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
+                    className="flex h-[72px] w-full items-center gap-3 rounded-none border border-white/10 bg-white/5 px-4 text-left transition hover:border-white/20 hover:bg-white/8"
                   >
                     <SuitcaseIcon className="h-5 w-5 shrink-0 text-white/40" />
                     <div className="min-w-0 flex-1">
@@ -742,7 +742,7 @@ export default function LuggageBookingWidget() {
                       ref={bagsPopoverRef}
                       role="dialog"
                       aria-label="Seleziona il numero di bagagli"
-                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-xl border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[280px] md:left-auto md:right-0 md:w-[300px]"
+                      className="absolute left-0 right-0 bottom-full z-50 mb-2 rounded-none border border-white/15 bg-[#0f1d32]/95 p-4 shadow-2xl backdrop-blur-xl sm:min-w-[280px] md:left-auto md:right-0 md:w-[300px]"
                     >
                       <div className="space-y-1">
                         <BagCounter
@@ -779,7 +779,7 @@ export default function LuggageBookingWidget() {
                       <button
                         type="button"
                         onClick={() => { setBagsOpen(false); bagsButtonRef.current?.focus(); }}
-                        className="mt-3 w-full rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+                        className="mt-3 w-full rounded-none bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
                       >
                         Conferma
                       </button>
@@ -793,7 +793,7 @@ export default function LuggageBookingWidget() {
                   onClick={handleSubmit}
                   disabled={!isValid}
                   aria-label="Cerca deposito bagagli"
-                  className={`flex h-[72px] items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white transition-all duration-300 md:col-span-2 lg:col-span-1 ${
+                  className={`flex h-[72px] items-center justify-center gap-2 rounded-none px-6 text-sm font-bold text-white transition-all duration-300 md:col-span-2 lg:col-span-1 ${
                     isValid
                       ? "bg-linear-to-r from-[#0066FF] to-[#0099FF] shadow-lg shadow-blue-500/25 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/35"
                       : "cursor-not-allowed bg-white/10 text-white/30"

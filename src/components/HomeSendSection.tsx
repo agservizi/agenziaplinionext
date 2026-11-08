@@ -100,10 +100,10 @@ export default function HomeSendSection() {
             animate={visible ? { opacity: 1, y: 0 } : undefined}
             transition={{ duration: 0.8, ease: EASE }}
           >
-            <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.07] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-200">
+            <div className="mb-7 inline-flex items-center gap-3 rounded-none border border-white/15 bg-white/[0.07] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-200">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-300 opacity-60 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-300" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-none bg-cyan-300 opacity-60 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-2 w-2 rounded-none bg-cyan-300" />
               </span>
               Nuovo servizio
             </div>
@@ -128,7 +128,7 @@ export default function HomeSendSection() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/send"
-                className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-extrabold shadow-[0_16px_45px_rgba(34,211,238,.16)] transition duration-300 hover:-translate-y-0.5 hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+                className="brutal-cta-ink group inline-flex min-h-12 items-center justify-center gap-3 bg-white px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-colors hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
                 style={{ color: "#21134f" }}
               >
                 Avvia la pratica SEND
@@ -148,8 +148,8 @@ export default function HomeSendSection() {
             transition={{ duration: 0.95, ease: EASE, delay: 0.12 }}
             className="relative mx-auto w-full max-w-xl"
           >
-            <div className="relative rounded-[2rem] border border-white/12 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-sm sm:p-8">
-              <div className="absolute left-7 top-7 z-10 rounded-full border border-violet-300/25 bg-[#171334]/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-200">
+            <div className="relative rounded-none border border-white/12 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-sm sm:p-8">
+              <div className="absolute left-7 top-7 z-10 rounded-none border border-violet-300/25 bg-[#171334]/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-200">
                 Notifica tracciata
               </div>
               <SendMark />
@@ -160,7 +160,7 @@ export default function HomeSendSection() {
                     initial={reducedMotion ? false : { opacity: 0, y: 18 }}
                     animate={visible ? { opacity: 1, y: 0 } : undefined}
                     transition={{ duration: 0.6, ease: EASE, delay: 0.3 + index * 0.1 }}
-                    className="rounded-2xl border border-white/10 bg-[#171334]/80 p-4"
+                    className="rounded-none border border-white/10 bg-[#171334]/80 p-4"
                   >
                     <span className="text-[10px] font-black tracking-[0.18em] text-cyan-300">
                       {step.label}

@@ -82,7 +82,7 @@ export default function HomeContent() {
       {/* ═══════════════════════════════════════
           SERVIZI — white
       ═══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-24 md:py-32">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-40 top-20 h-[400px] w-[400px] rounded-full bg-[#5E0ED7]/4 blur-[120px]" />
           <div className="absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#22d3ee]/4 blur-[100px]" />
@@ -91,36 +91,25 @@ export default function HomeContent() {
         <Container className="relative">
           <div className="mb-14 space-y-5">
             <FadeUp>
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#5E0ED7]/20 bg-[#5E0ED7]/6 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5E0ED7]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#5E0ED7]" />
+              <span className="inline-flex items-center gap-2 rounded-none border border-[#5E0ED7]/20 bg-[#5E0ED7]/6 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5E0ED7]">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-none bg-[#5E0ED7]" />
                 I nostri servizi
               </span>
             </FadeUp>
 
             <TextReveal>
-              <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+              <h2 className="display-type text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                 Tutto quello che cerchi.
               </h2>
             </TextReveal>
             <TextReveal delay={0.12}>
-              <h2
-                className="inline-block bg-clip-text text-transparent"
-                style={{
-                  fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                  lineHeight: 0.92,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
-                  backgroundSize: "300% 100%",
-                  animation: "heroGradientShift 5s ease infinite",
-                }}
-              >
+              <h2 className="display-type text-[#5E0ED7]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                 Da noi.
               </h2>
             </TextReveal>
 
             <FadeUp delay={0.3}>
-              <p className="max-w-xl text-lg leading-relaxed text-slate-600">
+              <p className="max-w-xl text-lg leading-relaxed text-[var(--ink)]/65">
                 Pagamenti, telefonia, energia, spedizioni, SPID, PEC e siti web.
                 Passa da noi, ti spieghiamo tutto.
               </p>
@@ -137,8 +126,7 @@ export default function HomeContent() {
             <div className="mt-14 text-center">
               <Link
                 href="/servizi"
-                className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-8 py-4 text-sm font-semibold shadow-sm transition-all duration-300 hover:border-[#5E0ED7]/30 hover:shadow-md"
-                style={{ color: "#0f172a" }}
+                className="group inline-flex items-center gap-3 border border-[var(--ink)]/15 bg-[var(--paper)] px-8 py-4 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-all duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
               >
                 Esplora tutti i servizi
                 <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none">
@@ -155,7 +143,7 @@ export default function HomeContent() {
       {/* ═══════════════════════════════════════
           COME LAVORIAMO — off-white
       ═══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-24 md:py-32">
         <Container className="relative">
           <div className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div>
@@ -165,18 +153,18 @@ export default function HomeContent() {
                 </p>
               </FadeUp>
               <TextReveal>
-                <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+                <h2 className="display-type text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                   Tre passi.
                 </h2>
               </TextReveal>
               <TextReveal delay={0.1}>
-                <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+                <h2 className="display-type text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                   Nessuna sorpresa.
                 </h2>
               </TextReveal>
             </div>
             <FadeUp delay={0.3}>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-600 md:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-[var(--ink)]/65 md:text-base">
                 Ti diciamo cosa facciamo, quanto ci vuole e quanto costa. Sempre la stessa persona, dall&apos;inizio alla fine.
               </p>
             </FadeUp>
@@ -192,12 +180,12 @@ export default function HomeContent() {
               {STEPS.map((step, i) => (
                 <ScaleCard key={step.n} delay={0.15 + i * 0.12}>
                   <div className="flex flex-col items-center text-center">
-                    <div className={`relative z-10 mb-6 h-3 w-3 rounded-full ${step.accent} bg-current shadow-[0_0_12px] shadow-current/30`} />
-                    <div className={`group relative w-full overflow-hidden rounded-2xl border p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl ${step.border}`}>
+                    <div className={`relative z-10 mb-6 h-3 w-3 rounded-none ${step.accent} bg-current shadow-[0_0_12px] shadow-current/30`} />
+                    <div className={`group relative w-full overflow-hidden rounded-none border p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl ${step.border}`}>
                       <div className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] transition-transform duration-500 group-hover:scale-x-100" />
                       <p className={`text-6xl font-black leading-none ${step.accent} opacity-15`}>{step.n}</p>
-                      <h3 className="mt-3 text-xl font-bold text-slate-900">{step.title}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-slate-600">{step.desc}</p>
+                      <h3 className="mt-3 text-xl font-bold text-[var(--ink)]">{step.title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]/65">{step.desc}</p>
                     </div>
                   </div>
                 </ScaleCard>
@@ -210,7 +198,7 @@ export default function HomeContent() {
       {/* ═══════════════════════════════════════
           PERCHÉ NOI — white
       ═══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-24 md:py-32">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-[#5E0ED7]/3 blur-[120px]" />
           <div className="absolute -left-32 bottom-20 h-80 w-80 rounded-full bg-[#22d3ee]/3 blur-[100px]" />
@@ -224,23 +212,12 @@ export default function HomeContent() {
               </p>
             </FadeUp>
             <TextReveal>
-              <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+              <h2 className="display-type text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                 Sempre gli stessi.
               </h2>
             </TextReveal>
             <TextReveal delay={0.12}>
-              <h2
-                className="inline-block bg-clip-text text-transparent"
-                style={{
-                  fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                  lineHeight: 0.92,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
-                  backgroundSize: "300% 100%",
-                  animation: "heroGradientShift 5s ease infinite",
-                }}
-              >
+              <h2 className="display-type text-[#5E0ED7]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                 Dal 2016.
               </h2>
             </TextReveal>
@@ -250,13 +227,13 @@ export default function HomeContent() {
           <div className="grid gap-5 md:grid-cols-3">
             {values.map((val, i) => (
               <ScaleCard key={val.title} delay={0.1 + i * 0.12}>
-                <div className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#5E0ED7]/20 hover:shadow-xl">
-                  <div className="h-[2px] absolute inset-x-0 top-0 w-full rounded-t-2xl bg-linear-to-r from-[#5E0ED7] via-purple-400 to-[#22d3ee] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <div className={`mb-5 inline-flex rounded-xl p-3 ${ICON_COLORS[i].bg} ${ICON_COLORS[i].text}`}>
+                <div className="group relative h-full overflow-hidden rounded-none border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#5E0ED7]/20 hover:shadow-xl">
+                  <div className="h-[2px] absolute inset-x-0 top-0 w-full rounded-none bg-linear-to-r from-[#5E0ED7] via-purple-400 to-[#22d3ee] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className={`mb-5 inline-flex rounded-none p-3 ${ICON_COLORS[i].bg} ${ICON_COLORS[i].text}`}>
                     {VALUE_ICONS[i]}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">{val.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{val.description}</p>
+                  <h3 className="text-xl font-bold text-[var(--ink)]">{val.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]/65">{val.description}</p>
                 </div>
               </ScaleCard>
             ))}
@@ -271,16 +248,16 @@ export default function HomeContent() {
               { label: "su Google", num: 5, suffix: "★", accent: false },
             ].map((stat, i) => (
               <ScaleCard key={stat.label} delay={0.3 + i * 0.1}>
-                <div className={`flex flex-col items-center justify-center gap-3 rounded-2xl border px-6 py-10 text-center transition-all duration-300 hover:shadow-md ${
+                <div className={`flex flex-col items-center justify-center gap-3 rounded-none border px-6 py-10 text-center transition-all duration-300 hover:shadow-md ${
                   stat.accent
                     ? "border-[#5E0ED7]/15 bg-[#5E0ED7]/4"
-                    : "border-slate-100 bg-slate-50/80"
+                    : "border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)]/80"
                 }`}>
-                  <p className="font-black tracking-tight text-slate-900" style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
+                  <p className="font-black tracking-tight text-[var(--ink)]" style={{ fontSize: "clamp(2rem, 4vw, 3rem)" }}>
                     <ScrollCounter target={stat.num} delay={0.5 + i * 0.15} />
                     {stat.suffix && <span className="text-[#5E0ED7]">{stat.suffix}</span>}
                   </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[var(--ink)]/40">
                     {stat.label}
                   </p>
                 </div>
@@ -293,7 +270,7 @@ export default function HomeContent() {
       {/* ═══════════════════════════════════════
           RECENSIONI — off-white
       ═══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-24 md:py-32">
         <Container className="relative">
           <div className="mb-14 flex flex-col items-center text-center">
             <FadeUp>
@@ -311,7 +288,7 @@ export default function HomeContent() {
               </p>
             </FadeUp>
             <TextReveal delay={0.15}>
-              <h2 className="mt-3 text-slate-900" style={{ fontSize: "clamp(2.5rem, 7vw, 4rem)", lineHeight: 0.92, fontWeight: 900, letterSpacing: "-0.02em" }}>
+              <h2 className="display-type mt-3 text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 7vw, 4rem)" }}>
                 Parla chi ha provato.
               </h2>
             </TextReveal>
@@ -338,7 +315,7 @@ export default function HomeContent() {
       {/* ═══════════════════════════════════════
           CTA FINALE — white premium
       ═══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-28 md:py-36">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-28 md:py-36">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#5E0ED7]/5 blur-[100px]" />
           <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-[#22d3ee]/4 blur-[100px]" />
@@ -353,29 +330,18 @@ export default function HomeContent() {
             </FadeUp>
 
             <TextReveal delay={0.1} className="mt-6">
-              <h2 className="text-slate-900" style={{ fontSize: "clamp(2.5rem, 8vw, 5.5rem)", lineHeight: 0.88, fontWeight: 900, letterSpacing: "-0.02em" }}>
+              <h2 className="display-type text-[var(--ink)]" style={{ fontSize: "clamp(2.5rem, 8vw, 5.5rem)" }}>
                 Vieni da noi.
               </h2>
             </TextReveal>
             <TextReveal delay={0.2}>
-              <h2
-                className="inline-block bg-clip-text text-transparent"
-                style={{
-                  fontSize: "clamp(2.5rem, 8vw, 5.5rem)",
-                  lineHeight: 0.88,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
-                  backgroundSize: "300% 100%",
-                  animation: "heroGradientShift 5s ease infinite",
-                }}
-              >
+              <h2 className="display-type text-[#5E0ED7]" style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}>
                 Risolviamo insieme.
               </h2>
             </TextReveal>
 
             <FadeUp delay={0.35}>
-              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-slate-600">
+              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-[var(--ink)]/65">
                 Consulenza gratuita, senza impegno. Spiegaci cosa ti serve e ci pensiamo noi.
                 Dal 2016, ogni giorno.
               </p>
@@ -385,7 +351,7 @@ export default function HomeContent() {
               <div className="mt-10 flex flex-wrap justify-center gap-4">
                 <Link
                   href="/contatti"
-                  className="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-[#5E0ED7] to-purple-500 px-9 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(94,14,215,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(94,14,215,0.4)]"
+                  className="brutal-cta-ink group inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                 >
                   Parla con noi
                   <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none">
@@ -394,8 +360,7 @@ export default function HomeContent() {
                 </Link>
                 <Link
                   href="/servizi"
-                  className="rounded-full border border-slate-300 bg-slate-100 px-9 py-4 text-sm font-semibold shadow-sm transition-all duration-300 hover:border-[#5E0ED7]/30 hover:shadow-md"
-                  style={{ color: "#0f172a" }}
+                  className="inline-flex items-center border border-[var(--ink)]/25 bg-transparent px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--ink)] transition-colors duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                 >
                   Vedi i servizi
                 </Link>
