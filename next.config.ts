@@ -267,8 +267,25 @@ const nextConfig: NextConfig = {
       { source: "/servizi/energia/windtre-luce-gas", destination: "/servizi/energia", permanent: true },
     ];
   },
-  // Pin workspace root so Vercel post-build doesn't look for .next in the wrong place.
-  outputFileTracingRoot: path.join(__dirname),
+  // Keep webpack/.git/export artifacts out of serverless NFT (Hobby 250MB uncompressed).
+  outputFileTracingExcludes: {
+    "*": [
+      "./.git/**/*",
+      "./.next/cache/**/*",
+      "./.next/dev/**/*",
+      "./deploy-out/**/*",
+      "./deploy-out.zip",
+      "./out/**/*",
+      "./agenziaplinio-it-out.zip",
+      "./booking-backend/**/*",
+      "./brt/**/*",
+      "./docker/**/*",
+      "./storefront/**/*",
+      "./public/demos/**/*",
+      "./public/draco/**/*",
+      "./public/video/**/*",
+    ],
+  },
   turbopack: {
     root: __dirname,
   },

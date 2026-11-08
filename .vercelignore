@@ -1,8 +1,20 @@
+# Callers: vercel deploy CLI / Vercel Git builds. Affects upload payload size only.
+# Schema: none. User: "manca il campo iban bancario in da agganciare a gestiio su /area-clienti/contratti-telefonia"
 node_modules
 .next
+.git
 deploy-out
 deploy-out.zip
+out
+agenziaplinio-it-out.zip
+booking-backend
 booking-backend/node_modules
+brt
+docker
+storefront
+catalogo-prodotti
+.superdesign
+tools
 *.log
 .env
 .env.*
