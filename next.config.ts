@@ -64,10 +64,7 @@ const nextConfig: NextConfig = {
         source: "/api/client-area/visure/openapi",
         destination: `${localPhpApiOrigin}/api/client-area/visure/openapi.php`,
       },
-      {
-        source: "/api/client-area/visure/history",
-        destination: `${localPhpApiOrigin}/api/client-area/visure/history.php`,
-      },
+      // visure/history|checkout|pricing: Next App Router routes (no PHP :8089 rewrite)
       {
         source: "/api/client-area/visure/checkout",
         destination: `${localPhpApiOrigin}/api/client-area/visure/checkout.php`,
@@ -108,10 +105,7 @@ const nextConfig: NextConfig = {
         source: "/api/client-area/caf-patronato/file-download",
         destination: `${localPhpApiOrigin}/api/client-area/caf-patronato/file-download.php`,
       },
-      {
-        source: "/api/client-area/caf-patronato/history",
-        destination: `${localPhpApiOrigin}/api/client-area/caf-patronato/history.php`,
-      },
+      // caf-patronato/history: Next App Router route (no PHP :8089 rewrite)
       {
         source: "/api/client-area/caf-patronato/checkout",
         destination: `${localPhpApiOrigin}/api/client-area/caf-patronato/checkout.php`,

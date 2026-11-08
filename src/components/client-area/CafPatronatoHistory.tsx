@@ -74,16 +74,25 @@ export default function CafPatronatoHistory() {
 
     async function load() {
       try {
+        // Callers: /area-clienti/caf-patronato/storico. API: POST /api/client-area/caf-patronato/history.
+        // User: "Unexpected token 'I', \"Internal S\"... is not valid JSON"
         const response = await fetch("/api/client-area/caf-patronato/history", {
           method: "POST",
           cache: "no-store",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: getClientPortalToken() }),
         });
-        const payload = (await response.json()) as {
-          requests?: CafHistoryRecord[];
-          message?: string;
-        };
+        const raw = await response.text();
+        let payload: { requests?: CafHistoryRecord[]; message?: string } = {};
+        try {
+          payload = raw ? (JSON.parse(raw) as typeof payload) : {};
+        } catch {
+          throw new Error(
+            response.ok
+              ? "Risposta storico non valida."
+              : raw.slice(0, 140) || "Impossibile caricare lo storico pratiche.",
+          );
+        }
 
         if (!response.ok) {
           throw new Error(payload.message || "Impossibile caricare lo storico pratiche.");
@@ -109,15 +118,15 @@ export default function CafPatronatoHistory() {
 
   if (status === "loading") {
     return (
-      <div className="lux-panel rounded-3xl p-6">
-        <p className="text-sm font-medium text-slate-600">Sto recuperando le tue pratiche...</p>
+      <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
+        <p className="text-sm font-medium text-[var(--ink)]/55">Sto recuperando le tue pratiche...</p>
       </div>
     );
   }
 
   if (status === "error") {
     return (
-      <div className="lux-panel rounded-3xl p-6">
+      <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
         <p className="text-sm font-medium text-red-600">{message}</p>
       </div>
     );
@@ -125,8 +134,8 @@ export default function CafPatronatoHistory() {
 
   if (!items.length) {
     return (
-      <div className="lux-panel rounded-3xl p-6">
-        <p className="text-sm font-medium text-slate-700">
+      <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
+        <p className="text-sm font-medium text-[var(--ink)]">
           Non ci sono ancora pratiche salvate in questo spazio.
         </p>
       </div>
@@ -134,20 +143,20 @@ export default function CafPatronatoHistory() {
   }
 
   return (
-    <div className="lux-panel rounded-3xl p-6 md:p-8">
+    <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 md:p-8">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">Storico pratiche</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">CAF e Patronato</h2>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">Storico pratiche</p>
+          <h2 className="display-type mt-2 text-2xl text-[var(--ink)]">CAF e Patronato</h2>
         </div>
-        <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        <span className="border border-[var(--ink)]/15 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
           {items.length} registrate
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="min-w-300 w-full text-left text-sm text-slate-700">
-          <thead className="bg-slate-50 text-xs uppercase tracking-[0.14em] text-slate-500">
+      <div className="overflow-x-auto border border-[var(--ink)]/12 bg-[var(--paper)]">
+        <table className="min-w-300 w-full text-left text-sm text-[var(--ink)]">
+          <thead className="bg-[color-mix(in_srgb,var(--paper)_90%,white)] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/45">
             <tr>
               <th className="px-4 py-3 font-semibold">#</th>
               <th className="px-4 py-3 font-semibold">Data</th>
@@ -163,30 +172,30 @@ export default function CafPatronatoHistory() {
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.requestId} className="border-t border-slate-200 align-top">
+              <tr key={item.requestId} className="border-t border-[var(--ink)]/12 align-top">
                 <td className="px-4 py-3">
-                  <p className="font-semibold text-slate-900">#{item.requestId}</p>
-                  <p className="text-xs text-slate-500">{item.serviceScope === "caf" ? "CAF" : "Patronato"}</p>
+                  <p className="font-semibold text-[var(--ink)]">#{item.requestId}</p>
+                  <p className="text-xs text-[var(--ink)]/45">{item.serviceScope === "caf" ? "CAF" : "Patronato"}</p>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{formatDate(item.createdAt)}</td>
                 <td className="px-4 py-3">
-                  <p className="font-semibold text-slate-900">{item.serviceLabel || "n/d"}</p>
-                  <p className="text-xs text-slate-500">{item.categoryLabel || ""}</p>
+                  <p className="font-semibold text-[var(--ink)]">{item.serviceLabel || "n/d"}</p>
+                  <p className="text-xs text-[var(--ink)]/45">{item.categoryLabel || ""}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="font-semibold text-slate-900">{item.customerName || "n/d"}</p>
-                  <p className="text-xs text-slate-500">{item.email || ""}</p>
+                  <p className="font-semibold text-[var(--ink)]">{item.customerName || "n/d"}</p>
+                  <p className="text-xs text-[var(--ink)]/45">{item.email || ""}</p>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <p>{getStatusLabel(item.intakeStatus || item.status)}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--ink)]/45">
                     {item.operatorEmailStatus === "sent" ? "Mail inviata" : "Mail in attesa"}
                   </p>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{formatDate(item.resolvedAt)}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <p>{formatMoney(item.paymentAmountCents, item.paymentCurrency)}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--ink)]/45">
                     {item.priceLabel || (item.paymentStatus ? `Pagamento ${item.paymentStatus}` : "In attesa")}
                   </p>
                 </td>
@@ -199,17 +208,17 @@ export default function CafPatronatoHistory() {
                           href={file.downloadUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="block text-xs font-medium text-cyan-700 hover:underline"
+                          className="block text-xs font-medium text-[#5E0ED7] hover:underline"
                         >
                           {file.originalName}
                         </a>
                       ))}
                       {item.customerFiles.length > 2 ? (
-                        <p className="text-xs text-slate-500">+{item.customerFiles.length - 2} altri</p>
+                        <p className="text-xs text-[var(--ink)]/45">+{item.customerFiles.length - 2} altri</p>
                       ) : null}
                     </div>
                   ) : (
-                    <span className="text-xs text-slate-500">Nessuno</span>
+                    <span className="text-xs text-[var(--ink)]/45">Nessuno</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -221,20 +230,20 @@ export default function CafPatronatoHistory() {
                           href={file.downloadUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="block text-xs font-semibold text-cyan-700 hover:underline"
+                          className="block text-xs font-semibold text-[#5E0ED7] hover:underline"
                         >
                           {file.originalName}
                         </a>
                       ))}
                       {item.resolvedFiles.length > 2 ? (
-                        <p className="text-xs text-slate-500">+{item.resolvedFiles.length - 2} altri</p>
+                        <p className="text-xs text-[var(--ink)]/45">+{item.resolvedFiles.length - 2} altri</p>
                       ) : null}
                     </div>
                   ) : (
-                    <span className="text-xs text-slate-500">Non disponibili</span>
+                    <span className="text-xs text-[var(--ink)]/45">Non disponibili</span>
                   )}
                 </td>
-                <td className="px-4 py-3 max-w-80 text-xs text-slate-600">
+                <td className="px-4 py-3 max-w-80 text-xs text-[var(--ink)]/55">
                   {item.operatorNotes || "Nessuna nota"}
                 </td>
               </tr>
