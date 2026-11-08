@@ -43,14 +43,16 @@ const nextConfig: NextConfig = {
       return [];
     }
 
+    // Callers: Next rewrites. Affects public static demos under /demos/*.
+    // User: "le demo in /web-agency/lavori al clic su apri demo live non portano a nulla"
     return [
       {
-        source: "/api/admin-auth/login",
-        destination: `${localPhpApiOrigin}/api/admin-auth/login.php`,
+        source: "/demos/:slug",
+        destination: "/demos/:slug/index.html",
       },
       {
-        source: "/api/admin-auth/session",
-        destination: `${localPhpApiOrigin}/api/admin-auth/session.php`,
+        source: "/demos/:slug/",
+        destination: "/demos/:slug/index.html",
       },
       {
         source: "/api/public/plinio-assistant",
@@ -60,33 +62,10 @@ const nextConfig: NextConfig = {
         source: "/api/client-area/requests",
         destination: `${localPhpApiOrigin}/api/client-area/requests.php`,
       },
-      {
-        source: "/api/client-area/visure/openapi",
-        destination: `${localPhpApiOrigin}/api/client-area/visure/openapi.php`,
-      },
+      // Visure openapi/pricing/checkout/history: Next App Router routes (no PHP :8089 rewrite)
       {
         source: "/api/client-area/visure/history",
         destination: `${localPhpApiOrigin}/api/client-area/visure/history.php`,
-      },
-      {
-        source: "/api/client-area/visure/checkout",
-        destination: `${localPhpApiOrigin}/api/client-area/visure/checkout.php`,
-      },
-      {
-        source: "/api/client-area/visure/pricing",
-        destination: `${localPhpApiOrigin}/api/client-area/visure/pricing.php`,
-      },
-      {
-        source: "/api/client-area/fotocopie/checkout",
-        destination: `${localPhpApiOrigin}/api/client-area/fotocopie/checkout.php`,
-      },
-      {
-        source: "/api/client-area/fotocopie/verify",
-        destination: `${localPhpApiOrigin}/api/client-area/fotocopie/verify.php`,
-      },
-      {
-        source: "/api/client-area/fotocopie/history",
-        destination: `${localPhpApiOrigin}/api/client-area/fotocopie/history.php`,
       },
       {
         source: "/api/client-area/consulenza-utenze/history",
@@ -120,142 +99,7 @@ const nextConfig: NextConfig = {
         source: "/api/client-area/caf-patronato/finalize",
         destination: `${localPhpApiOrigin}/api/client-area/caf-patronato/finalize.php`,
       },
-      {
-        source: "/api/client-area/caf-patronato/pricing",
-        destination: `${localPhpApiOrigin}/api/client-area/caf-patronato/pricing.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/history",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/history.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/checkout",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/checkout.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/checkout/verify",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/checkout/verify.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/confirm",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/confirm.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/delete",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/delete.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/manifest",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/manifest.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/pudo",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/pudo.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/routing",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/routing.php`,
-      },
-      {
-        source: "/api/client-area/spedizioni/brt/tracking",
-        destination: `${localPhpApiOrigin}/api/client-area/spedizioni/brt/tracking.php`,
-      },
-      {
-        source: "/api/admin/shipping-pricing",
-        destination: `${localPhpApiOrigin}/api/admin/shipping-pricing.php`,
-      },
-      {
-        source: "/api/admin/shipping-pricing/delete",
-        destination: `${localPhpApiOrigin}/api/admin/shipping-pricing/delete.php`,
-      },
-      {
-        source: "/api/admin/shipping-pricing/upsert",
-        destination: `${localPhpApiOrigin}/api/admin/shipping-pricing/upsert.php`,
-      },
-      {
-        source: "/api/admin/visure-pricing",
-        destination: `${localPhpApiOrigin}/api/admin/visure-pricing.php`,
-      },
-      {
-        source: "/api/admin/visure-pricing/delete",
-        destination: `${localPhpApiOrigin}/api/admin/visure-pricing/delete.php`,
-      },
-      {
-        source: "/api/admin/visure-pricing/upsert",
-        destination: `${localPhpApiOrigin}/api/admin/visure-pricing/upsert.php`,
-      },
-      {
-        source: "/api/admin/caf-patronato/pricing",
-        destination: `${localPhpApiOrigin}/api/admin/caf-patronato/pricing.php`,
-      },
-      {
-        source: "/api/admin/caf-patronato/pricing/delete",
-        destination: `${localPhpApiOrigin}/api/admin/caf-patronato/pricing/delete.php`,
-      },
-      {
-        source: "/api/admin/caf-patronato/pricing/upsert",
-        destination: `${localPhpApiOrigin}/api/admin/caf-patronato/pricing/upsert.php`,
-      },
-      {
-        source: "/api/admin/caf-patronato/requests",
-        destination: `${localPhpApiOrigin}/api/admin/caf-patronato/requests.php`,
-      },
-      {
-        source: "/api/admin/caf-patronato/requests/status",
-        destination: `${localPhpApiOrigin}/api/admin/caf-patronato/requests/status.php`,
-      },
-      {
-        source: "/api/admin/client-area/consulting-leads",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/consulting-leads.php`,
-      },
-      {
-        source: "/api/admin/client-area/consulting-leads/status",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/consulting-leads/status.php`,
-      },
-      {
-        source: "/api/admin/client-area/consulting-leads/quote",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/consulting-leads/quote.php`,
-      },
-      {
-        source: "/api/admin/client-area/web-agency",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency.php`,
-      },
-      {
-        source: "/api/admin/client-area/web-agency/status",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency/status.php`,
-      },
-      {
-        source: "/api/admin/client-area/web-agency/quote",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/web-agency/quote.php`,
-      },
-      {
-        source: "/api/admin/client-area/payments",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/payments.php`,
-      },
-      {
-        source: "/api/admin/client-area/requests",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/requests.php`,
-      },
-      {
-        source: "/api/admin/client-area/requests/status",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/requests/status.php`,
-      },
-      {
-        source: "/api/admin/client-area/visure",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/visure.php`,
-      },
-      {
-        source: "/api/admin/client-area/visure-upload",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/visure-upload.php`,
-      },
-      {
-        source: "/api/admin/client-area/email-notifications",
-        destination: `${localPhpApiOrigin}/api/admin/client-area/email-notifications.php`,
-      },
+      // caf-patronato/pricing served by Next App Router route
     ];
   },
   async redirects() {
@@ -264,9 +108,20 @@ const nextConfig: NextConfig = {
     }
     return [
       { source: "/servizi/telefonia/windtre", destination: "/servizi/telefonia", permanent: true },
+      { source: "/servizi/telefonia/very-mobile", destination: "/servizi/telefonia", permanent: true },
       { source: "/servizi/energia/windtre-luce-gas", destination: "/servizi/energia", permanent: true },
+      { source: "/area-clienti/spedizioni", destination: "/area-clienti/brt", permanent: true },
+      { source: "/area-clienti/spedizioni/:path*", destination: "/area-clienti/brt", permanent: true },
+      { source: "/area-clienti/web-agency", destination: "/area-clienti", permanent: true },
+      { source: "/area-clienti/web-agency/:path*", destination: "/area-clienti", permanent: true },
+      { source: "/area-clienti/consulenza-utenze", destination: "/area-clienti/contratti-energia", permanent: true },
+      { source: "/area-clienti/consulenza-utenze/:path*", destination: "/area-clienti/contratti-energia", permanent: true },
+      { source: "/area-clienti/fotocopie", destination: "/area-clienti", permanent: true },
+      { source: "/area-clienti/fotocopie/:path*", destination: "/area-clienti", permanent: true },
     ];
   },
+  // Pin workspace root so Vercel post-build doesn't look for .next in the wrong place.
+  outputFileTracingRoot: path.join(__dirname),
   turbopack: {
     root: __dirname,
   },
