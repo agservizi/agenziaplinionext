@@ -267,6 +267,8 @@ const nextConfig: NextConfig = {
       { source: "/servizi/energia/windtre-luce-gas", destination: "/servizi/energia", permanent: true },
     ];
   },
+  // Pin workspace root so Vercel post-build doesn't look for .next in the wrong place.
+  outputFileTracingRoot: path.join(__dirname),
   turbopack: {
     root: __dirname,
   },
