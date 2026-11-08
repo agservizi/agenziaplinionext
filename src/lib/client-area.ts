@@ -93,6 +93,12 @@ export const clientAreas: ClientAreaConfig[] = [
       { id: "tax_code", label: "Codice fiscale", placeholder: "Codice fiscale", required: true },
       { id: "phone", label: "Cellulare", placeholder: "333…", required: true },
       { id: "email", label: "Email", placeholder: "tua@email.it", required: true },
+      {
+        id: "iban",
+        label: "IBAN bancario",
+        placeholder: "IT60X0542811101000000123456",
+        required: false,
+      },
       { id: "current_operator", label: "Operatore attuale", placeholder: "Es. TIM, Vodafone (se cambio)" },
       { id: "notes", label: "Note / offerta desiderata", placeholder: "Mobile, fissa, bundle…" },
     ],
