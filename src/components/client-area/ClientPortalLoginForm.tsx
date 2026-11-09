@@ -20,6 +20,7 @@ export default function ClientPortalLoginForm() {
   const [email, setEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -56,11 +57,15 @@ export default function ClientPortalLoginForm() {
       if (registerPassword !== confirmPassword) {
         throw new Error("Le password non coincidono");
       }
+      if (!ageConfirmed) {
+        throw new Error("Per registrarti devi dichiarare di avere almeno 14 anni.");
+      }
 
       const resultMessage = await submitClientPortalRegistrationRequest({
         fullName,
         email,
         password: registerPassword,
+        ageConfirmed: true,
       });
       setStatus("idle");
       setMessage(resultMessage);
@@ -68,6 +73,7 @@ export default function ClientPortalLoginForm() {
       setEmail("");
       setRegisterPassword("");
       setConfirmPassword("");
+      setAgeConfirmed(false);
       setMode("login");
       setUsername(email);
       setPassword("");
@@ -197,6 +203,18 @@ export default function ClientPortalLoginForm() {
                 autoComplete="new-password"
                 required={mode === "register"}
               />
+            </label>
+            <label className="flex items-start gap-2 text-xs leading-snug text-slate-400">
+              <input
+                type="checkbox"
+                checked={ageConfirmed}
+                onChange={(event) => setAgeConfirmed(event.target.checked)}
+                className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                required={mode === "register"}
+              />
+              <span>
+                Dichiaro di avere almeno 14 anni. Se ho meno di 14 anni, un genitore o tutore deve prestare il consenso al trattamento dei dati.
+              </span>
             </label>
           </div>
         )}

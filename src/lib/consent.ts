@@ -1,3 +1,8 @@
+/**
+ * Fact-forcing: ConsentProvider + CookiePreferencesModal + ConsentScripts + SplineScene.
+ * Bump version so users re-see banner after preferences now gate remote 3D.
+ * User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
 export type ConsentCategory = "necessary" | "preferences" | "analytics" | "marketing";
 
 export type ConsentState = {
@@ -10,7 +15,8 @@ export type ConsentState = {
 };
 
 export const CONSENT_COOKIE_NAME = "ag_consent";
-export const CONSENT_POLICY_VERSION = "1.0";
+/** Bumped when preference category starts gating remote 3D (Spline). */
+export const CONSENT_POLICY_VERSION = "1.1";
 export const CONSENT_MAX_AGE_DAYS = 180;
 
 export const defaultConsent: ConsentState = {

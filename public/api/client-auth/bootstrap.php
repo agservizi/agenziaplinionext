@@ -169,9 +169,14 @@ function client_auth_parse_json_body(): array
     return is_array($data) ? $data : [];
 }
 
+// Callers: client_auth_create_token/verify_token. No default secret. User: procedi con tutto al 100%
 function client_auth_secret(): string
 {
-    return trim((string) client_auth_env('CLIENT_PORTAL_SESSION_SECRET', 'ag-client-portal-dev-secret'));
+    $secret = trim((string) client_auth_env('CLIENT_PORTAL_SESSION_SECRET', ''));
+    if ($secret === '') {
+        throw new RuntimeException('CLIENT_PORTAL_SESSION_SECRET non configurato');
+    }
+    return $secret;
 }
 
 function client_auth_env_username(): string

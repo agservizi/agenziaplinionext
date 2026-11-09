@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+/**
+ * Fact-forcing: ticket file upload; add PrivateUploadNotice (DSA).
+ * User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
+import { useEffect, useState, type FormEvent } from "react";
+import PrivateUploadNotice from "@/components/compliance/PrivateUploadNotice";
 
 type TicketItem = {
   id: number;
@@ -27,9 +32,14 @@ type TicketItem = {
   updatedAt?: string;
 };
 
+const inputCls =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+const panelCls = "border border-[var(--ink)]/12 bg-[var(--paper)] p-5 md:p-6";
+const primaryBtn =
+  "brutal-cta-ink mt-5 inline-flex bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7] disabled:opacity-70";
+
 const initialForm = {
   customerName: "",
-  email: "",
   phone: "",
   requestId: "",
   ticketArea: "visure",
@@ -57,8 +67,35 @@ export default function TicketPraticheWorkspace() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
-  const [historyEmail, setHistoryEmail] = useState("");
   const [tickets, setTickets] = useState<TicketItem[]>([]);
+
+  const loadHistory = async () => {
+    setLoadingHistory(true);
+    setFeedback("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/client-area/ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ action: "list" }),
+      });
+      const payload = (await response.json()) as { message?: string; tickets?: TicketItem[] };
+      if (!response.ok) {
+        throw new Error(payload.message || "Storico ticket non disponibile.");
+      }
+      setTickets(Array.isArray(payload.tickets) ? payload.tickets : []);
+    } catch (historyError) {
+      setError(historyError instanceof Error ? historyError.message : "Storico non disponibile.");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadHistory();
+  }, []);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -69,7 +106,6 @@ export default function TicketPraticheWorkspace() {
     try {
       const body = new FormData();
       body.set("customerName", form.customerName.trim());
-      body.set("email", form.email.trim().toLowerCase());
       body.set("phone", form.phone.trim());
       body.set("requestId", form.requestId.trim());
       body.set("ticketArea", form.ticketArea);
@@ -94,6 +130,8 @@ export default function TicketPraticheWorkspace() {
       setFiles([]);
       if (payload.ticket) {
         setTickets((current) => [payload.ticket!, ...current]);
+      } else {
+        await loadHistory();
       }
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Ticket non creato.");
@@ -102,83 +140,45 @@ export default function TicketPraticheWorkspace() {
     }
   };
 
-  const loadHistory = async () => {
-    setLoadingHistory(true);
-    setFeedback("");
-    setError("");
-
-    try {
-      const response = await fetch("/api/client-area/ticket", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        cache: "no-store",
-        body: JSON.stringify({ action: "list", email: historyEmail.trim().toLowerCase() }),
-      });
-      const payload = (await response.json()) as { message?: string; tickets?: TicketItem[] };
-      if (!response.ok) {
-        throw new Error(payload.message || "Storico ticket non disponibile.");
-      }
-      setTickets(Array.isArray(payload.tickets) ? payload.tickets : []);
-    } catch (historyError) {
-      setError(historyError instanceof Error ? historyError.message : "Storico non disponibile.");
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
-
   return (
     <section className="space-y-8">
-      <div className="rounded-[32px] border border-cyan-200 bg-gradient-to-br from-cyan-50 via-white to-sky-100/70 p-8 shadow-[0_20px_50px_rgba(8,47,73,0.14)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-          Modulo Ticket Pratiche & Documenti
-        </p>
-        <h2 className="mt-3 text-3xl font-semibold text-slate-900">
-          Apri un ticket operativo e allega i documenti in un solo passaggio
+      <div className={panelCls}>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">Modulo operativo</p>
+        <h2 className="mt-3 text-xl font-semibold text-[var(--ink)]">
+          Apri un ticket e allega i documenti in un passaggio
         </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-700">
-          Usa questo modulo per richieste su pratiche già pagate, integrazioni documentali,
-          chiarimenti su stato lavorazione o consegna documenti finali.
+        <p className="mt-3 text-sm leading-7 text-[var(--ink)]/60">
+          Per pratiche già pagate, integrazioni documentali, chiarimenti su stato o consegna documenti finali.
         </p>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <form
-          onSubmit={onSubmit}
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
-        >
-          <h3 className="text-xl font-semibold text-slate-900">Apri nuovo ticket</h3>
+        <form onSubmit={onSubmit} className={panelCls}>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">Apri nuovo ticket</h3>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <input
               value={form.customerName}
               onChange={(event) => setForm((current) => ({ ...current, customerName: event.target.value }))}
               placeholder="Nome e cognome"
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
-              required
-            />
-            <input
-              value={form.email}
-              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-              placeholder="Email"
-              type="email"
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+              className={inputCls}
               required
             />
             <input
               value={form.phone}
               onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
               placeholder="Telefono"
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+              className={inputCls}
             />
             <input
               value={form.requestId}
               onChange={(event) => setForm((current) => ({ ...current, requestId: event.target.value }))}
               placeholder="ID pratica (opzionale)"
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+              className={inputCls}
             />
             <select
               value={form.ticketArea}
               onChange={(event) => setForm((current) => ({ ...current, ticketArea: event.target.value }))}
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+              className={inputCls}
             >
               <option value="visure">Visure</option>
               <option value="spedizioni">Spedizioni</option>
@@ -189,7 +189,7 @@ export default function TicketPraticheWorkspace() {
             <select
               value={form.priority}
               onChange={(event) => setForm((current) => ({ ...current, priority: event.target.value }))}
-              className="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+              className={inputCls}
             >
               <option value="normale">Priorità normale</option>
               <option value="alta">Priorità alta</option>
@@ -201,7 +201,7 @@ export default function TicketPraticheWorkspace() {
             value={form.subject}
             onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
             placeholder="Oggetto ticket"
-            className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+            className={`mt-4 ${inputCls}`}
             required
           />
           <textarea
@@ -209,11 +209,11 @@ export default function TicketPraticheWorkspace() {
             onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
             rows={6}
             placeholder="Descrivi chiaramente la richiesta e cosa ti serve."
-            className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
+            className={`mt-4 ${inputCls}`}
             required
           />
 
-          <label className="mt-4 block rounded-2xl border border-dashed border-cyan-300 bg-cyan-50 px-4 py-4 text-sm text-slate-700">
+          <label className="mt-4 block border border-dashed border-[var(--ink)]/20 px-4 py-4 text-sm text-[var(--ink)]/70">
             Allega documenti (opzionale)
             <input
               type="file"
@@ -221,6 +221,7 @@ export default function TicketPraticheWorkspace() {
               className="mt-3 block w-full text-sm"
               onChange={(event) => setFiles(Array.from(event.target.files || []))}
             />
+            <PrivateUploadNotice className="mt-3" />
           </label>
           {files.length > 0 ? (
             <p className="mt-2 text-xs text-slate-600">{files.length} allegato/i pronto/i</p>
@@ -229,36 +230,25 @@ export default function TicketPraticheWorkspace() {
           {error ? <p className="mt-4 text-sm font-medium text-red-600">{error}</p> : null}
           {feedback ? <p className="mt-4 text-sm font-medium text-emerald-600">{feedback}</p> : null}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="mt-5 rounded-full bg-cyan-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-70"
-          >
+          <button type="submit" disabled={saving} className={primaryBtn}>
             {saving ? "Sto aprendo il ticket..." : "Apri ticket"}
           </button>
         </form>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <h3 className="text-xl font-semibold text-slate-900">Consulta ticket esistenti</h3>
-          <p className="mt-2 text-sm text-slate-600">
-            Inserisci la tua email per vedere lo storico pratiche aperte.
+        <div className={panelCls}>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">I tuoi ticket</h3>
+          <p className="mt-2 text-sm text-[var(--ink)]/55">
+            Storico legato al tuo account. L&apos;email arriva dalla sessione, non da un campo libero.
           </p>
 
-          <div className="mt-4 flex gap-2">
-            <input
-              value={historyEmail}
-              onChange={(event) => setHistoryEmail(event.target.value)}
-              placeholder="email cliente"
-              type="email"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none focus:border-cyan-500"
-            />
+          <div className="mt-4">
             <button
               type="button"
-              onClick={loadHistory}
+              onClick={() => void loadHistory()}
               disabled={loadingHistory}
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:opacity-60"
+              className="border border-[var(--ink)]/20 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:border-[#5E0ED7] disabled:opacity-60"
             >
-              {loadingHistory ? "..." : "Carica"}
+              {loadingHistory ? "..." : "Aggiorna"}
             </button>
           </div>
 
@@ -267,8 +257,8 @@ export default function TicketPraticheWorkspace() {
           ) : (
             <div className="mt-4 space-y-3">
               {tickets.map((ticket) => (
-                <div key={ticket.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-sm font-semibold text-slate-900">
+                <div key={ticket.id} className="border border-[var(--ink)]/12 p-4">
+                  <p className="text-sm font-semibold text-[var(--ink)]">
                     #{ticket.id} · {ticket.subject}
                   </p>
                   <p className="mt-1 text-xs text-slate-600">
@@ -283,7 +273,7 @@ export default function TicketPraticheWorkspace() {
                           href={url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs font-semibold text-cyan-700 underline"
+                          className="text-xs font-semibold text-[#5E0ED7] underline"
                         >
                           Allegato {index + 1}
                         </a>

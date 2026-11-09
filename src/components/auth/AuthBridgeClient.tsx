@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -6,9 +6,9 @@ import {
   getClientPortalToken,
   readClientPortalTokenPayload,
 } from "@/lib/client-portal-auth";
-import { getAdminPortalToken } from "@/lib/admin-portal-auth";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
+/** Callers: auth/bridge. User: CMS plan — staff bridge removed with legacy admin. */
 export default function AuthBridgeClient({
   kind,
 }: {
@@ -19,19 +19,19 @@ export default function AuthBridgeClient({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const next =
-      kind === "staff"
-        ? safeNextPath(searchParams.get("next"), "/area-admin")
-        : safeNextPath(searchParams.get("next"), "/area-clienti");
-    const loginPath = kind === "staff" ? "/admin-login" : "/login";
-    const token = kind === "customer" ? getClientPortalToken() : getAdminPortalToken();
+    if (kind === "staff") {
+      router.replace("/");
+      return;
+    }
+    const next = safeNextPath(searchParams.get("next"), "/area-clienti");
+    const token = getClientPortalToken();
 
     if (!token) {
-      router.replace(`${loginPath}?next=${encodeURIComponent(next)}`);
+      router.replace(`/login?next=${encodeURIComponent(next)}`);
       return;
     }
 
-    const payload = kind === "customer" ? readClientPortalTokenPayload() : null;
+    const payload = readClientPortalTokenPayload();
 
     void (async () => {
       try {
@@ -40,7 +40,7 @@ export default function AuthBridgeClient({
           headers: { "Content-Type": "application/json" },
           credentials: "same-origin",
           body: JSON.stringify({
-            kind,
+            kind: "customer",
             token,
             username: payload?.username,
             userId: payload?.userId ?? null,
@@ -48,13 +48,13 @@ export default function AuthBridgeClient({
         });
         if (!res.ok) {
           setError("Sessione non valida. Accedi di nuovo.");
-          router.replace(`${loginPath}?next=${encodeURIComponent(next)}`);
+          router.replace(`/login?next=${encodeURIComponent(next)}`);
           return;
         }
         router.replace(next);
       } catch {
         setError("Impossibile sincronizzare la sessione.");
-        router.replace(`${loginPath}?next=${encodeURIComponent(next)}`);
+        router.replace(`/login?next=${encodeURIComponent(next)}`);
       }
     })();
   }, [kind, router, searchParams]);

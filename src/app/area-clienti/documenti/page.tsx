@@ -2,12 +2,7 @@ import { ModuleFrame, ModuleNotice, ModuleTable } from "@/components/portal/Modu
 import type { RowDataPacket } from "mysql2";
 import { readCustomerSession } from "@/lib/auth/session";
 import { getPool } from "@/lib/db";
-import {
-  getCustomerEmailByUserId,
-  listCustomerEntitlements,
-  listCustomerInvoices,
-} from "@/lib/client/portal-queries";
-import Link from "next/link";
+import { getCustomerEmailByUserId, listCustomerInvoices } from "@/lib/client/portal-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +13,7 @@ export default async function ClientDocumentiPage() {
     (userId ? await getCustomerEmailByUserId(userId) : null) ||
     (session?.username?.includes("@") ? session.username : null);
 
-  const [invoices, entitlements] = await Promise.all([
-    listCustomerInvoices(userId, email),
-    listCustomerEntitlements(userId),
-  ]);
+  const invoices = await listCustomerInvoices(userId, email);
 
   let serviceDocs: RowDataPacket[] = [];
   if (process.env.MYSQL_HOST && (userId || email)) {
@@ -42,14 +34,14 @@ export default async function ClientDocumentiPage() {
     }
   }
 
-  const hasAny = invoices.length > 0 || entitlements.length > 0 || serviceDocs.length > 0;
+  const hasAny = invoices.length > 0 || serviceDocs.length > 0;
 
   return (
     <ModuleFrame
       tone="client"
       eyebrow="Account"
       title="Documenti"
-      description="Hub CAF / visure / fatture / download digitali — solo tuoi."
+      description="Hub CAF / visure / fatture — solo tuoi."
     >
       {!hasAny ? (
         <ModuleNotice tone="client" variant="empty">
@@ -65,25 +57,18 @@ export default async function ClientDocumentiPage() {
                 `#${r.id}`,
                 String(r.status),
                 r.invoice_pdf_url ? (
-                  <a key={String(r.id)} href={String(r.invoice_pdf_url)} className="text-cyan-300 font-semibold" target="_blank" rel="noreferrer">
+                  <a
+                    key={String(r.id)}
+                    href={String(r.invoice_pdf_url)}
+                    className="font-semibold text-[#5E0ED7] hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     PDF
                   </a>
                 ) : (
                   "—"
                 ),
-              ])}
-            />
-          ) : null}
-          {entitlements.length > 0 ? (
-            <ModuleTable
-              tone="client"
-              headers={["Download", "Ordine", ""]}
-              rows={entitlements.map((r) => [
-                String(r.asset_key),
-                String(r.saleor_order_id),
-                <Link key={String(r.id)} href={`/api/client-area/shop/download?id=${r.id}`} className="text-cyan-300 font-semibold">
-                  Scarica
-                </Link>,
               ])}
             />
           ) : null}

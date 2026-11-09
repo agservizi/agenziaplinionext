@@ -24,3 +24,4 @@ export const faqs = [
     a: "Certo. Abbiamo pacchetti per ogni tipo di business: landing page per presentarsi online, siti completi con gestione contenuti, e-commerce, gestionali. Ti diciamo i costi in anticipo, senza sorprese.",
   },
 ];
+

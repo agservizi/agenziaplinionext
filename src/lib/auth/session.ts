@@ -147,14 +147,15 @@ export function canAccessAdminModule(
     | "shop_write"
     | "refund"
     | "staff"
-    | "settings",
+    | "settings"
+    | "cms",
 ) {
   if (role === "SUPERADMIN") return true;
   if (role === "ADMIN") {
     return module !== "staff" && module !== "settings";
   }
   if (role === "OPERATOR") {
-    return module === "ops" || module === "shop_read";
+    return module === "ops" || module === "shop_read" || module === "cms";
   }
   return false;
 }

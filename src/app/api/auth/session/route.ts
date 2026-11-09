@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   CUSTOMER_SESSION_COOKIE,
-  STAFF_SESSION_COOKIE,
   createCustomerSession,
-  createStaffSession,
   sessionCookieOptions,
   verifySessionToken,
 } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/auth/rate-limit";
 
 /**
- * Dual-read cutover:
- * - POST { kind: "customer"|"staff", token: legacyOrNew }
- * Validates and sets httpOnly session cookie.
+ * Callers: AuthBridgeClient, SessionCookieBridge.
+ * API: POST /api/auth/session. Schema: token only; identity from upstream.user.
+ * User: procedi con tutto al 100% (security-audit AUTHZ-002).
  */
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -20,37 +18,33 @@ export async function POST(request: NextRequest) {
   if (!limited.ok) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
-  let body: { kind?: string; token?: string; username?: string; userId?: number | null };
+  let body: { kind?: string; token?: string };
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const kind = body.kind === "staff" ? "staff" : "customer";
-  const token = String(body.token || "");
+  if (body.kind === "staff") {
+    return NextResponse.json({ error: "Staff portal removed" }, { status: 410 });
+  }
 
+  const token = String(body.token || "");
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
 
-  // Already new-format cookie token?
-  const existing = verifySessionToken(token, kind);
+  const existing = verifySessionToken(token, "customer");
   if (existing) {
     const res = NextResponse.json({ ok: true, role: existing.role });
-    const cookieName = kind === "staff" ? STAFF_SESSION_COOKIE : CUSTOMER_SESSION_COOKIE;
     const maxAge = Math.max(60, Math.floor((existing.exp - Date.now()) / 1000));
-    res.cookies.set(cookieName, token, sessionCookieOptions(maxAge));
+    res.cookies.set(CUSTOMER_SESSION_COOKIE, token, sessionCookieOptions(maxAge));
     return res;
   }
 
-  // Legacy HMAC portal token: trust only after upstream session validate
   const origin = request.nextUrl.origin;
-  const validatePath =
-    kind === "staff" ? "/api/admin-auth/session" : "/api/client-auth/session";
-
   try {
-    const upstream = await fetch(`${origin}${validatePath}`, {
+    const upstream = await fetch(`${origin}/api/client-auth/session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
@@ -63,41 +57,31 @@ export async function POST(request: NextRequest) {
       ok?: boolean;
       username?: string;
       userId?: number | null;
+      user?: { username?: string; userId?: number | null };
     };
-    if (!data?.ok && !data?.username) {
-      // Some backends return username at top-level without ok
-      if (!data?.username) {
-        return NextResponse.json({ error: "Invalid session" }, { status: 401 });
-      }
-    }
 
-    const username = String(data.username || body.username || "user");
+    const username = String(data.user?.username || data.username || "").trim();
+    if (!username) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+    }
     const userId =
-      typeof data.userId === "number"
-        ? data.userId
-        : typeof body.userId === "number"
-          ? body.userId
+      typeof data.user?.userId === "number"
+        ? data.user.userId
+        : typeof data.userId === "number"
+          ? data.userId
           : null;
 
-    const sessionToken =
-      kind === "staff"
-        ? createStaffSession({ username, role: "ADMIN" })
-        : createCustomerSession({ username, userId });
-
-    const res = NextResponse.json({ ok: true, kind });
-    const cookieName = kind === "staff" ? STAFF_SESSION_COOKIE : CUSTOMER_SESSION_COOKIE;
-    const maxAge = kind === "staff" ? 4 * 60 * 60 : 12 * 60 * 60;
-    res.cookies.set(cookieName, sessionToken, sessionCookieOptions(maxAge));
+    const sessionToken = createCustomerSession({ username, userId });
+    const res = NextResponse.json({ ok: true, kind: "customer" });
+    res.cookies.set(CUSTOMER_SESSION_COOKIE, sessionToken, sessionCookieOptions(12 * 60 * 60));
     return res;
   } catch {
     return NextResponse.json({ error: "Session sync failed" }, { status: 502 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
-  const kind = request.nextUrl.searchParams.get("kind") === "staff" ? "staff" : "customer";
+export async function DELETE() {
   const res = NextResponse.json({ ok: true });
-  const cookieName = kind === "staff" ? STAFF_SESSION_COOKIE : CUSTOMER_SESSION_COOKIE;
-  res.cookies.set(cookieName, "", { ...sessionCookieOptions(0), maxAge: 0 });
+  res.cookies.set(CUSTOMER_SESSION_COOKIE, "", { ...sessionCookieOptions(0), maxAge: 0 });
   return res;
 }

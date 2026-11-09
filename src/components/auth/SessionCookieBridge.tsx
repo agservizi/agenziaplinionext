@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import {
@@ -6,39 +6,29 @@ import {
   getClientPortalToken,
   readClientPortalTokenPayload,
 } from "@/lib/client-portal-auth";
-import {
-  ADMIN_PORTAL_TOKEN_KEY,
-  getAdminPortalToken,
-} from "@/lib/admin-portal-auth";
 
-/**
- * Bridges legacy localStorage portal tokens into httpOnly cookies (dual-read cutover).
- */
+/** Callers: area-clienti layout. User: CMS plan — staff SessionCookieBridge removed. */
 export default function SessionCookieBridge({
   kind,
 }: {
   kind: "customer" | "staff";
 }) {
   useEffect(() => {
-    const token =
-      kind === "customer" ? getClientPortalToken() : getAdminPortalToken();
+    if (kind !== "customer") return;
+    const token = getClientPortalToken();
     if (!token) return;
-
-    const payload = kind === "customer" ? readClientPortalTokenPayload() : null;
-
+    const payload = readClientPortalTokenPayload();
     void fetch("/api/auth/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
       body: JSON.stringify({
-        kind,
+        kind: "customer",
         token,
         username: payload?.username,
         userId: payload?.userId ?? null,
       }),
-    }).catch(() => {
-      /* ignore — middleware will redirect if sync fails */
-    });
+    }).catch(() => {});
   }, [kind]);
 
   useEffect(() => {
@@ -47,18 +37,6 @@ export default function SessionCookieBridge({
       if (event.key !== CLIENT_PORTAL_TOKEN_KEY) return;
       if (!event.newValue) {
         void fetch("/api/auth/session?kind=customer", { method: "DELETE" });
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [kind]);
-
-  useEffect(() => {
-    if (kind !== "staff") return;
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== ADMIN_PORTAL_TOKEN_KEY) return;
-      if (!event.newValue) {
-        void fetch("/api/auth/session?kind=staff", { method: "DELETE" });
       }
     };
     window.addEventListener("storage", onStorage);

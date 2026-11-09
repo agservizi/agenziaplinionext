@@ -47,9 +47,9 @@ const actions = [
   },
   {
     title: "Area clienti",
-    description: "Spedizioni, visure, CAF e fotocopie da casa.",
+    description: "Contratti, visure, CAF, SEND e deposito: pratiche Gestiio da casa.",
     href: "/area-clienti",
-    tag: "Self-service",
+    tag: "Gestiio",
     icon: "client" as ServiceMotionIconId,
     span: "md:col-span-2",
     accent: "from-emerald-500/10 to-cyan-500/10",

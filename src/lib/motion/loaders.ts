@@ -1,7 +1,7 @@
-const DRACO_CDN =
-  "https://www.gstatic.com/draco/versioned/decoders/1.5.7/";
+/** Self-hosted Draco decoder (no gstatic request before/without consent). */
+const DRACO_LOCAL = "/draco/";
 
-export const DRACO_DECODER_PATH = DRACO_CDN;
+export const DRACO_DECODER_PATH = DRACO_LOCAL;
 
 /** Lazy GLTF loader with Draco + Meshopt for compressed assets in public/models/ */
 export async function createGLTFLoader() {
@@ -17,7 +17,7 @@ export async function createGLTFLoader() {
   }
 
   const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath(DRACO_CDN);
+  dracoLoader.setDecoderPath(DRACO_LOCAL);
 
   const loader = new GLTFLoader();
   loader.setDRACOLoader(dracoLoader);

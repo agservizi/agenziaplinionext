@@ -13,14 +13,14 @@ export function generateMetadata() {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="lux-surface pb-20 pt-20 text-slate-900">
+    <div className="bg-[var(--paper)] pb-20 pt-20 text-[var(--ink)]">
       <Container className="space-y-8">
         <div className="lux-panel rounded-3xl p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-600">
             Privacy Policy
           </p>
           <h1 className="mt-3 text-3xl font-semibold">Informativa Privacy</h1>
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-3 text-sm text-[var(--ink)]/65">
             Questa informativa descrive come vengono trattati i dati personali degli utenti che
             navigano il sito, compilano i moduli di contatto, usano l’area clienti o richiedono i
             servizi offerti da AG SERVIZI, ai sensi del Regolamento UE 2016/679 (GDPR).
@@ -28,9 +28,9 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <div className="lux-panel rounded-3xl p-8">
-          <div className="space-y-6 text-sm leading-7 text-slate-600">
+          <div className="space-y-6 text-sm leading-7 text-[var(--ink)]/65">
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Titolare del trattamento</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Titolare del trattamento</h2>
               <p className="mt-2">
                 Il Titolare del trattamento è <strong>{company.legalName}</strong>, con sede in{" "}
                 <strong>{company.address}</strong>.
@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Dati trattati</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Dati trattati</h2>
               <p className="mt-2">
                 Possono essere trattati dati identificativi e di contatto come nome, cognome,
                 email, numero di telefono, dati inseriti nei moduli, dati necessari alla gestione
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Finalità del trattamento</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Finalità del trattamento</h2>
               <p className="mt-2">I dati vengono trattati per:</p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>rispondere a richieste di contatto e di assistenza;</li>
@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Base giuridica</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Base giuridica</h2>
               <p className="mt-2">
                 Il trattamento si basa sull’esecuzione di misure precontrattuali richieste
                 dall’interessato, sull’esecuzione di un contratto o servizio richiesto, su obblighi
@@ -72,7 +72,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Modalità di trattamento</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Modalità di trattamento</h2>
               <p className="mt-2">
                 I dati sono trattati con strumenti elettronici e organizzativi adeguati a garantire
                 riservatezza, integrità e disponibilità. L’accesso è limitato ai soli soggetti
@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Conservazione dei dati</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Conservazione dei dati</h2>
               <p className="mt-2">
                 I dati sono conservati per il tempo strettamente necessario alla gestione della
                 richiesta o del servizio, e comunque per i periodi previsti dalla normativa civile,
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Comunicazione dei dati</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Comunicazione dei dati</h2>
               <p className="mt-2">
                 I dati possono essere comunicati a fornitori e partner tecnici coinvolti
                 nell’erogazione dei servizi (ad esempio hosting, pagamenti, email operative,
@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Diritti dell’interessato</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Diritti dell’interessato</h2>
               <p className="mt-2">
                 L’interessato può esercitare i diritti previsti dagli articoli 15-22 del GDPR,
                 inclusi accesso, rettifica, cancellazione, limitazione, opposizione e portabilità,
@@ -111,7 +111,7 @@ export default function PrivacyPolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Cookie e tracciamenti</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Cookie e tracciamenti</h2>
               <p className="mt-2">
                 Per quanto riguarda i cookie e gli strumenti di tracciamento utilizzati nel sito, si
                 rimanda alla relativa{" "}

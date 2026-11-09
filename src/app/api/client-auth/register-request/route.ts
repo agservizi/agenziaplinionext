@@ -3,6 +3,12 @@ import { Resend } from "resend";
 import { getPool, isTableEnsured, markTableEnsured } from "@/lib/db";
 import { escapeHtml } from "@/lib/escape-html";
 
+/**
+ * Fact-forcing:
+ * - Caller: ClientPortalLoginForm register mode → POST /api/client-auth/register-request.
+ * - Schema: client_portal_registration_requests + age_confirmed / age_confirmed_at audit cols.
+ * - User: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP".
+ */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -28,6 +34,8 @@ async function ensureClientPortalRegistrationRequestsTable() {
       phone VARCHAR(80) DEFAULT '',
       company_name VARCHAR(191) DEFAULT '',
       notes TEXT DEFAULT '',
+      age_confirmed TINYINT(1) NOT NULL DEFAULT 0,
+      age_confirmed_at DATETIME NULL DEFAULT NULL,
       status VARCHAR(40) NOT NULL DEFAULT 'new',
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -35,6 +43,22 @@ async function ensureClientPortalRegistrationRequestsTable() {
       KEY idx_client_portal_registration_email (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+  try {
+    await pool.execute(
+      `ALTER TABLE client_portal_registration_requests
+       ADD COLUMN age_confirmed TINYINT(1) NOT NULL DEFAULT 0`,
+    );
+  } catch {
+    /* already present */
+  }
+  try {
+    await pool.execute(
+      `ALTER TABLE client_portal_registration_requests
+       ADD COLUMN age_confirmed_at DATETIME NULL DEFAULT NULL`,
+    );
+  } catch {
+    /* already present */
+  }
   markTableEnsured("client_portal_registration_requests");
 }
 
@@ -49,6 +73,7 @@ export async function POST(request: Request) {
     phone?: string;
     companyName?: string;
     notes?: string;
+    ageConfirmed?: boolean | string | number;
   };
 
   const fullName = String(body.fullName || "").trim();
@@ -56,6 +81,11 @@ export async function POST(request: Request) {
   const phone = String(body.phone || "").trim();
   const companyName = String(body.companyName || "").trim();
   const notes = String(body.notes || "").trim();
+  const ageConfirmed =
+    body.ageConfirmed === true ||
+    body.ageConfirmed === "true" ||
+    body.ageConfirmed === 1 ||
+    body.ageConfirmed === "1";
 
   if (!fullName || !email) {
     return NextResponse.json(
@@ -64,12 +94,22 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!ageConfirmed) {
+    return NextResponse.json(
+      {
+        message:
+          "Per registrarti devi dichiarare di avere almeno 14 anni (consenso genitoriale richiesto sotto i 14).",
+      },
+      { status: 400 },
+    );
+  }
+
   await ensureClientPortalRegistrationRequestsTable();
   const pool = getPool();
   await pool.execute(
     `INSERT INTO client_portal_registration_requests
-      (full_name, email, phone, company_name, notes, status)
-     VALUES (?, ?, ?, ?, ?, 'new')`,
+      (full_name, email, phone, company_name, notes, age_confirmed, age_confirmed_at, status)
+     VALUES (?, ?, ?, ?, ?, 1, NOW(), 'new')`,
     [fullName, email, phone, companyName, notes],
   );
 
@@ -88,6 +128,7 @@ export async function POST(request: Request) {
               <tr><td style="padding:8px 0;color:#64748b;">Email</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(email)}</td></tr>
               <tr><td style="padding:8px 0;color:#64748b;">Telefono</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(phone || "Non indicato")}</td></tr>
               <tr><td style="padding:8px 0;color:#64748b;">Azienda</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">${escapeHtml(companyName || "Non indicata")}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b;">Età ≥14</td><td style="padding:8px 0;color:#0f172a;font-weight:600;">Dichiarata (audit salvato)</td></tr>
             </table>
             ${
               notes
@@ -107,6 +148,7 @@ export async function POST(request: Request) {
       text: [
         `Nome: ${fullName}`,
         `Email: ${email}`,
+        `Età ≥14: dichiarata (audit salvato)`,
         `Telefono: ${phone || "Non indicato"}`,
         `Azienda: ${companyName || "Non indicata"}`,
         "",

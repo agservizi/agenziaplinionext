@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
@@ -12,70 +12,60 @@ import GlobalParallaxLayer from "@/components/GlobalParallaxLayer";
 import PlatformFooter from "@/components/PlatformFooter";
 import MotionProvider from "@/components/motion/MotionProvider";
 import ViewTransitionsShell from "@/components/motion/ViewTransitionsShell";
+import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
 
 const PlinioAssistantChat = dynamic(() => import("@/components/PlinioAssistantChat"), { ssr: false });
-import { clearClientPortalToken, readClientPortalTokenPayload } from "@/lib/client-portal-auth";
-import { clearAdminPortalToken } from "@/lib/admin-portal-auth";
 
-const ADMIN_SIDEBAR_STATE_KEY = "admin-sidebar-collapsed";
-
-function readAdminSidebarCollapsedSnapshot() {
-  return window.localStorage.getItem(ADMIN_SIDEBAR_STATE_KEY) === "1";
-}
-
-function subscribeAdminSidebarCollapsed(onStoreChange: () => void) {
-  const onToggle = () => onStoreChange();
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === ADMIN_SIDEBAR_STATE_KEY) onStoreChange();
-  };
-
-  window.addEventListener("admin-sidebar-toggle", onToggle as EventListener);
-  window.addEventListener("storage", onStorage);
-  return () => {
-    window.removeEventListener("admin-sidebar-toggle", onToggle as EventListener);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
-
+/** Callers: src/app/layout.tsx. Replaces admin chrome with CMS standalone routes. User: Implement Keystatic Brutal CMS plan — demolish legacy area-admin. */
 export default function AppShell({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const rawPathname = usePathname();
-  // Normalize trailing slash so checks work with both /login and /login/
   const pathname = rawPathname.length > 1 && rawPathname.endsWith("/") ? rawPathname.slice(0, -1) : rawPathname;
   const router = useRouter();
   const isClientRoute = pathname === "/login" || pathname.startsWith("/area-clienti");
-  const isAdminRoute = pathname === "/admin-login" || pathname.startsWith("/area-admin");
-  const isAdminDashboardRoute = pathname.startsWith("/area-admin");
   const isClientDashboardRoute = pathname.startsWith("/area-clienti");
+  const isCmsRoute = pathname.startsWith("/area-admin") || pathname.startsWith("/keystatic");
   const isOperatorRoute = pathname.startsWith("/evadi-pratica");
-  const isPlatformRoute = isClientRoute || isAdminRoute || isOperatorRoute;
-  const showPlinioAssistant = !isAdminRoute && !isOperatorRoute && !isClientRoute;
+  const isPlatformRoute = isClientRoute || isOperatorRoute;
+  const showPlinioAssistant = !isOperatorRoute && !isClientRoute && !isCmsRoute;
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const clientUserLabel =
-    isClientRoute && pathname !== "/login" ? readClientPortalTokenPayload()?.username || "" : "";
-  const adminSidebarCollapsed = useSyncExternalStore(
-    subscribeAdminSidebarCollapsed,
-    readAdminSidebarCollapsedSnapshot,
-    () => false,
-  );
+  const [clientUserLabel, setClientUserLabel] = useState("");
+
+  useEffect(() => {
+    if (!(isClientRoute && pathname !== "/login")) {
+      setClientUserLabel("");
+      return;
+    }
+    setClientUserLabel(readClientPortalTokenPayload()?.username || "");
+  }, [isClientRoute, pathname]);
 
   useEffect(() => {
     const toggleScrollTopButton = () => {
       setShowScrollTop(window.scrollY > 320);
     };
-
     toggleScrollTopButton();
     window.addEventListener("scroll", toggleScrollTopButton, { passive: true });
-
     return () => {
       window.removeEventListener("scroll", toggleScrollTopButton);
     };
   }, []);
 
+  useEffect(() => {
+    if (!isClientDashboardRoute) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, [isClientDashboardRoute]);
 
   const scrollTopButton = showScrollTop ? (
     <button
@@ -100,25 +90,33 @@ export default function AppShell({
     </button>
   ) : null;
 
-  // Login pages: completely standalone, no chrome
-  if (pathname === "/login" || pathname === "/admin-login") {
+  if (pathname === "/login" || pathname === "/admin-login" || isCmsRoute) {
     return <>{children}</>;
   }
 
   if (isPlatformRoute) {
-    const isLoginPage = pathname === "/login" || pathname === "/admin-login";
-    const isAdminPlatform = isAdminRoute;
-    const platformLabel = isOperatorRoute
-      ? "Presa in Carico"
-      : isAdminPlatform
-        ? "Area di Controllo"
-        : "Spazio Clienti";
+    const isClientPlatform = isClientRoute;
+    const platformLabel = isOperatorRoute ? "Presa in Carico" : "Spazio Clienti";
 
     return (
       <>
-        <div className={`flex min-h-screen flex-col ${isAdminPlatform ? "bg-slate-50 text-slate-950" : "bg-slate-950 text-white"}`}>
-          <div className={`sticky top-0 z-30 backdrop-blur-xl ${isAdminPlatform ? "border-b border-slate-200 bg-white/92" : "border-b border-white/6 bg-[#0a1122]/90 shadow-[0_1px_2px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.03)]"}`}>
-            <div className="mx-auto flex w-full max-w-none items-center justify-between px-5 py-3.5 md:px-8 lg:px-12">
+        <div
+          className={`flex flex-col ${
+            isClientDashboardRoute ? "h-dvh overflow-hidden" : "min-h-screen"
+          } ${
+            isClientPlatform
+              ? "bg-[var(--paper)] text-[var(--ink)]"
+              : "bg-slate-950 text-white"
+          }`}
+        >
+          <header
+            className={`z-30 h-14 shrink-0 ${
+              isClientPlatform
+                ? "border-b border-[var(--ink)]/10 bg-[var(--paper)]"
+                : "border-b border-white/6 bg-[#0a1122]/90 shadow-[0_1px_2px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-xl"
+            }`}
+          >
+            <div className="mx-auto flex h-full w-full max-w-none items-center justify-between px-5 md:px-8 lg:px-12">
               <div className="inline-flex items-center gap-3">
                 <Link href="/" className="inline-flex items-center gap-3">
                   <Image
@@ -129,81 +127,31 @@ export default function AppShell({
                     className="h-8 w-auto"
                     priority
                   />
-                  <span className={`hidden text-xs font-semibold uppercase tracking-[0.2em] md:inline ${isAdminPlatform ? "text-slate-500" : "text-slate-300"}`}>
+                  <span
+                    className={`hidden text-[10px] font-bold uppercase tracking-[0.22em] md:inline ${
+                      isClientPlatform ? "text-[var(--ink)]/40" : "text-slate-300"
+                    }`}
+                  >
                     {platformLabel}
                   </span>
                 </Link>
-                {isAdminDashboardRoute ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = !readAdminSidebarCollapsedSnapshot();
-                      window.localStorage.setItem(ADMIN_SIDEBAR_STATE_KEY, next ? "1" : "0");
-                      window.dispatchEvent(new CustomEvent("admin-sidebar-toggle", { detail: { collapsed: next } }));
-                    }}
-                    className="hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 xl:inline-flex"
-                    aria-label={adminSidebarCollapsed ? "Espandi sidebar admin" : "Collassa sidebar admin"}
-                    title={adminSidebarCollapsed ? "Espandi sidebar" : "Collassa sidebar"}
-                  >
-                    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" aria-hidden="true">
-                      {adminSidebarCollapsed ? (
-                        <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      ) : (
-                        <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      )}
-                    </svg>
-                  </button>
-                ) : null}
               </div>
               <div className="flex items-center gap-3">
-                {isAdminPlatform && !isLoginPage ? (
-                  <div className="hidden items-center gap-2 2xl:flex">
-                    <Link
-                      href="/area-admin/spedizioni"
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                    >
-                      Apri spedizioni
-                    </Link>
-                    <Link
-                      href="/area-admin/richieste"
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                    >
-                      Apri richieste
-                    </Link>
-                    <Link
-                      href="/area-admin/ticket"
-                      className="rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:border-cyan-300 hover:bg-cyan-100/80"
-                    >
-                      Apri ticket
-                    </Link>
-                    <Link
-                      href="/area-admin/listino-spedizioni"
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                    >
-                      Nuova regola listino
-                    </Link>
-                  </div>
-                ) : null}
-                {isClientRoute && !isLoginPage ? (
+                {isClientRoute ? (
                   <div className="flex items-center gap-2">
-                    {/* Torna al sito */}
                     <Link
                       href="/"
-                      className="group inline-flex h-9 items-center gap-1.5 rounded-lg bg-white/5 px-3 text-[13px] font-medium text-slate-400 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white hover:ring-white/20"
+                      className="group inline-flex h-9 items-center gap-1.5 border border-[var(--ink)]/15 bg-[var(--paper)] px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/55 transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4 transition group-hover:-translate-x-0.5" fill="none" aria-hidden="true">
                         <path d="M19 12H5M5 12l5-5M5 12l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                       <span className="hidden sm:inline">Sito</span>
                     </Link>
-
-                    {/* Divider */}
-                    <div className="mx-1 h-5 w-px bg-white/10" />
-
-                    {/* Profilo */}
+                    <div className="mx-1 h-5 w-px bg-[var(--ink)]/10" />
                     <Link
                       href="/area-clienti/profilo"
-                      className="inline-flex h-9 items-center gap-2 rounded-lg bg-linear-to-b from-cyan-500/15 to-cyan-600/10 px-3.5 text-[13px] font-semibold text-cyan-300 ring-1 ring-cyan-400/20 transition hover:from-cyan-500/25 hover:to-cyan-600/18 hover:text-cyan-200 hover:ring-cyan-400/35"
+                      className="inline-flex h-9 items-center gap-2 border border-[var(--ink)] bg-[var(--ink)] px-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--paper)] transition hover:bg-[#5E0ED7] hover:border-[#5E0ED7]"
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                         <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
@@ -211,15 +159,13 @@ export default function AppShell({
                       </svg>
                       {clientUserLabel || "Profilo"}
                     </Link>
-
-                    {/* Esci */}
                     <button
                       type="button"
                       onClick={() => {
                         clearClientPortalToken();
                         router.push("/login");
                       }}
-                      className="group inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 ring-1 ring-white/8 transition hover:bg-red-500/10 hover:text-red-400 hover:ring-red-500/25"
+                      className="inline-flex h-9 w-9 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink)]/45 transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
                       aria-label="Esci dall'area clienti"
                       title="Esci"
                     >
@@ -231,45 +177,24 @@ export default function AppShell({
                     </button>
                   </div>
                 ) : null}
-                {!isClientRoute && !isLoginPage && !isOperatorRoute ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isAdminPlatform) {
-                          clearAdminPortalToken();
-                          router.push("/admin-login");
-                          return;
-                        }
-
-                        clearClientPortalToken();
-                        router.push("/login");
-                      }}
-                      className={`rounded-full px-4 py-2 text-[13px] font-medium transition ${isAdminPlatform ? "border border-slate-200 text-slate-700 hover:border-slate-300 bg-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/6"}`}
-                    >
-                      Esci
-                    </button>
-                    <Link
-                      href="/"
-                      className={`rounded-full px-4 py-2 text-[13px] font-semibold transition ${isAdminPlatform ? "bg-slate-100 text-slate-700 hover:bg-slate-200" : "border border-white/8 bg-white/6 text-slate-200 hover:bg-white/10 hover:border-white/15"}`}
-                    >
-                      Torna al sito
-                    </Link>
-                  </>
-                ) : null}
               </div>
             </div>
-          </div>
-          <main id="main-content" className={`flex-1 ${isAdminPlatform ? "bg-slate-50" : "bg-slate-950"}`}>{children}</main>
-          <div className={
-            isAdminDashboardRoute
-              ? `transition-[padding] duration-300 ease-out ${adminSidebarCollapsed ? "lg:pl-22" : "lg:pl-72"}`
-              : isClientDashboardRoute
-                ? "lg:pl-60 xl:pl-64"
-                : ""
-          }>
-            <PlatformFooter />
-          </div>
+          </header>
+          <main
+            id="main-content"
+            className={`min-h-0 flex-1 ${
+              isClientDashboardRoute ? "relative overflow-hidden" : "flex flex-col"
+            } ${isClientPlatform ? "bg-[var(--paper)]" : "bg-slate-950"}`}
+          >
+            {isClientDashboardRoute ? (
+              children
+            ) : (
+              <div className="flex min-h-full flex-1 flex-col">
+                <div className="flex-1">{children}</div>
+                <PlatformFooter />
+              </div>
+            )}
+          </main>
         </div>
         {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
         {scrollTopButton}
@@ -280,10 +205,14 @@ export default function AppShell({
   return (
     <ViewTransitionsShell>
       <MotionProvider>
-        <Header />
-        <GlobalParallaxLayer />
-        <main id="main-content" className="relative z-10 min-h-screen bg-slate-950">{children}</main>
-        <Footer />
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <GlobalParallaxLayer />
+          <main id="main-content" className="relative z-10 flex-1 bg-[var(--paper)] text-[var(--ink)]">
+            {children}
+          </main>
+          <Footer />
+        </div>
         {showPlinioAssistant ? <PlinioAssistantChat pathname={pathname} /> : null}
         {scrollTopButton}
       </MotionProvider>

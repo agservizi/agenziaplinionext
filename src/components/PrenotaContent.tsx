@@ -170,7 +170,7 @@ export default function PrenotaContent() {
               <div className="mt-8">
                 <button
                   onClick={() => setBookingOpen(true)}
-                  className="group inline-flex items-center gap-3 rounded-full bg-[#5E0ED7] px-9 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(94,14,215,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(94,14,215,0.4)]"
+                  className="brutal-cta-ink group inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                   style={{ color: "#ffffff", minHeight: "44px" }}
                 >
                   Prenota Ora
@@ -262,7 +262,7 @@ export default function PrenotaContent() {
       {/* ══════════════════════════════════════
           HOW IT WORKS
       ══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 sm:py-32">
+      <section className="bg-[var(--paper)] relative overflow-hidden py-24 sm:py-32">
         {/* Subtle orbs */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#5E0ED7]/5 blur-[100px]" />
@@ -284,7 +284,7 @@ export default function PrenotaContent() {
           <div className="mt-4">
             <TextReveal>
               <h2
-                className="text-slate-900"
+                className="text-[var(--ink)]"
                 style={{
                   fontSize: "clamp(1.8rem, 4vw, 3rem)",
                   lineHeight: 1.1,
@@ -301,7 +301,7 @@ export default function PrenotaContent() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map((step, i) => (
               <ScaleCard key={step.num} delay={i * 0.1}>
-                <article className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#5E0ED7]/20 hover:shadow-xl">
+                <article className="group relative overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#5E0ED7]/20 hover:shadow-xl">
                   {/* Gradient top border on hover */}
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -315,10 +315,10 @@ export default function PrenotaContent() {
 
                   {/* Content */}
                   <div className="relative">
-                    <h3 className="text-lg font-bold text-slate-900">
+                    <h3 className="text-lg font-bold text-[var(--ink)]">
                       {step.num}. {step.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-500">
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--ink)]/55">
                       {step.description}
                     </p>
                   </div>
@@ -332,7 +332,7 @@ export default function PrenotaContent() {
             <div className="mt-12 text-center">
               <button
                 onClick={() => setBookingOpen(true)}
-                className="group inline-flex items-center gap-3 rounded-full bg-[#5E0ED7] px-9 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(94,14,215,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(94,14,215,0.4)]"
+                className="brutal-cta-ink group inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                 style={{ color: "#ffffff", minHeight: "44px" }}
               >
                 Prenota un appuntamento

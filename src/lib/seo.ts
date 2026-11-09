@@ -36,7 +36,7 @@ export const GEO = {
 } as const;
 
 const NOINDEX_PREFIXES = ["/area-admin", "/area-clienti", "/api", "/evadi-pratica", "/scarica-pratica", "/checkout"];
-const NOINDEX_EXACT = new Set(["/login", "/admin-login"]);
+const NOINDEX_EXACT = new Set(["/login", "/keystatic"]);
 
 export const PRIVATE_AREA_ROBOTS: NonNullable<Metadata["robots"]> = {
   index: false,

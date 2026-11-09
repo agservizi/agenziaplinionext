@@ -109,7 +109,7 @@ export default function ServiceCategory({
       "rounded-2xl p-4 transition hover:-translate-y-1",
       isDark
         ? "border border-white/10 bg-slate-950/60 hover:border-cyan-400/40 hover:shadow-[0_18px_45px_rgba(8,47,73,0.45)]"
-        : "border border-slate-200/60 bg-white/95 hover:border-cyan-500/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.15)]",
+        : "border border-[var(--ink)]/15/60 bg-white/95 hover:border-cyan-500/40 hover:shadow-[0_18px_45px_rgba(15,23,42,0.15)]",
     );
 
     const content = (
@@ -118,7 +118,7 @@ export default function ServiceCategory({
           <h4
             className={cx(
               "text-base font-semibold",
-              isDark ? "text-white" : "text-slate-900",
+              isDark ? "text-white" : "text-[var(--ink)]",
             )}
           >
             {item.title}
@@ -128,13 +128,13 @@ export default function ServiceCategory({
               "hidden rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] md:inline",
               isDark
                 ? "border-white/10 text-cyan-300"
-                : "border-slate-200 text-cyan-600",
+                : "border-[var(--ink)]/15 text-cyan-600",
             )}
           >
             {targetHref ? "Apri" : "Servizio"}
           </span>
         </div>
-        <p className={cx("mt-2 text-sm", isDark ? "text-slate-300" : "text-slate-600")}>
+        <p className={cx("mt-2 text-sm", isDark ? "text-[var(--ink)]/40" : "text-[var(--ink)]/65")}>
           {item.description}
         </p>
       </>
@@ -166,7 +166,7 @@ export default function ServiceCategory({
         "group relative overflow-hidden rounded-[32px] p-7",
         isDark
           ? "border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/80 to-slate-950/95 shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
-          : "border border-slate-200/60 bg-white/90 shadow-[0_30px_90px_rgba(15,23,42,0.12)]",
+          : "border border-[var(--ink)]/15/60 bg-white/90 shadow-[0_30px_90px_rgba(15,23,42,0.12)]",
       )}
     >
       <div
@@ -190,12 +190,12 @@ export default function ServiceCategory({
           <h3
             className={cx(
               "text-xl font-semibold",
-              isDark ? "text-white" : "text-slate-900",
+              isDark ? "text-white" : "text-[var(--ink)]",
             )}
           >
             {category.title}
           </h3>
-          <p className={cx("text-sm", isDark ? "text-slate-300" : "text-slate-600")}>
+          <p className={cx("text-sm", isDark ? "text-[var(--ink)]/40" : "text-[var(--ink)]/65")}>
             {category.subtitle}
           </p>
         </div>

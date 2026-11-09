@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { BOOKING_SERVICE_OPTIONS, resolveClientBookingApiBase } from "@/lib/booking-api";
 
@@ -144,25 +145,24 @@ function CalendarPicker({
     (viewYear === min.getFullYear() && viewMonth <= min.getMonth());
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-      {/* Month navigation */}
-      <div className="mb-3 flex items-center justify-between">
+    <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-3 sm:p-4">
+      <div className="mb-2 flex items-center justify-between sm:mb-3">
         <button
           type="button"
           onClick={prevMonth}
           disabled={isPrevDisabled}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white transition hover:border-white/25 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="flex h-8 w-8 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-30"
           aria-label="Mese precedente"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <span className="text-sm font-semibold capitalize text-white">{monthLabel}</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]">{monthLabel}</span>
         <button
           type="button"
           onClick={nextMonth}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-white transition hover:border-white/25"
+          className="flex h-8 w-8 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
           aria-label="Mese successivo"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -171,13 +171,12 @@ function CalendarPicker({
         </button>
       </div>
 
-      {/* Day names header */}
-      <div className="mb-1 grid grid-cols-7 gap-1">
+      <div className="mb-1 grid grid-cols-7 gap-0.5 sm:gap-1">
         {DAY_NAMES.map((d) => (
           <span
             key={d}
-            className={`text-center text-[11px] font-semibold uppercase tracking-wide ${
-              d === "Dom" ? "text-red-400/60" : "text-slate-500"
+            className={`text-center text-[9px] font-bold uppercase tracking-[0.12em] sm:text-[10px] ${
+              d === "Dom" ? "text-[#5E0ED7]/55" : "text-[var(--ink)]/40"
             }`}
           >
             {d}
@@ -185,8 +184,7 @@ function CalendarPicker({
         ))}
       </div>
 
-      {/* Day grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
         {cells.map((day, i) => {
           if (day === null) {
             return <div key={`empty-${i}`} />;
@@ -215,14 +213,14 @@ function CalendarPicker({
               type="button"
               disabled={disabled}
               onClick={() => onChange(iso)}
-              className={`flex h-10 w-full items-center justify-center rounded-xl text-sm font-medium transition ${
+              className={`flex h-8 w-full items-center justify-center text-xs font-semibold transition sm:h-9 sm:text-sm ${
                 isSelected
-                  ? "bg-cyan-500 font-bold text-slate-950"
+                  ? "bg-[var(--ink)] text-white"
                   : isToday
-                    ? "border border-cyan-400/40 text-cyan-300"
+                    ? "border border-[#5E0ED7] text-[#5E0ED7]"
                     : disabled
-                      ? "cursor-not-allowed text-slate-600"
-                      : "text-slate-200 hover:bg-white/10"
+                      ? "cursor-not-allowed text-[var(--ink)]/25"
+                      : "text-[var(--ink)] hover:bg-[var(--ink)]/5"
               }`}
               aria-label={`${day} ${monthLabel}`}
               aria-pressed={!!isSelected}
@@ -307,7 +305,7 @@ const STEP_LABELS = ["Servizio", "Orario", "Dati"] as const;
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   return (
-    <div className="flex items-center justify-center gap-0 px-4 py-6">
+    <div className="flex shrink-0 items-center justify-center gap-0 border-y border-[var(--ink)]/10 px-4 py-4">
       {STEP_LABELS.map((label, index) => {
         const stepNum = index + 1;
         const isActive = stepNum === currentStep;
@@ -315,25 +313,23 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 
         return (
           <div key={label} className="flex items-center">
-            {/* Connector line before (skip first) */}
             {index > 0 && (
               <div className="mx-1 h-px w-8 sm:w-12 md:w-16">
                 <div
                   className={`h-full transition-colors duration-300 ${
-                    isCompleted || isActive ? "bg-cyan-400" : "bg-white/15"
+                    isCompleted || isActive ? "bg-[#5E0ED7]" : "bg-[var(--ink)]/15"
                   }`}
                 />
               </div>
             )}
-            {/* Step circle + label */}
-            <div className="flex flex-col items-center gap-1.5">
+            <div className="flex flex-col items-center gap-1">
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
+                className={`flex h-8 w-8 items-center justify-center text-xs font-bold transition-all duration-300 ${
                   isCompleted
-                    ? "bg-cyan-500 text-slate-950"
+                    ? "bg-[var(--ink)] text-white"
                     : isActive
-                      ? "border-2 border-cyan-400 bg-cyan-400/10 text-cyan-300"
-                      : "border border-white/15 text-slate-500"
+                      ? "border-2 border-[#5E0ED7] text-[#5E0ED7]"
+                      : "border border-[var(--ink)]/15 text-[var(--ink)]/35"
                 }`}
               >
                 {isCompleted ? (
@@ -345,8 +341,8 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 )}
               </div>
               <span
-                className={`text-[11px] font-semibold uppercase tracking-widest transition-colors duration-300 ${
-                  isActive ? "text-cyan-300" : isCompleted ? "text-cyan-400/70" : "text-slate-500"
+                className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300 ${
+                  isActive ? "text-[#5E0ED7]" : isCompleted ? "text-[var(--ink)]/55" : "text-[var(--ink)]/30"
                 }`}
               >
                 {label}
@@ -372,9 +368,8 @@ function AnimatedCheckmark() {
           cy={26}
           r={24}
           fill="none"
-          stroke="#22d3ee"
+          stroke="#5E0ED7"
           strokeWidth={2}
-          className="animate-[drawCircle_0.6s_ease-in-out_forwards]"
           style={{
             strokeDasharray: 151,
             strokeDashoffset: 151,
@@ -384,7 +379,7 @@ function AnimatedCheckmark() {
         <path
           d="M14.1 27.2l7.1 7.2 16.7-16.8"
           fill="none"
-          stroke="#22d3ee"
+          stroke="#5E0ED7"
           strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -441,8 +436,13 @@ export default function PublicBookingDrawer({
   /* --- Wizard state --- */
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+  const [mounted, setMounted] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   /* --- Reset step on close --- */
   useEffect(() => {
@@ -690,14 +690,15 @@ export default function PublicBookingDrawer({
 
   /* --- Render --- */
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
-      {/* Backdrop */}
       <AnimatePresence>
         {open && (
           <motion.div
             key="booking-overlay"
-            className="fixed inset-0 z-60 bg-slate-950/70"
+            className="fixed inset-0 z-[100] bg-[var(--ink)]/45"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -707,12 +708,11 @@ export default function PublicBookingDrawer({
         )}
       </AnimatePresence>
 
-      {/* Drawer */}
       <AnimatePresence>
         {open && (
           <motion.aside
             key="booking-drawer"
-            className="fixed right-0 top-0 z-70 flex h-svh w-full max-w-xl flex-col overflow-y-auto bg-slate-950 text-white shadow-2xl"
+            className="fixed right-0 top-0 z-[110] flex h-svh w-full max-w-xl flex-col overflow-hidden border-l border-[var(--ink)]/12 bg-[var(--paper)] text-[var(--ink)] shadow-[-24px_0_60px_rgba(11,17,32,0.12)]"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -720,21 +720,23 @@ export default function PublicBookingDrawer({
             aria-modal="true"
             aria-label="Prenota appuntamento"
           >
-            <div className="flex min-h-full flex-col bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.22),transparent_38%),linear-gradient(180deg,#020617_0%,#020617_55%,#0f172a_100%)]">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-4 p-6 pb-0 md:p-8 md:pb-0">
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
+            <div className="flex h-full min-h-0 flex-col">
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--ink)]/10 px-5 py-4 md:px-6 md:py-5">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
                     Prenotazione rapida
                   </p>
-                  <h2 className="text-xl font-semibold text-white md:text-2xl">
-                    Prenota il tuo appuntamento
+                  <h2 className="display-type text-2xl text-[var(--ink)] md:text-3xl">
+                    Prenota<span className="text-[#5E0ED7]">.</span>
                   </h2>
+                  <p className="max-w-xs text-xs leading-relaxed text-[var(--ink)]/60 md:text-sm">
+                    Scegli servizio, data e orario. Ti confermiamo sullo slot libero.
+                  </p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-white/30"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--ink)]/15 text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                   aria-label="Chiudi"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -744,11 +746,10 @@ export default function PublicBookingDrawer({
                 </button>
               </div>
 
-              {/* Health check: loading */}
               {healthStatus === "loading" && (
-                <div className="mx-6 mt-6 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300 md:mx-8">
+                <div className="mx-6 mt-6 border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-5 text-sm text-[var(--ink)]/70 md:mx-8">
                   <div className="flex items-center gap-3">
-                    <svg className="h-5 w-5 animate-spin text-cyan-400" viewBox="0 0 24 24" fill="none">
+                    <svg className="h-5 w-5 animate-spin text-[#5E0ED7]" viewBox="0 0 24 24" fill="none">
                       <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} className="opacity-20" />
                       <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
                     </svg>
@@ -757,22 +758,20 @@ export default function PublicBookingDrawer({
                 </div>
               )}
 
-              {/* Health check: error */}
               {healthStatus === "error" && (
-                <div className="mx-6 mt-6 rounded-3xl border border-red-400/30 bg-red-500/10 p-5 text-sm text-red-100 md:mx-8">
+                <div className="mx-6 mt-6 border border-red-700/25 bg-red-50 p-5 text-sm text-red-900 md:mx-8">
                   {healthMessage}
                 </div>
               )}
 
-              {/* Success screen (after booking) */}
               {submitStatus === "success" ? (
                 <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center md:px-8">
                   <AnimatedCheckmark />
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-white">Appuntamento confermato</h3>
-                    <p className="text-sm text-slate-300">{submitMessage}</p>
+                    <h3 className="display-type text-3xl text-[var(--ink)]">Confermato.</h3>
+                    <p className="text-sm text-[var(--ink)]/65">{submitMessage}</p>
                     {confirmedStart && (
-                      <p className="mt-3 text-sm font-semibold uppercase tracking-widest text-cyan-300">
+                      <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.22em] text-[#5E0ED7]">
                         {formatAppointmentDate(confirmedStart)}
                       </p>
                     )}
@@ -780,7 +779,7 @@ export default function PublicBookingDrawer({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-full bg-cyan-500 px-8 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                    className="brutal-cta-ink mt-4 inline-flex min-h-[44px] items-center justify-center bg-[var(--ink)] px-8 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#5E0ED7]"
                   >
                     Chiudi
                   </button>
@@ -791,7 +790,7 @@ export default function PublicBookingDrawer({
                   <StepIndicator currentStep={step} />
 
                   {/* Step content */}
-                  <div className="relative flex-1 overflow-hidden">
+                  <div className="relative min-h-0 flex-1 overflow-hidden">
                     <AnimatePresence mode="wait" custom={direction}>
                       {/* ======================== STEP 1: Service ======================== */}
                       {step === 1 && (
@@ -803,16 +802,18 @@ export default function PublicBookingDrawer({
                           animate="center"
                           exit="exit"
                           transition={slideTransition}
-                          className="px-6 pb-6 md:px-8 md:pb-8"
+                          className="absolute inset-0 flex flex-col px-5 py-5 md:px-6 md:py-6"
                         >
-                          <p className="mb-1 text-sm font-medium text-slate-200">
-                            Che servizio ti serve?
-                          </p>
-                          <p className="mb-5 text-xs text-slate-400">
-                            Seleziona il servizio per cui vuoi prenotare un appuntamento.
-                          </p>
+                          <div className="shrink-0">
+                            <p className="mb-1.5 text-base font-semibold text-[var(--ink)]">
+                              Che servizio ti serve?
+                            </p>
+                            <p className="mb-5 max-w-md text-sm leading-relaxed text-[var(--ink)]/55">
+                              Seleziona il servizio per cui vuoi prenotare un appuntamento.
+                            </p>
+                          </div>
 
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div className="grid min-h-0 flex-1 grid-cols-2 gap-px overflow-hidden bg-[var(--ink)]/10">
                             {BOOKING_SERVICE_OPTIONS.map((item, index) => {
                               const isSelected = service === item.value;
                               return (
@@ -820,42 +821,45 @@ export default function PublicBookingDrawer({
                                   key={item.value}
                                   type="button"
                                   onClick={() => setService(item.value)}
-                                  initial={reducedMotion ? {} : { opacity: 0, y: 16 }}
+                                  initial={reducedMotion ? {} : { opacity: 0, y: 12 }}
                                   animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
                                   transition={
                                     reducedMotion
                                       ? { duration: 0 }
                                       : { delay: index * 0.04, duration: 0.35 }
                                   }
-                                  className={`group relative flex min-h-[44px] items-start gap-3 rounded-2xl border p-4 text-left backdrop-blur-sm transition-all active:scale-[0.98] ${
+                                  className={`group relative flex h-full min-h-0 items-start gap-3 p-3.5 text-left transition-colors active:scale-[0.99] sm:gap-4 sm:p-4 ${
                                     isSelected
-                                      ? "border-cyan-400/60 bg-cyan-400/10 shadow-[0_0_24px_-4px_rgba(34,211,238,0.25)]"
-                                      : "border-white/10 bg-white/5 hover:border-white/20"
+                                      ? "bg-[var(--ink)] text-white"
+                                      : "bg-[var(--paper)] text-[var(--ink)] hover:bg-[color-mix(in_srgb,var(--paper)_88%,white)]"
                                   }`}
                                 >
                                   <div
-                                    className={`shrink-0 transition-colors ${
-                                      isSelected ? "text-cyan-400" : "text-slate-400 group-hover:text-slate-300"
+                                    className={`shrink-0 transition-colors [&_svg]:h-6 [&_svg]:w-6 ${
+                                      isSelected ? "text-[#22d3ee]" : "text-[var(--ink)]/45 group-hover:text-[#5E0ED7]"
                                     }`}
                                   >
                                     {SERVICE_ICONS[item.value] || null}
                                   </div>
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 pr-4">
                                     <p
-                                      className={`text-sm font-semibold transition-colors ${
-                                        isSelected ? "text-cyan-100" : "text-white"
+                                      className={`text-[11px] font-bold uppercase leading-snug tracking-[0.06em] sm:text-sm ${
+                                        isSelected ? "text-white" : "text-[var(--ink)]"
                                       }`}
                                     >
                                       {item.label}
                                     </p>
-                                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                                    <p
+                                      className={`mt-1 line-clamp-2 text-[11px] leading-relaxed sm:text-xs ${
+                                        isSelected ? "text-white/70" : "text-[var(--ink)]/55"
+                                      }`}
+                                    >
                                       {item.description}
                                     </p>
                                   </div>
-                                  {/* Selection indicator */}
                                   {isSelected && (
-                                    <div className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500">
-                                      <svg viewBox="0 0 24 24" fill="none" stroke="#020617" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+                                    <div className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center bg-[#22d3ee] text-[var(--ink)]">
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
                                         <polyline points="20 6 9 17 4 12" />
                                       </svg>
                                     </div>
@@ -865,13 +869,12 @@ export default function PublicBookingDrawer({
                             })}
                           </div>
 
-                          {/* Forward button */}
-                          <div className="mt-6 flex justify-end">
+                          <div className="mt-5 flex shrink-0 justify-end">
                             <button
                               type="button"
                               onClick={goForward}
                               disabled={!service}
-                              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="brutal-cta-ink inline-flex min-h-[44px] items-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               Continua
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -893,92 +896,92 @@ export default function PublicBookingDrawer({
                           animate="center"
                           exit="exit"
                           transition={slideTransition}
-                          className="px-6 pb-6 md:px-8 md:pb-8"
+                          className="absolute inset-0 flex flex-col px-5 py-5 md:px-6 md:py-6"
                         >
-                          {/* Selected service summary */}
-                          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                            <div className="text-cyan-400">
+                          <div className="mb-4 flex shrink-0 items-center gap-3 border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3 py-2.5">
+                            <div className="text-[#5E0ED7] [&_svg]:h-5 [&_svg]:w-5">
                               {SERVICE_ICONS[service] || null}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-semibold text-white">{selectedServiceMeta?.label}</p>
+                              <p className="text-xs font-bold uppercase tracking-[0.06em] text-[var(--ink)] sm:text-sm">
+                                {selectedServiceMeta?.label}
+                              </p>
                             </div>
                           </div>
 
-                          {/* Calendar picker */}
-                          <div>
-                            <span className="mb-2 block text-sm font-medium text-slate-200">
-                              Scegli la data
-                            </span>
-                            <CalendarPicker
-                              value={date}
-                              onChange={setDate}
-                              minDate={getNextBookableDateValue()}
-                            />
-                            <p className="mt-3 text-xs leading-relaxed text-slate-400">
-                              Lun-ven 09:00-13:00 e 16:20-18:30, sab 09:20-12:30. Domenica chiuso.
-                            </p>
-                          </div>
-
-                          {/* Time slots */}
-                          <div className="mt-5">
-                            <p className="mb-3 text-sm font-medium text-slate-200">
-                              Orari disponibili
-                            </p>
-
-                            {slotStatus === "loading" && (
-                              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-                                <svg className="h-5 w-5 animate-spin text-cyan-400" viewBox="0 0 24 24" fill="none">
-                                  <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} className="opacity-20" />
-                                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                                </svg>
-                                Sto cercando gli slot liberi...
-                              </div>
-                            )}
-
-                            {(slotStatus === "error" || slotMessage) && (
-                              <p
-                                role="alert"
-                                className={`rounded-2xl border p-4 text-sm ${
-                                  slotStatus === "error"
-                                    ? "border-red-400/30 bg-red-500/10 text-red-300"
-                                    : "border-white/10 bg-white/5 text-slate-300"
-                                }`}
-                              >
-                                {slotMessage}
+                          <div className="min-h-0 flex-1 space-y-4 overflow-hidden">
+                            <div>
+                              <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                Scegli la data
+                              </span>
+                              <CalendarPicker
+                                value={date}
+                                onChange={setDate}
+                                minDate={getNextBookableDateValue()}
+                              />
+                              <p className="mt-2 text-[11px] leading-relaxed text-[var(--ink)]/50">
+                                Lun-ven 09:00-13:00 e 16:20-18:30, sab 09:20-12:30. Domenica chiuso.
                               </p>
-                            )}
+                            </div>
 
-                            {slotStatus === "ready" && slots.length > 0 && (
-                              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                                {slots.map((slot) => {
-                                  const slotTime = slot.start.slice(11, 16);
-                                  const active = selectedTime === slotTime;
-                                  return (
-                                    <button
-                                      key={slot.start}
-                                      type="button"
-                                      onClick={() => setSelectedTime(slotTime)}
-                                      className={`min-h-[44px] rounded-full border px-3 py-2.5 text-sm font-semibold transition active:scale-[0.98] ${
-                                        active
-                                          ? "border-cyan-300 bg-cyan-500 text-slate-950"
-                                          : "border-white/10 bg-slate-900/70 text-slate-200 hover:border-cyan-400/50"
-                                      }`}
-                                    >
-                                      {formatSlotLabel(slot.start)}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
+                            <div>
+                              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                Orari disponibili
+                              </p>
+
+                              {slotStatus === "loading" && (
+                                <div className="flex items-center gap-3 border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-3 text-sm text-[var(--ink)]/70">
+                                  <svg className="h-5 w-5 animate-spin text-[#5E0ED7]" viewBox="0 0 24 24" fill="none">
+                                    <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} className="opacity-20" />
+                                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                                  </svg>
+                                  Sto cercando gli slot liberi...
+                                </div>
+                              )}
+
+                              {(slotStatus === "error" || slotMessage) && (
+                                <p
+                                  role="alert"
+                                  className={`border p-3 text-sm ${
+                                    slotStatus === "error"
+                                      ? "border-red-700/25 bg-red-50 text-red-900"
+                                      : "border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] text-[var(--ink)]/70"
+                                  }`}
+                                >
+                                  {slotMessage}
+                                </p>
+                              )}
+
+                              {slotStatus === "ready" && slots.length > 0 && (
+                                <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 sm:gap-2">
+                                  {slots.map((slot) => {
+                                    const slotTime = slot.start.slice(11, 16);
+                                    const active = selectedTime === slotTime;
+                                    return (
+                                      <button
+                                        key={slot.start}
+                                        type="button"
+                                        onClick={() => setSelectedTime(slotTime)}
+                                        className={`min-h-[40px] border px-2 py-2 text-sm font-bold transition active:scale-[0.98] ${
+                                          active
+                                            ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                                            : "border-[var(--ink)]/15 text-[var(--ink)] hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+                                        }`}
+                                      >
+                                        {formatSlotLabel(slot.start)}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
                           </div>
 
-                          {/* Back + Forward */}
-                          <div className="mt-6 flex items-center justify-between gap-3">
+                          <div className="mt-5 flex shrink-0 items-center justify-between gap-3">
                             <button
                               type="button"
                               onClick={goBack}
-                              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30"
+                              className="inline-flex min-h-[44px] items-center gap-2 border border-[var(--ink)]/20 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                             >
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                                 <path d="M19 12H5" />
@@ -990,7 +993,7 @@ export default function PublicBookingDrawer({
                               type="button"
                               onClick={goForward}
                               disabled={!canContinueStep2}
-                              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="brutal-cta-ink inline-flex min-h-[44px] items-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               Continua
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
@@ -1012,16 +1015,17 @@ export default function PublicBookingDrawer({
                           animate="center"
                           exit="exit"
                           transition={slideTransition}
-                          className="px-6 pb-6 md:px-8 md:pb-8"
+                          className="absolute inset-0 flex flex-col px-5 py-5 md:px-6 md:py-6"
                         >
-                          {/* Summary bar */}
-                          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                            <div className="text-cyan-400">
+                          <div className="mb-4 flex shrink-0 items-center gap-3 border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3 py-2.5">
+                            <div className="text-[#5E0ED7] [&_svg]:h-5 [&_svg]:w-5">
                               {SERVICE_ICONS[service] || null}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-white">{selectedServiceMeta?.label}</p>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs font-bold uppercase tracking-[0.06em] text-[var(--ink)] sm:text-sm">
+                                {selectedServiceMeta?.label}
+                              </p>
+                              <p className="text-[11px] text-[var(--ink)]/55">
                                 {date} alle {selectedTime}
                               </p>
                             </div>
@@ -1031,120 +1035,123 @@ export default function PublicBookingDrawer({
                                 setDirection(-1);
                                 setStep(2);
                               }}
-                              className="shrink-0 text-xs font-semibold text-cyan-400 transition hover:text-cyan-300"
+                              className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em] text-[#5E0ED7] transition hover:text-[var(--ink)]"
                             >
                               Modifica
                             </button>
                           </div>
 
-                          <form onSubmit={onSubmit} className="space-y-4">
-                            <label className="block">
-                              <span className="mb-2 block text-sm font-medium text-slate-200">
-                                Nome e cognome
-                              </span>
-                              <input
-                                ref={nameInputRef}
-                                value={name}
-                                onChange={(event) => setName(event.target.value)}
-                                className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                placeholder="Come ti chiami"
-                                autoComplete="name"
-                                required
-                              />
-                            </label>
+                          <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+                            <div className="min-h-0 flex-1 space-y-3.5">
+                              <label className="block">
+                                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                  Nome e cognome
+                                </span>
+                                <input
+                                  ref={nameInputRef}
+                                  value={name}
+                                  onChange={(event) => setName(event.target.value)}
+                                  className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]"
+                                  placeholder="Come ti chiami"
+                                  autoComplete="name"
+                                  required
+                                />
+                              </label>
 
-                            <label className="block">
-                              <span className="mb-2 block text-sm font-medium text-slate-200">
-                                Email
-                              </span>
-                              <input
-                                type="email"
-                                value={email}
-                                onChange={(event) => setEmail(event.target.value)}
-                                className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                placeholder="nome@dominio.it"
-                                autoComplete="email"
-                                required
-                              />
-                            </label>
+                              <label className="block">
+                                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                  Email
+                                </span>
+                                <input
+                                  type="email"
+                                  value={email}
+                                  onChange={(event) => setEmail(event.target.value)}
+                                  className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]"
+                                  placeholder="nome@dominio.it"
+                                  autoComplete="email"
+                                  required
+                                />
+                              </label>
 
-                            <label className="block">
-                              <span className="mb-2 block text-sm font-medium text-slate-200">
-                                Telefono
-                              </span>
-                              <input
-                                value={phone}
-                                onChange={(event) => setPhone(event.target.value)}
-                                className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                placeholder="Il numero su cui ricontattarti"
-                                autoComplete="tel"
-                                required
-                              />
-                            </label>
+                              <label className="block">
+                                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                  Telefono
+                                </span>
+                                <input
+                                  value={phone}
+                                  onChange={(event) => setPhone(event.target.value)}
+                                  className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]"
+                                  placeholder="Il numero su cui ricontattarti"
+                                  autoComplete="tel"
+                                  required
+                                />
+                              </label>
 
-                            <label className="block">
-                              <span className="mb-2 block text-sm font-medium text-slate-200">
-                                Note (facoltativo)
-                              </span>
-                              <textarea
-                                value={notes}
-                                onChange={(event) => setNotes(event.target.value)}
-                                className="min-h-24 w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-                                placeholder="Scrivi in breve cosa vuoi affrontare, così arrivo già preparato."
-                              />
-                            </label>
+                              <label className="block">
+                                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45">
+                                  Note (facoltativo)
+                                </span>
+                                <textarea
+                                  value={notes}
+                                  onChange={(event) => setNotes(event.target.value)}
+                                  rows={2}
+                                  className="min-h-0 w-full resize-none border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]"
+                                  placeholder="Scrivi in breve cosa vuoi affrontare, così arrivo già preparato."
+                                />
+                              </label>
 
-                            {/* Submit error */}
-                            {submitStatus === "error" && submitMessage && (
-                              <div
-                                role="alert"
-                                className="rounded-2xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-100"
-                              >
-                                {submitMessage}
-                              </div>
-                            )}
-
-                            {/* Back + Submit */}
-                            <div className="flex items-center justify-between gap-3 pt-2">
-                              <button
-                                type="button"
-                                onClick={goBack}
-                                className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30"
-                              >
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                                  <path d="M19 12H5" />
-                                  <path d="m12 19-7-7 7-7" />
-                                </svg>
-                                Indietro
-                              </button>
-                              <button
-                                type="submit"
-                                disabled={submitStatus === "loading"}
-                                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {submitStatus === "loading" ? (
-                                  <>
-                                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                      <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} className="opacity-20" />
-                                      <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                                    </svg>
-                                    Sto bloccando lo slot...
-                                  </>
-                                ) : (
-                                  <>
-                                    Conferma prenotazione
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                                      <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                  </>
-                                )}
-                              </button>
+                              {submitStatus === "error" && submitMessage && (
+                                <div
+                                  role="alert"
+                                  className="border border-red-700/25 bg-red-50 px-3 py-2.5 text-sm text-red-900"
+                                >
+                                  {submitMessage}
+                                </div>
+                              )}
                             </div>
 
-                            <p className="text-center text-xs leading-relaxed text-slate-500">
-                              L&apos;appuntamento viene confermato solo sugli slot realmente liberi nel
-                              calendario operativo.
-                            </p>
+                            <div className="mt-5 shrink-0 space-y-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <button
+                                  type="button"
+                                  onClick={goBack}
+                                  className="inline-flex min-h-[44px] items-center gap-2 border border-[var(--ink)]/20 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                                    <path d="M19 12H5" />
+                                    <path d="m12 19-7-7 7-7" />
+                                  </svg>
+                                  Indietro
+                                </button>
+                                <button
+                                  type="submit"
+                                  disabled={submitStatus === "loading"}
+                                  className="brutal-cta-ink inline-flex min-h-[44px] items-center justify-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                  {submitStatus === "loading" ? (
+                                    <>
+                                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                        <circle cx={12} cy={12} r={10} stroke="currentColor" strokeWidth={3} className="opacity-20" />
+                                        <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                                      </svg>
+                                      Sto bloccando lo slot...
+                                    </>
+                                  ) : (
+                                    <>
+                                      Conferma
+                                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                                        <polyline points="20 6 9 17 4 12" />
+                                      </svg>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+
+                              <p className="text-center text-[11px] leading-relaxed text-[var(--ink)]/45">
+                                L&apos;appuntamento viene confermato solo sugli slot realmente liberi nel
+                                calendario operativo.
+                              </p>
+                            </div>
                           </form>
                         </motion.div>
                       )}
@@ -1156,6 +1163,7 @@ export default function PublicBookingDrawer({
           </motion.aside>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body,
   );
 }

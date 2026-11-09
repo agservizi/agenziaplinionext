@@ -1,10 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { proxyBookingRequest } from "../_proxy";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return NextResponse.json(
-    { message: "API booking gestite dal backend PHP in produzione/export." },
-    { status: 410 },
-  );
+export async function GET(request: NextRequest) {
+  return proxyBookingRequest(request, "/api/booking/health");
 }

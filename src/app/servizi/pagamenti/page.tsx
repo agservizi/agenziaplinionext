@@ -3,7 +3,8 @@ import Container from "@/components/Container";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { serviceCategories } from "@/lib/site-data";
 import { buildMetadata } from "@/lib/seo";
-import { paymentServiceDetails } from "@/lib/payment-services";
+import { getCmsPaymentServices } from "@/lib/cms/server";
+const paymentServiceDetails = getCmsPaymentServices();
 
 export function generateMetadata() {
   return buildMetadata({
@@ -32,16 +33,16 @@ export default function PagamentiPage() {
       { name: "Pagamenti", href: "/servizi/pagamenti" },
     ]} />
     <div className="pb-24">
-      <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
+      <section className="border-b border-[var(--ink)]/10 bg-[var(--paper)] pt-40 pb-16 text-[var(--ink)]">
         <Container className="grid gap-12 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <div className="space-y-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
               Pagamenti
             </p>
-            <h1 className="text-4xl font-semibold text-white md:text-5xl">
+            <h1 className="text-4xl font-semibold text-[var(--ink)] md:text-5xl">
               Pagamenti e bollettini a Castellammare di Stabia
             </h1>
-            <p className="text-base text-slate-300 md:text-lg">
+            <p className="text-base text-[var(--ink)]/40 md:text-lg">
               Servizi di pagamento assistiti per privati e imprese: bollettini, F24,
               bonifici e PagoPA con supporto locale e tempi rapidi.
             </p>
@@ -61,10 +62,10 @@ export default function PagamentiPage() {
             </div>
           </div>
           <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/40">
               Supporto locale
             </p>
-            <p className="mt-3 text-base text-slate-200">
+            <p className="mt-3 text-base text-[var(--ink)]/55">
               Ci trovi in sede a Castellammare di Stabia per pagamenti immediati,
               verifiche e consulenza su pratiche amministrative.
             </p>
@@ -72,19 +73,19 @@ export default function PagamentiPage() {
         </Container>
       </section>
 
-      <div className="lux-surface pb-20 text-slate-900">
+      <div className="bg-[var(--paper)] pb-20 text-[var(--ink)]">
         <section className="-mt-8 py-6">
           <Container>
-            <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:grid-cols-4">
+            <div className="grid gap-4 rounded-3xl border border-[var(--ink)]/15 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:grid-cols-4">
               {[
                 { label: "Tipologie gestite", value: `${paymentServiceDetails.length}` },
                 { label: "Ricevuta", value: "Immediata" },
                 { label: "Assistenza", value: "In sede" },
                 { label: "Copertura", value: "Privati e imprese" },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-2xl bg-slate-50 p-4 text-center">
+                <div key={stat.label} className="rounded-2xl bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-4 text-center">
                   <p className="text-2xl font-bold text-cyan-700">{stat.value}</p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/55">
                     {stat.label}
                   </p>
                 </div>
@@ -100,10 +101,10 @@ export default function PagamentiPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
                   Catalogo pagamenti
                 </p>
-                <h2 className="mt-2 text-3xl font-semibold text-slate-900 md:text-4xl">
+                <h2 className="mt-2 text-3xl font-semibold text-[var(--ink)] md:text-4xl">
                   Scegli la tipologia e apri il dettaglio
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm text-slate-600">
+                <p className="mt-3 max-w-2xl text-sm text-[var(--ink)]/65">
                   Ogni card è un pulsante: trovi cosa serve, tempi indicativi e modalità operative prima di venire in agenzia.
                 </p>
               </div>
@@ -123,16 +124,16 @@ export default function PagamentiPage() {
               <Link
                 key={item.title}
                 href={cardLinksByTitle[item.title] || "/servizi/pagamenti"}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-[0_24px_60px_rgba(8,47,73,0.14)]"
+                className="group relative overflow-hidden rounded-3xl border border-[var(--ink)]/15 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-[0_24px_60px_rgba(8,47,73,0.14)]"
               >
                 <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-gradient-to-br from-cyan-100 to-transparent" />
                 <div className="relative">
-                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-900 px-2 text-xs font-bold text-white">
+                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[var(--ink)] px-2 text-xs font-bold text-white">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>
-                  <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-                  <span className="mt-5 inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-slate-700 transition group-hover:border-cyan-300 group-hover:text-cyan-700">
+                  <h3 className="mt-4 text-lg font-semibold text-[var(--ink)]">{item.title}</h3>
+                  <p className="mt-2 text-sm text-[var(--ink)]/65">{item.description}</p>
+                  <span className="mt-5 inline-flex items-center rounded-full border border-[var(--ink)]/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--ink)]/65 transition group-hover:border-cyan-300 group-hover:text-cyan-700">
                     Apri scheda
                   </span>
                 </div>
@@ -157,9 +158,9 @@ export default function PagamentiPage() {
                 description: "Rilascio immediato della prova di pagamento.",
               },
             ].map((step) => (
-              <article key={step.title} className="rounded-3xl border border-slate-200 bg-white p-6">
+              <article key={step.title} className="rounded-3xl border border-[var(--ink)]/15 bg-white p-6">
                 <p className="text-sm font-semibold text-cyan-700">{step.title}</p>
-                <p className="mt-3 text-sm text-slate-600">{step.description}</p>
+                <p className="mt-3 text-sm text-[var(--ink)]/65">{step.description}</p>
               </article>
             ))}
           </Container>
@@ -167,14 +168,14 @@ export default function PagamentiPage() {
 
         <section className="py-4">
           <Container>
-            <div className="rounded-3xl border border-slate-200 bg-white p-6">
-              <h2 className="text-xl font-semibold text-slate-900">Tutte le tipologie disponibili</h2>
+            <div className="rounded-3xl border border-[var(--ink)]/15 bg-white p-6">
+              <h2 className="text-xl font-semibold text-[var(--ink)]">Tutte le tipologie disponibili</h2>
               <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {paymentServiceDetails.map((service) => (
                   <Link
                     key={service.slug}
                     href={`/servizi/pagamenti/${service.slug}`}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-cyan-400 hover:bg-cyan-50 hover:text-cyan-700"
+                    className="rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm font-medium text-[var(--ink)]/65 transition hover:border-cyan-400 hover:bg-cyan-50 hover:text-cyan-700"
                   >
                     {service.title}
                   </Link>
@@ -185,11 +186,11 @@ export default function PagamentiPage() {
         </section>
 
         <section className="py-12">
-          <Container className="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-white">
+          <Container className="rounded-3xl border border-[var(--ink)]/15 bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-white">
             <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
               <div>
                 <h2 className="text-2xl font-semibold">Hai più pagamenti da gestire insieme?</h2>
-                <p className="mt-2 text-sm text-slate-300">
+                <p className="mt-2 text-sm text-[var(--ink)]/40">
                   Possiamo organizzare il flusso in un unico passaggio operativo per ridurre tempi e attese in sede.
                 </p>
               </div>

@@ -30,7 +30,7 @@ export default async function ClientFatturePage() {
               <a
                 key={`pdf-${r.id}`}
                 href={String(r.invoice_pdf_url)}
-                className="font-semibold text-cyan-300 hover:underline"
+                className="font-semibold text-[#5E0ED7] hover:underline"
                 target="_blank"
                 rel="noreferrer"
               >

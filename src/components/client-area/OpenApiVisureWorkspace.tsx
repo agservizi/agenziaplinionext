@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Fact-forcing: existing checkout UI; add PaymentCheckoutNotice near pay CTA.
+ * Callers: area-clienti visure pages. User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
@@ -10,6 +14,16 @@ import {
   fetchPublicVisurePricing,
   type PublicVisurePricingRule,
 } from "@/lib/visure-pricing-public";
+import PaymentCheckoutNotice from "@/components/compliance/PaymentCheckoutNotice";
+
+const inputCls =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+const labelCls = "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45";
+const panelCls = "border border-[var(--ink)]/12 bg-[var(--paper)] p-5 md:p-7";
+const primaryBtn =
+  "brutal-cta-ink mt-6 inline-flex bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
+const ghostBtn =
+  "border border-[var(--ink)]/20 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/70 transition hover:border-[var(--ink)]/40 hover:text-[var(--ink)]";
 
 type CatalogItem = {
   serviceType: string;
@@ -40,6 +54,56 @@ type FormState = {
   reportType: string;
   plate: string;
 };
+
+async function readJsonBody<T extends Record<string, unknown>>(
+  response: Response,
+  fallbackMessage: string,
+): Promise<T> {
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(fallbackMessage);
+  }
+}
+
+const FALLBACK_CATALOG: CatalogItem[] = [
+  {
+    serviceType: "visura-camerale",
+    provider: "visure-camerali",
+    available: true,
+    title: "Visura camerale",
+    description: "Recupero dati impresa con verifica anagrafica dedicata.",
+  },
+  {
+    serviceType: "visura-catastale",
+    provider: "catasto",
+    available: true,
+    title: "Visura catastale",
+    description: "Richiesta visura catastale per soggetto con flusso dedicato.",
+  },
+  {
+    serviceType: "visura-pra",
+    provider: "visengine2",
+    available: true,
+    title: "Visura PRA",
+    description: "Richiesta PRA con collegamento al servizio dedicato.",
+  },
+  {
+    serviceType: "visura-crif",
+    provider: "visengine2",
+    available: true,
+    title: "Visura CRIF",
+    description: "Richiesta CRIF con collegamento al servizio dedicato.",
+  },
+  {
+    serviceType: "visura-cr",
+    provider: "visengine2",
+    available: true,
+    title: "Visura Centrale Rischi",
+    description: "Richiesta Centrale Rischi con collegamento al servizio dedicato.",
+  },
+];
 
 function buildInitialState(area: ClientAreaConfig): FormState {
   return {
@@ -115,24 +179,35 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
           cache: "no-store",
           body: JSON.stringify({ action: "catalog" }),
         });
-        const payload = (await response.json()) as {
+        const payload = await readJsonBody<{
           services?: CatalogItem[];
           message?: string;
-        };
+        }>(response, "Servizio visure non disponibile al momento. Riprova tra poco.");
+
+        if (!active) return;
 
         if (!response.ok) {
-          throw new Error(payload.message || "Catalogo visure non disponibile.");
+          setCatalog(FALLBACK_CATALOG);
+          setCatalogStatus("ready");
+          setCatalogMessage(
+            payload.message ||
+              "Catalogo remoto non raggiungibile: mostro i servizi base disponibili.",
+          );
+          return;
         }
 
-        if (!active) return;
-        setCatalog(Array.isArray(payload.services) ? payload.services : []);
+        const services = Array.isArray(payload.services) ? payload.services : [];
+        setCatalog(services.length > 0 ? services : FALLBACK_CATALOG);
         setCatalogStatus("ready");
+        setCatalogMessage("");
       } catch (error) {
         if (!active) return;
-        setCatalog([]);
-        setCatalogStatus("error");
+        setCatalog(FALLBACK_CATALOG);
+        setCatalogStatus("ready");
         setCatalogMessage(
-          error instanceof Error ? error.message : "Catalogo visure non disponibile.",
+          error instanceof Error
+            ? `${error.message} Uso elenco servizi base.`
+            : "Catalogo remoto non raggiungibile: mostro i servizi base disponibili.",
         );
       }
     };
@@ -238,13 +313,13 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
           email: form.email,
         }),
       });
-      const payload = (await response.json()) as {
-        url?: string;
-        message?: string;
-      };
+      const payload = await readJsonBody<{ url?: string; message?: string }>(
+        response,
+        "Servizio visure non disponibile al momento. Riprova tra poco.",
+      );
 
       if (!response.ok) {
-        throw new Error(payload.message || "Pagamento visura non avviato.");
+        throw new Error(payload.message || "Non siamo riusciti ad avviare il pagamento. Riprova tra poco.");
       }
 
       if (!payload.url) {
@@ -271,22 +346,23 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
   }, [searchParams]);
 
   return (
-    <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr]">
-      <div className="lux-card rounded-3xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+    <div className="px-5 py-8 md:px-8">
+    <div className="grid gap-px bg-[var(--ink)]/10 md:grid-cols-[0.9fr_1.1fr]">
+      <div className="bg-[var(--paper)] p-5 md:p-7">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
           Servizi disponibili
         </p>
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Servizi disponibili ora</h2>
-        <p className="mt-2 text-sm leading-7 text-slate-600">
+        <h2 className="mt-3 text-xl font-semibold text-[var(--ink)]">Servizi disponibili ora</h2>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--ink)]/55">
           Qui vedi quali servizi sono pronti in questo momento e, per PRA/CRIF/CR, quale voce
           operativa è stata collegata al modulo.
         </p>
 
         {catalogStatus === "loading" ? (
-          <p className="mt-5 text-sm text-slate-500">Sto verificando i servizi disponibili...</p>
+          <p className="mt-5 text-sm text-[var(--ink)]/45">Sto verificando i servizi disponibili...</p>
         ) : null}
         {catalogStatus === "error" ? (
-          <p className="mt-5 text-sm font-medium text-red-600">{catalogMessage}</p>
+          <p className="mt-5 text-sm font-medium text-red-700">{catalogMessage}</p>
         ) : null}
 
         {catalogStatus === "ready" ? (
@@ -294,23 +370,23 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
             {catalog.map((item) => (
               <div
                 key={item.serviceType}
-                className="rounded-2xl border border-slate-200 bg-white p-4"
+                className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_92%,white)] p-4"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                    <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                    <p className="text-sm font-semibold text-[var(--ink)]">{item.title}</p>
+                    <p className="mt-1 text-sm text-[var(--ink)]/55">{item.description}</p>
                     {item.resolvedServiceLabel ? (
-                      <p className="mt-2 text-xs font-medium text-slate-500">
+                      <p className="mt-2 text-xs font-medium text-[var(--ink)]/45">
                         Catalogo: {item.resolvedServiceLabel}
                       </p>
                     ) : null}
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`shrink-0 border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
                       item.available
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
+                        ? "border-emerald-700/30 text-emerald-800"
+                        : "border-red-700/30 text-red-800"
                     }`}
                   >
                     {item.available ? "attivo" : "non disponibile"}
@@ -322,34 +398,29 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         ) : null}
       </div>
 
-      <form onSubmit={onSubmit} className="lux-card rounded-3xl p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+      <form onSubmit={onSubmit} className="bg-[var(--paper)] p-5 md:p-7">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
           Richiesta visura
         </p>
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Compila i dati e avvio la richiesta</h2>
+        <h2 className="mt-3 text-xl font-semibold text-[var(--ink)]">Compila i dati e avvio la richiesta</h2>
         {profileStatus === "ready" ? (
-          <p className="mt-2 text-xs font-medium text-emerald-700">
+          <p className="mt-2 text-xs font-medium text-[#5E0ED7]">
             Dati profilo cliente precaricati nel modulo.
           </p>
         ) : null}
         <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/area-clienti/visure/storico"
-            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
-          >
+          <Link href="/area-clienti/visure/storico" className={ghostBtn}>
             Vai allo storico visure
           </Link>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="block md:col-span-2">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Tipo visura
-            </span>
+            <span className={labelCls}>Tipo visura</span>
             <select
               value={form.serviceType}
               onChange={(event) => updateField("serviceType", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className={inputCls}
             >
               {area.serviceOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -360,52 +431,46 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Nome e cognome
-            </span>
+            <span className={labelCls}>Nome e cognome</span>
             <input
               value={form.customerName}
               onChange={(event) => updateField("customerName", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className={inputCls}
               placeholder="Chi sta richiedendo la visura"
             />
           </label>
           <label className="block">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Email
-            </span>
+            <span className={labelCls}>Email</span>
             <input
               value={form.email}
               onChange={(event) => updateField("email", event.target.value)}
               type="email"
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className={inputCls}
               placeholder="dove inviare gli aggiornamenti"
             />
           </label>
           <label className="block md:col-span-2">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Telefono
-            </span>
+            <span className={labelCls}>Telefono</span>
             <input
               value={form.phone}
               onChange={(event) => updateField("phone", event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+              className={inputCls}
               placeholder="Per eventuali verifiche rapide"
             />
           </label>
         </div>
 
         {form.serviceType === "visura-camerale" ? (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-semibold text-slate-900">Dati impresa</p>
+          <div className={`${panelCls} mt-6`}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+              Dati impresa
+            </p>
             <label className="mt-4 block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Codice fiscale / P. IVA
-              </span>
+              <span className={labelCls}>Codice fiscale / P. IVA</span>
               <input
                 value={form.companyTaxId}
                 onChange={(event) => updateField("companyTaxId", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                className={inputCls}
                 placeholder="Identificativo impresa"
               />
             </label>
@@ -413,52 +478,46 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         ) : null}
 
         {form.serviceType === "visura-catastale" ? (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-semibold text-slate-900">Dati catastali</p>
+          <div className={`${panelCls} mt-6`}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+              Dati catastali
+            </p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Codice fiscale / P. IVA soggetto
-                </span>
+                <span className={labelCls}>Codice fiscale / P. IVA soggetto</span>
                 <input
                   value={form.subjectTaxCode}
                   onChange={(event) => updateField("subjectTaxCode", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                   placeholder="Riferimento soggetto"
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Provincia
-                </span>
+                <span className={labelCls}>Provincia</span>
                 <input
                   value={form.province}
                   onChange={(event) => updateField("province", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                   placeholder="Es. NA"
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Catasto
-                </span>
+                <span className={labelCls}>Catasto</span>
                 <select
                   value={form.landRegistryType}
                   onChange={(event) => updateField("landRegistryType", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                 >
                   <option value="F">Fabbricati</option>
                   <option value="T">Terreni</option>
                 </select>
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Tipo visura
-                </span>
+                <span className={labelCls}>Tipo visura</span>
                 <select
                   value={form.reportType}
                   onChange={(event) => updateField("reportType", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                 >
                   <option value="attuale">Attuale</option>
                   <option value="storica">Storica</option>
@@ -469,16 +528,16 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         ) : null}
 
         {form.serviceType === "visura-pra" ? (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-semibold text-slate-900">Dati veicolo</p>
+          <div className={`${panelCls} mt-6`}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+              Dati veicolo
+            </p>
             <label className="mt-4 block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Targa
-              </span>
+              <span className={labelCls}>Targa</span>
               <input
                 value={form.plate}
                 onChange={(event) => updateField("plate", event.target.value)}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                className={inputCls}
                 placeholder="Es. AB123CD"
               />
             </label>
@@ -486,39 +545,35 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         ) : null}
 
         {form.serviceType === "visura-crif" || form.serviceType === "visura-cr" ? (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-semibold text-slate-900">Dati soggetto</p>
+          <div className={`${panelCls} mt-6`}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+              Dati soggetto
+            </p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Nome
-                </span>
+                <span className={labelCls}>Nome</span>
                 <input
                   value={form.subjectName}
                   onChange={(event) => updateField("subjectName", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                   placeholder="Nome"
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Cognome
-                </span>
+                <span className={labelCls}>Cognome</span>
                 <input
                   value={form.subjectSurname}
                   onChange={(event) => updateField("subjectSurname", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                   placeholder="Cognome"
                 />
               </label>
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Codice fiscale
-                </span>
+                <span className={labelCls}>Codice fiscale</span>
                 <input
                   value={form.subjectTaxCode}
                   onChange={(event) => updateField("subjectTaxCode", event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+                  className={inputCls}
                   placeholder="Codice fiscale"
                 />
               </label>
@@ -527,34 +582,32 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         ) : null}
 
         <label className="mt-6 block">
-          <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Note operative
-          </span>
+          <span className={labelCls}>Note operative</span>
           <textarea
             value={form.notes}
             onChange={(event) => updateField("notes", event.target.value)}
             rows={4}
-            className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none"
+            className={`${inputCls} min-h-24 py-3`}
             placeholder="Dettagli utili, urgenze o riferimenti aggiuntivi"
           />
         </label>
 
         {catalogItem && !catalogItem.available ? (
-          <p className="mt-4 text-sm font-medium text-amber-700">
+          <p className="mt-4 text-sm font-medium text-amber-800">
             Questo servizio al momento non risulta disponibile con la configurazione attuale.
           </p>
         ) : null}
 
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+        <div className="mt-4 border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
             Prezzo attuale
           </p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
             {pricingRule
               ? `${pricingRule.priceEUR.toFixed(2).replace(".", ",")} euro`
               : "Prezzo calcolato automaticamente al checkout"}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-[var(--ink)]/45">
             {pricingRule?.label || "Se non c'è una regola salvata, uso il prezzo base del sistema."}
           </p>
         </div>
@@ -562,7 +615,7 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         {message ? (
           <p
             className={`mt-4 text-sm font-medium ${
-              status === "error" ? "text-red-600" : "text-emerald-700"
+              status === "error" ? "text-red-700" : "text-[#5E0ED7]"
             }`}
           >
             {message}
@@ -572,11 +625,20 @@ export default function OpenApiVisureWorkspace({ area }: WorkspaceProps) {
         <button
           type="submit"
           disabled={status === "redirecting" || (catalogItem ? !catalogItem.available : false)}
-          className="button-link-light mt-6 inline-flex rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-slate-50 shadow-lg shadow-slate-950/15 transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          className={primaryBtn}
         >
           {status === "redirecting" ? "Sto aprendo il pagamento..." : "Paga e richiedi visura"}
         </button>
+        <PaymentCheckoutNotice
+          className="mt-3"
+          amountLabel={
+            pricingRule
+              ? `${pricingRule.priceEUR.toFixed(2).replace(".", ",")} €`
+              : undefined
+          }
+        />
       </form>
+    </div>
     </div>
   );
 }

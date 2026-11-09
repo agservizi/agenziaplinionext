@@ -1,10 +1,18 @@
 "use client";
 
+/**
+ * Fact-forcing:
+ * - Callers: app/deposito-bagagli/prenota page.
+ * - API: /api/deposito-bagagli/checkout (Stripe one-shot).
+ * - Change: PaymentCheckoutNotice next to pay CTA.
+ * - User: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP".
+ */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import Container from "@/components/Container";
+import PaymentCheckoutNotice from "@/components/compliance/PaymentCheckoutNotice";
 
 /* ─── Types ────────────────────────────────────────────────────────── */
 
@@ -32,6 +40,48 @@ const STEPS = [
 
 const INPUT_CLASS =
   "w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 placeholder:text-slate-500";
+
+const DEPOSITO_CHECKOUT_DRAFT_KEY = "ag:deposito-checkout-draft";
+
+type DepositoCheckoutDraft = {
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  bagCount: number;
+  bookingDate: string;
+  days: number;
+  expectedCheckIn?: string;
+  expectedCheckOut?: string;
+  notes?: string;
+};
+
+function apiMessage(json: unknown, fallback: string): string {
+  if (!json || typeof json !== "object") return fallback;
+  const o = json as Record<string, unknown>;
+  if (typeof o.message === "string" && o.message.trim()) return o.message;
+  const err = o.error;
+  if (
+    err &&
+    typeof err === "object" &&
+    typeof (err as { message?: string }).message === "string"
+  ) {
+    return (err as { message: string }).message;
+  }
+  return fallback;
+}
+
+function buildDepositoReturnPath(searchParams: URLSearchParams): string {
+  const path =
+    typeof window !== "undefined"
+      ? window.location.pathname
+      : "/deposito-bagagli/prenota";
+  const qs = new URLSearchParams();
+  searchParams.forEach((value, key) => {
+    if (key !== "deposito_checkout" && key !== "session_id") qs.set(key, value);
+  });
+  const q = qs.toString();
+  return q ? `${path}?${q}` : path;
+}
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 
@@ -172,6 +222,7 @@ export default function PrenotaFlowClient() {
 
   const [pricing, setPricing] = useState<PricingData | null>(null);
   const [pricingError, setPricingError] = useState("");
+  const [checkoutHandled, setCheckoutHandled] = useState(false);
 
   /* Focus management ref */
   const stepContainerRef = useRef<HTMLDivElement>(null);
@@ -235,7 +286,154 @@ export default function PrenotaFlowClient() {
   const canGoStep3 =
     customerName.trim() !== "" && customerEmail.trim() !== "";
 
+  const cleanCheckoutQuery = useCallback(() => {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("deposito_checkout");
+    next.delete("session_id");
+    const q = next.toString();
+    router.replace(
+      q ? `/deposito-bagagli/prenota?${q}` : "/deposito-bagagli/prenota",
+    );
+  }, [router, searchParams]);
+
+  const applyCheckoutDraft = useCallback((draft: DepositoCheckoutDraft) => {
+    setCustomerName(draft.customerName);
+    setCustomerEmail(draft.customerEmail);
+    if (draft.customerPhone) setCustomerPhone(draft.customerPhone);
+    if (draft.notes) {
+      const prefix = `${bagBreakdownNote}. `;
+      setNotes(
+        draft.notes.startsWith(bagBreakdownNote)
+          ? draft.notes.slice(bagBreakdownNote.length).replace(/^\.?\s*/, "")
+          : draft.notes.replace(prefix, ""),
+      );
+    }
+    setAcceptTerms(true);
+    setStep(3);
+  }, [bagBreakdownNote]);
+
+  useEffect(() => {
+    if (checkoutHandled || typeof window === "undefined") return;
+    const checkoutState = searchParams.get("deposito_checkout");
+    if (!checkoutState) return;
+
+    setCheckoutHandled(true);
+    let draft: DepositoCheckoutDraft | null = null;
+    try {
+      draft = JSON.parse(
+        sessionStorage.getItem(DEPOSITO_CHECKOUT_DRAFT_KEY) || "null",
+      ) as DepositoCheckoutDraft | null;
+    } catch {
+      draft = null;
+    }
+
+    if (checkoutState === "cancel") {
+      if (draft) applyCheckoutDraft(draft);
+      setFormState("error");
+      setFormError(
+        "Pagamento annullato. Puoi riprovare quando vuoi.",
+      );
+      cleanCheckoutQuery();
+      return;
+    }
+
+    const sessionId = searchParams.get("session_id") || "";
+    if (checkoutState !== "success" || !sessionId) {
+      cleanCheckoutQuery();
+      return;
+    }
+
+    if (!draft) {
+      setFormState("error");
+      setFormError(
+        "Sessione di pagamento scaduta. Compila di nuovo i dati e riprova.",
+      );
+      cleanCheckoutQuery();
+      return;
+    }
+
+    const verifyLockKey = `ag:deposito-verify:${sessionId}`;
+    if (sessionStorage.getItem(verifyLockKey) === "done") {
+      cleanCheckoutQuery();
+      return;
+    }
+    if (sessionStorage.getItem(verifyLockKey) === "pending") {
+      applyCheckoutDraft(draft);
+      setFormState("loading");
+      setFormError("");
+      return;
+    }
+    sessionStorage.setItem(verifyLockKey, "pending");
+
+    applyCheckoutDraft(draft);
+    setFormState("loading");
+    setFormError("");
+    void (async () => {
+      try {
+        const res = await fetch("/api/deposito-bagagli/checkout/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId, ...draft }),
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(
+            apiMessage(json, "Verifica pagamento non riuscita. Contattaci."),
+          );
+        }
+        const code =
+          json.data?.depositCode ?? json.depositCode ?? json.data?.code ?? "";
+        if (!code) {
+          throw new Error("Codice prenotazione non ricevuto. Contattaci.");
+        }
+        sessionStorage.removeItem(DEPOSITO_CHECKOUT_DRAFT_KEY);
+        sessionStorage.setItem(verifyLockKey, "done");
+        cleanCheckoutQuery();
+        router.push(
+          `/deposito-bagagli/conferma?code=${encodeURIComponent(code)}`,
+        );
+      } catch (err) {
+        sessionStorage.removeItem(verifyLockKey);
+        applyCheckoutDraft(draft!);
+        setFormState("error");
+        setFormError(
+          err instanceof Error
+            ? err.message
+            : "Verifica pagamento non riuscita.",
+        );
+        cleanCheckoutQuery();
+      }
+    })();
+  }, [
+    applyCheckoutDraft,
+    checkoutHandled,
+    cleanCheckoutQuery,
+    router,
+    searchParams,
+  ]);
+
   /* ── Submit ─────────────────────────────────────────────────────── */
+
+  async function bookWithoutPayment(bookPayload: Record<string, unknown>) {
+    const res = await fetch("/api/deposito-bagagli/book", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookPayload),
+    });
+    const json = await res.json();
+
+    if (!res.ok || json.success === false) {
+      throw new Error(
+        apiMessage(json, "Prenotazione non riuscita. Riprova."),
+      );
+    }
+
+    const code =
+      json.data?.depositCode ?? json.depositCode ?? json.data?.code ?? "";
+    router.push(
+      `/deposito-bagagli/conferma?code=${encodeURIComponent(code)}`,
+    );
+  }
 
   async function handleSubmit() {
     if (formState === "loading" || !acceptTerms) return;
@@ -244,7 +442,7 @@ export default function PrenotaFlowClient() {
 
     try {
       const combinedNotes = [bagBreakdownNote, notes].filter(Boolean).join(". ");
-      const payload: Record<string, unknown> = {
+      const bookPayload: Record<string, unknown> = {
         customerName,
         customerEmail,
         bagCount: totalBags,
@@ -253,37 +451,65 @@ export default function PrenotaFlowClient() {
         expectedCheckOut: checkoutTime ? `${checkout}T${checkoutTime}` : undefined,
         notes: combinedNotes || undefined,
       };
-      if (customerPhone) payload.customerPhone = customerPhone;
+      if (customerPhone) bookPayload.customerPhone = customerPhone;
 
-      // Remove undefined values
-      Object.keys(payload).forEach((k) => {
-        if (payload[k] === undefined) delete payload[k];
+      Object.keys(bookPayload).forEach((k) => {
+        if (bookPayload[k] === undefined) delete bookPayload[k];
       });
 
-      const res = await fetch("/api/deposito-bagagli/book", {
+      const draft: DepositoCheckoutDraft = {
+        customerName,
+        customerEmail,
+        bagCount: totalBags,
+        bookingDate: checkin,
+        days,
+        ...(customerPhone ? { customerPhone } : {}),
+        ...(bookPayload.expectedCheckIn
+          ? { expectedCheckIn: String(bookPayload.expectedCheckIn) }
+          : {}),
+        ...(bookPayload.expectedCheckOut
+          ? { expectedCheckOut: String(bookPayload.expectedCheckOut) }
+          : {}),
+        ...(combinedNotes ? { notes: combinedNotes } : {}),
+      };
+
+      const checkoutRes = await fetch("/api/deposito-bagagli/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...draft,
+          returnPath: buildDepositoReturnPath(searchParams),
+        }),
       });
-      const json = await res.json();
 
-      if (!res.ok || json.success === false) {
+      if (checkoutRes.status === 503) {
+        await bookWithoutPayment(bookPayload);
+        return;
+      }
+
+      const checkoutJson = await checkoutRes.json();
+      if (!checkoutRes.ok) {
         throw new Error(
-          json.error?.message ?? "Prenotazione non riuscita. Riprova.",
+          apiMessage(checkoutJson, "Pagamento non disponibile. Riprova."),
         );
       }
 
-      const code =
-        json.data?.depositCode ?? json.depositCode ?? json.data?.code ?? "";
-      router.push(
-        `/deposito-bagagli/conferma?code=${encodeURIComponent(code)}`,
-      );
+      const checkoutUrl =
+        checkoutJson && typeof checkoutJson.url === "string"
+          ? checkoutJson.url
+          : "";
+      if (!checkoutUrl) {
+        throw new Error("URL di pagamento non disponibile.");
+      }
+
+      sessionStorage.setItem(DEPOSITO_CHECKOUT_DRAFT_KEY, JSON.stringify(draft));
+      window.location.assign(checkoutUrl);
     } catch (err) {
       setFormState("error");
       setFormError(
         err instanceof Error
           ? err.message
-          : "Si e verificato un errore. Riprova piu tardi.",
+          : "Si è verificato un errore. Riprova più tardi.",
       );
     }
   }
@@ -335,7 +561,7 @@ export default function PrenotaFlowClient() {
             </p>
             <Link
               href="/deposito-bagagli"
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+              className="brutal-cta-ink mt-8 inline-flex items-center gap-2 bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7]"
             >
               Torna alla ricerca
             </Link>
@@ -524,7 +750,7 @@ export default function PrenotaFlowClient() {
                       type="button"
                       disabled={!canGoStep2}
                       onClick={() => goToStep(2)}
-                      className="mt-8 w-full rounded-full bg-cyan-500 px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-cyan-500/40 disabled:text-slate-950/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                      className="brutal-cta-ink mt-8 w-full bg-[var(--ink)] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#5E0ED7] focus:ring-offset-2 focus:ring-offset-slate-950"
                     >
                       Continua
                     </button>
@@ -606,7 +832,7 @@ export default function PrenotaFlowClient() {
                       <button
                         type="button"
                         onClick={() => goToStep(1)}
-                        className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        className="border border-white/35 bg-transparent px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:border-[#e8e2d6] hover:bg-[#e8e2d6] hover:text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[#5E0ED7] focus:ring-offset-2 focus:ring-offset-slate-950"
                       >
                         Indietro
                       </button>
@@ -614,7 +840,7 @@ export default function PrenotaFlowClient() {
                         type="button"
                         disabled={!canGoStep3}
                         onClick={() => goToStep(3)}
-                        className="flex-1 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-cyan-500/40 disabled:text-slate-950/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        className="brutal-cta-ink flex-1 bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#5E0ED7] focus:ring-offset-2 focus:ring-offset-slate-950"
                       >
                         Continua
                       </button>
@@ -756,7 +982,7 @@ export default function PrenotaFlowClient() {
                       <button
                         type="button"
                         onClick={() => goToStep(2)}
-                        className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        className="border border-white/35 bg-transparent px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:border-[#e8e2d6] hover:bg-[#e8e2d6] hover:text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[#5E0ED7] focus:ring-offset-2 focus:ring-offset-slate-950"
                       >
                         Indietro
                       </button>
@@ -766,13 +992,23 @@ export default function PrenotaFlowClient() {
                           !acceptTerms || formState === "loading"
                         }
                         onClick={handleSubmit}
-                        className="flex-1 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-cyan-500/40 disabled:text-slate-950/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+                        className="brutal-cta-ink flex-1 bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#5E0ED7] focus:ring-offset-2 focus:ring-offset-slate-950"
                       >
                         {formState === "loading"
-                          ? "Prenotazione in corso..."
-                          : "Conferma prenotazione"}
+                          ? checkoutHandled
+                            ? "Conferma pagamento in corso…"
+                            : "Reindirizzamento al pagamento…"
+                          : "Procedi al pagamento"}
                       </button>
                     </div>
+                    <PaymentCheckoutNotice
+                      className="mt-3 !text-slate-400 [&_a]:!text-cyan-300 [&_strong]:!text-slate-200"
+                      amountLabel={
+                        totalPrice > 0
+                          ? `${fmtPrice(totalPrice)} ${pricing?.currency || "EUR"}`
+                          : undefined
+                      }
+                    />
                   </div>
                 </motion.div>
               )}

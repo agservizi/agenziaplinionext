@@ -213,17 +213,15 @@ export default function ClientProfilePanel() {
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-[2rem] border border-sky-100 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,246,251,0.96))] shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+      <section className="border border-[var(--ink)]/12 bg-[var(--paper)]">
         <div className="grid gap-6 px-6 py-8 md:grid-cols-[1.3fr_0.7fr] md:px-8">
           <div className="space-y-5">
-            <div className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700">
-              Area clienti / Profilo
+            <div className="inline-flex items-center border border-[var(--ink)]/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/50">
+              Riepilogo profilo
             </div>
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                Impostazioni account e dati cliente
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+              <h2 className="display-type mt-3 text-2xl text-[var(--ink)] md:text-3xl">Dati account</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink)]/55 md:text-base">
                 Una pagina unica per gestire identita account, contatti principali e credenziali di
                 accesso, con uno stato chiaro su cosa puoi modificare subito.
               </p>
@@ -241,25 +239,25 @@ export default function ClientProfilePanel() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
-            <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <div className="border border-[var(--ink)]/12 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Accesso
               </p>
-              <p className="mt-2 break-all text-sm font-semibold text-slate-950">{displayName}</p>
+              <p className="mt-2 break-all text-sm font-semibold text-[var(--ink)]">{displayName}</p>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <div className="border border-[var(--ink)]/12 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Cliente
               </p>
-              <p className="mt-2 text-sm font-semibold text-slate-950">
+              <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
                 {profileMeta?.userId ? `Cliente #${profileMeta.userId}` : "Profilo non numerato"}
               </p>
             </div>
-            <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm">
+            <div className="border border-[var(--ink)]/12 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Operativita
               </p>
-              <p className="mt-2 text-sm font-semibold text-slate-950">
+              <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
                 {editable
                   ? "Aggiornamento dati e password disponibile"
                   : "Riepilogo visibile, modifica bloccata"}
@@ -271,20 +269,20 @@ export default function ClientProfilePanel() {
 
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="space-y-6">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+          <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-lg font-semibold text-white">
+              <div className="flex h-16 w-16 items-center justify-center bg-[var(--ink)] text-lg font-semibold text-white">
                 {profileInitials}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-lg font-semibold text-slate-950">
+                <p className="truncate text-lg font-semibold text-[var(--ink)]">
                   {fullName || profile?.fullName || "Profilo cliente"}
                 </p>
                 <p className="truncate text-sm text-slate-500">{email || displayName}</p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3 rounded-3xl bg-slate-50 p-4">
+            <div className="mt-6 space-y-3 border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_92%,white)] p-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Telefono
@@ -304,15 +302,15 @@ export default function ClientProfilePanel() {
             <div className="mt-6">
               <Link
                 href="/area-clienti"
-                className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-50"
+                className="inline-flex w-full items-center justify-center border border-[var(--ink)]/20 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:border-[#5E0ED7]"
               >
                 Torna alla dashboard clienti
               </Link>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-            <p className="text-sm font-semibold text-slate-950">Stato account</p>
+          <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
+            <p className="text-sm font-semibold text-[var(--ink)]">Stato account</p>
             <div className="mt-4 space-y-4 text-sm text-slate-600">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -336,13 +334,13 @@ export default function ClientProfilePanel() {
 
         <div className="space-y-6">
           {status === "loading" ? (
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+            <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 text-sm text-[var(--ink)]/60">
               Sto caricando i dati del profilo...
             </div>
           ) : null}
 
           {status === "error" && !profile ? (
-            <div className="rounded-[2rem] border border-red-200 bg-red-50 p-6 text-sm text-red-700 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
+            <div className="border border-red-200 bg-red-50 p-6 text-sm text-red-700">
               {profileMessage || "Non riesco a leggere il profilo."}
             </div>
           ) : null}
@@ -351,14 +349,14 @@ export default function ClientProfilePanel() {
             <>
               <form
                 onSubmit={onProfileSubmit}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] md:p-8"
+                className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 md:p-8"
               >
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-6 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                       Informazioni profilo
                     </p>
-                    <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">
                       Dati anagrafici e contatti
                     </h2>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
@@ -380,7 +378,7 @@ export default function ClientProfilePanel() {
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Nome mostrato nei riepiloghi e nelle richieste inviate.
@@ -393,7 +391,7 @@ export default function ClientProfilePanel() {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Usata per accesso, notifiche e conferme operative.
@@ -405,7 +403,7 @@ export default function ClientProfilePanel() {
                       value={phone}
                       onChange={(event) => setPhone(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Numero richiamabile dal team per pratiche e supporto.
@@ -417,7 +415,7 @@ export default function ClientProfilePanel() {
                       value={companyName}
                       onChange={(event) => setCompanyName(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Facoltativo, utile per richieste business e documenti intestati.
@@ -446,7 +444,7 @@ export default function ClientProfilePanel() {
                   <button
                     type="submit"
                     disabled={!editable || status === "saving" || !profileDirty}
-                    className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="brutal-cta-ink inline-flex items-center justify-center bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {status === "saving" ? "Sto salvando..." : "Salva dati profilo"}
                   </button>
@@ -455,14 +453,14 @@ export default function ClientProfilePanel() {
 
               <form
                 onSubmit={onSecuritySubmit}
-                className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] md:p-8"
+                className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 md:p-8"
               >
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-6 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                       Sicurezza
                     </p>
-                    <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                    <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">
                       Cambio password
                     </h2>
                     <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
@@ -485,7 +483,7 @@ export default function ClientProfilePanel() {
                       value={currentPassword}
                       onChange={(event) => setCurrentPassword(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Serve per confermare che sei il titolare dell&apos;accesso.
@@ -500,7 +498,7 @@ export default function ClientProfilePanel() {
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Usa una password diversa da quelle gia usate altrove.
@@ -515,7 +513,7 @@ export default function ClientProfilePanel() {
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       disabled={!editable}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition focus:border-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                     />
                     <span className="mt-2 block text-xs text-slate-500">
                       Ripeti la nuova password per evitare errori di digitazione.
@@ -550,7 +548,7 @@ export default function ClientProfilePanel() {
                   <button
                     type="submit"
                     disabled={!editable || status === "saving" || !passwordDirty}
-                    className="inline-flex items-center justify-center rounded-full bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="brutal-cta-ink inline-flex items-center justify-center bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {status === "saving" ? "Sto aggiornando..." : "Aggiorna password"}
                   </button>
@@ -559,24 +557,24 @@ export default function ClientProfilePanel() {
             </>
           ) : null}
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-            <p className="text-sm font-semibold text-slate-950">Link rapidi</p>
+          <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6">
+            <p className="text-sm font-semibold text-[var(--ink)]">Link rapidi</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <Link
-                href="/area-clienti/spedizioni"
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100"
+                href="/area-clienti/send"
+                className="border border-[var(--ink)]/12 px-4 py-4 text-sm font-medium text-[var(--ink)] transition hover:border-[#5E0ED7]"
               >
-                Vai a spedizioni
+                Vai a SEND
               </Link>
               <Link
-                href="/area-clienti/visure"
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100"
+                href="/area-clienti/acquisti"
+                className="border border-[var(--ink)]/12 px-4 py-4 text-sm font-medium text-[var(--ink)] transition hover:border-[#5E0ED7]"
               >
-                Vai a visure
+                I miei acquisti
               </Link>
               <Link
                 href="/area-clienti/ticket-pratiche-documenti"
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-900 transition hover:border-slate-300 hover:bg-slate-100"
+                className="border border-[var(--ink)]/12 px-4 py-4 text-sm font-medium text-[var(--ink)] transition hover:border-[#5E0ED7]"
               >
                 Apri ticket pratiche
               </Link>

@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Fact-forcing: CAF checkout + uploads; import PaymentCheckoutNotice + PrivateUploadNotice.
+ * Callers: area-clienti CAF pages. User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchClientPortalProfile, getClientPortalToken } from "@/lib/client-portal-auth";
@@ -12,6 +16,15 @@ import {
 import { fetchPublicCafPatronatoPricing } from "@/lib/caf-patronato-pricing-public";
 import { CAF_PATRONATO_PAYMENT_DRAFT_STORAGE_KEY } from "@/lib/caf-patronato-payment";
 import type { CafPatronatoPricingRule } from "@/lib/caf-patronato-pricing-engine";
+import PaymentCheckoutNotice from "@/components/compliance/PaymentCheckoutNotice";
+import PrivateUploadNotice from "@/components/compliance/PrivateUploadNotice";
+
+const inputCls =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+const labelCls = "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45";
+const panelCls = "border border-[var(--ink)]/12 bg-[var(--paper)] p-5 md:p-7";
+const primaryBtn =
+  "brutal-cta-ink mt-6 inline-flex bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
 
 type CafPatronatoRequestFormProps = {
   onSummaryChange?: (summary: {
@@ -259,56 +272,56 @@ export default function CafPatronatoRequestForm({
   };
 
   return (
-    <form onSubmit={onSubmit} className="lux-panel self-start rounded-3xl p-6 md:p-8">
-      <div className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+    <form onSubmit={onSubmit} className={`${panelCls} self-start`}>
+      <div className="space-y-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
           Nuova pratica
         </p>
-        <h2 className="text-2xl font-semibold text-slate-900">Apri la tua richiesta online</h2>
-        <p className="text-sm text-slate-600">
+        <h2 className="text-xl font-semibold text-[var(--ink)]">Apri la tua richiesta online</h2>
+        <p className="text-sm leading-relaxed text-[var(--ink)]/55">
           Compila i dati principali, allega i documenti che hai già pronti e il team riceve subito
           una mail operativa per iniziare la lavorazione.
         </p>
         {profileStatus === "ready" ? (
-          <p className="text-xs font-medium text-cyan-700">
+          <p className="text-xs font-medium text-[#5E0ED7]">
             Ho precaricato nome, email e telefono dal tuo profilo cliente.
           </p>
         ) : null}
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Nome e cognome</span>
+        <label className="block">
+          <span className={labelCls}>Nome e cognome</span>
           <input
             value={form.customerName}
             onChange={(event) => setForm((current) => ({ ...current, customerName: event.target.value }))}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             placeholder="Inserisci il nominativo"
             required
           />
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Email</span>
+        <label className="block">
+          <span className={labelCls}>Email</span>
           <input
             type="email"
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             placeholder="nome@dominio.it"
             required
           />
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Telefono</span>
+        <label className="block">
+          <span className={labelCls}>Telefono</span>
           <input
             value={form.phone}
             onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             placeholder="Numero di contatto"
           />
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Area</span>
+        <label className="block">
+          <span className={labelCls}>Area</span>
           <select
             value={form.scope}
             onChange={(event) =>
@@ -318,18 +331,18 @@ export default function CafPatronatoRequestForm({
                 serviceType: firstServiceForScope(event.target.value as CafPatronatoScope),
               }))
             }
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
           >
             <option value="caf">CAF</option>
             <option value="patronato">Patronato</option>
           </select>
         </label>
-        <label className="space-y-2 md:col-span-2">
-          <span className="block text-sm font-medium text-slate-700">Servizio richiesto</span>
+        <label className="block md:col-span-2">
+          <span className={labelCls}>Servizio richiesto</span>
           <select
             value={form.serviceType}
             onChange={(event) => setForm((current) => ({ ...current, serviceType: event.target.value }))}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             required
           >
             {availableCategories.map((category) => (
@@ -343,32 +356,32 @@ export default function CafPatronatoRequestForm({
             ))}
           </select>
           {selectedService ? (
-            <p className="text-xs text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-[var(--ink)]/50">
               {selectedService.description} Prezzo cliente:{" "}
-              <span className="font-semibold text-slate-700">
+              <span className="font-semibold text-[var(--ink)]">
                 {selectedPriceEUR.toFixed(2).replace(".", ",")} €
               </span>
-              <span className="ml-1 text-slate-500">· {selectedPriceLabel}</span>
+              <span className="ml-1 text-[var(--ink)]/45">· {selectedPriceLabel}</span>
             </p>
           ) : null}
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Urgenza pratica</span>
+        <label className="block">
+          <span className={labelCls}>Urgenza pratica</span>
           <input
             value={form.urgency}
             onChange={(event) => setForm((current) => ({ ...current, urgency: event.target.value }))}
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             placeholder="Es. entro 3 giorni"
           />
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Contatto preferito</span>
+        <label className="block">
+          <span className={labelCls}>Contatto preferito</span>
           <select
             value={form.preferredContactMethod}
             onChange={(event) =>
               setForm((current) => ({ ...current, preferredContactMethod: event.target.value }))
             }
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
           >
             <option value="email">Email</option>
             <option value="telefono">Telefono</option>
@@ -376,25 +389,25 @@ export default function CafPatronatoRequestForm({
             <option value="appuntamento">Appuntamento</option>
           </select>
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Data preferita</span>
+        <label className="block">
+          <span className={labelCls}>Data preferita</span>
           <input
             type="date"
             value={form.preferredContactDate}
             onChange={(event) =>
               setForm((current) => ({ ...current, preferredContactDate: event.target.value }))
             }
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
           />
         </label>
-        <label className="space-y-2">
-          <span className="block text-sm font-medium text-slate-700">Documenti già pronti</span>
+        <label className="block">
+          <span className={labelCls}>Documenti già pronti</span>
           <input
             value={form.documentSummary}
             onChange={(event) =>
               setForm((current) => ({ ...current, documentSummary: event.target.value }))
             }
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+            className={inputCls}
             placeholder="Es. CUD, SPID, documento identità"
           />
         </label>
@@ -410,10 +423,10 @@ export default function CafPatronatoRequestForm({
           setDragActive(false);
         }}
         onDrop={onDrop}
-        className={`mt-5 flex cursor-pointer flex-col rounded-3xl border border-dashed px-5 py-6 transition ${
+        className={`mt-5 flex cursor-pointer flex-col border border-dashed px-5 py-6 transition ${
           dragActive
-            ? "border-cyan-500 bg-cyan-50"
-            : "border-slate-300 bg-slate-50 hover:border-cyan-400 hover:bg-cyan-50/60"
+            ? "border-[#5E0ED7] bg-[color-mix(in_srgb,var(--paper)_88%,white)]"
+            : "border-[var(--ink)]/20 hover:border-[#5E0ED7]"
         }`}
       >
         <input
@@ -422,28 +435,31 @@ export default function CafPatronatoRequestForm({
           multiple
           onChange={(event) => appendFiles(event.target.files || [])}
         />
-        <span className="text-sm font-semibold text-slate-900">
+        <span className="text-sm font-semibold text-[var(--ink)]">
           Trascina qui i documenti oppure clicca per allegarli
         </span>
-        <span className="mt-2 text-sm text-slate-500">
+        <span className="mt-2 text-sm text-[var(--ink)]/50">
           Puoi caricare documenti già pronti per accelerare la presa in carico della pratica.
         </span>
+        <PrivateUploadNotice className="mt-3" />
       </label>
 
       {files.length ? (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-sm font-semibold text-slate-900">Allegati pronti ({files.length})</p>
+        <div className="mt-4 border border-[var(--ink)]/12 bg-[var(--paper)] p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+            Allegati pronti ({files.length})
+          </p>
           <div className="mt-3 grid gap-2">
             {files.map((file, index) => (
               <div
                 key={`${file.name}-${file.size}-${index}`}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
+                className="flex items-center justify-between border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] px-3.5 py-3 text-sm"
               >
-                <span className="min-w-0 truncate font-medium text-slate-700">{file.name}</span>
+                <span className="min-w-0 truncate font-medium text-[var(--ink)]">{file.name}</span>
                 <button
                   type="button"
                   onClick={() => setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                  className="ml-4 shrink-0 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                  className="ml-4 shrink-0 border border-[var(--ink)]/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--ink)]/60 transition hover:border-[var(--ink)]/40 hover:text-[var(--ink)]"
                 >
                   Rimuovi
                 </button>
@@ -453,32 +469,32 @@ export default function CafPatronatoRequestForm({
         </div>
       ) : null}
 
-      <label className="mt-5 block space-y-2">
-        <span className="block text-sm font-medium text-slate-700">Note per il team</span>
+      <label className="mt-5 block">
+        <span className={labelCls}>Note per il team</span>
         <textarea
           value={form.notes}
           onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500"
+          className={`${inputCls} min-h-28 py-3`}
           rows={5}
           placeholder="Raccontaci cosa ti serve, se hai scadenze o se vuoi essere richiamato in una fascia oraria precisa."
         />
       </label>
 
-      {message ? (
-        <p className="mt-4 text-sm font-medium text-red-600">
-          {message}
-        </p>
-      ) : null}
+      {message ? <p className="mt-4 text-sm font-medium text-red-700">{message}</p> : null}
 
-      <button
-        type="submit"
-        disabled={status === "submitting"}
-        className="mt-6 inline-flex rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-950/15 transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <button type="submit" disabled={status === "submitting"} className={primaryBtn}>
         {status === "submitting"
           ? "Reindirizzamento a Stripe..."
           : `Paga e invia richiesta ${getCafPatronatoScopeLabel(form.scope)}`}
       </button>
+      <PaymentCheckoutNotice
+        className="mt-3"
+        amountLabel={
+          selectedPriceEUR > 0
+            ? `${selectedPriceEUR.toFixed(2).replace(".", ",")} €`
+            : undefined
+        }
+      />
     </form>
   );
 }

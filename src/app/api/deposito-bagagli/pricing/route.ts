@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
+import {
+  DEPOSITO_API_BASE,
+  depositoApiHeaders,
+  depositoApiKey,
+  depositoMissingKeyResponse,
+} from "@/lib/deposito-bagagli-api";
 
 export const dynamic = "force-dynamic";
 
-const API_BASE = "https://coresuite.it/api/public/deposito-bagagli";
-const API_KEY =
-  process.env.CORESUITE_API_KEY ||
-  "16e43eaa90b6c5ae75a6821b0ba2a3251aae80da7d63c25967f404a467db6635";
-
 export async function GET() {
+  if (!depositoApiKey()) {
+    return NextResponse.json(depositoMissingKeyResponse(), { status: 503 });
+  }
   try {
-    const res = await fetch(`${API_BASE}/pricing`, {
-      headers: { "x-api-key": API_KEY },
+    const res = await fetch(`${DEPOSITO_API_BASE}/pricing`, {
+      headers: depositoApiHeaders(),
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
@@ -23,7 +27,7 @@ export async function GET() {
           message: "Servizio non disponibile.",
         },
       },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

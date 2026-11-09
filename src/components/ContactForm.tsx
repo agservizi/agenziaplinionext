@@ -99,12 +99,13 @@ export default function ContactForm({
           <option>Versamento passaporto</option>
           <option>Iliad Space</option>
           <option>Fastweb</option>
-          <option>Very Mobile</option>
           <option>Ho. Mobile</option>
           <option>Digi Mobile</option>
           <option>Enel Energia</option>
           <option>A2A Energia</option>
           <option>Fastweb Energia</option>
+          <option>Plenitude</option>
+          <option>Sentra Energia</option>
           <option>Altri operatori energia</option>
           <option>Spedizioni nazionali</option>
           <option>Spedizioni internazionali</option>

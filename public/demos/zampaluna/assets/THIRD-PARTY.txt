@@ -1,0 +1,6 @@
+Photographs: Unsplash, illustrative stock photographs. Original image identifiers are recorded in prepare-assets.py history and source repository.
+Dog video: supplied by the client, generated with Gemini; green background removed for this demo.
+GSAP 3.15.0 and ScrollTrigger: https://gsap.com/standard-license/
+Lenis: MIT, see vendor/LENIS-LICENSE.txt
+Three.js: MIT, see vendor/THREE-LICENSE.txt
+DM Sans and Libre Caslon Display: Google Fonts, SIL Open Font License.

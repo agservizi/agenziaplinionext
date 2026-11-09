@@ -14,15 +14,29 @@ import {
   AnimatePresence,
 } from "framer-motion";
 import Container from "@/components/Container";
+import WebAgencyPortfolioPreview from "@/components/web-agency/WebAgencyPortfolioPreview";
 
 /* ─────────────────── CONSTANTS ─────────────────── */
 
 const SPRING_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const ORB_VIDEO_URL =
-  "https://future.co/images/homepage/glassy-orb/orb-purple.webm";
-
+/* Orb self-hosted via CSS (no third-party media before cookie consent). */
 const TRUSTED_BY = ["Next.js", "PostgreSQL", "TailwindCSS", "MUI"];
+
+function LocalOrb() {
+  return (
+    <div
+      className="relative flex h-[min(420px,70vw)] w-full max-w-md items-center justify-center"
+      aria-hidden
+    >
+      <div className="absolute h-[72%] w-[72%] rounded-full bg-[#0084ff]/20 blur-[70px]" />
+      <div className="absolute h-[48%] w-[48%] rounded-full bg-[#5E0ED7]/25 blur-[40px]" />
+      <div className="relative h-[58%] w-[58%] rounded-full border border-white/25 bg-[radial-gradient(circle_at_32%_28%,rgba(255,255,255,0.55),rgba(0,132,255,0.35)_38%,rgba(94,14,215,0.55)_72%,rgba(11,17,32,0.9)_100%)] shadow-[0_30px_80px_rgba(94,14,215,0.35)] motion-safe:animate-[heroBreathe_4.8s_ease-in-out_infinite]" />
+      <div className="absolute left-[22%] top-[24%] h-10 w-10 rounded-full border border-white/20 bg-cyan-200/30 motion-safe:animate-[heroFloat_6s_ease-in-out_infinite]" />
+      <div className="absolute bottom-[22%] right-[20%] h-14 w-14 rounded-2xl border border-white/15 bg-violet-400/25 motion-safe:animate-[heroFloat_7s_ease-in-out_infinite_0.4s]" />
+    </div>
+  );
+}
 
 /* ──────────────── 3D TILT CARD ──────────────────── */
 
@@ -244,17 +258,17 @@ function InfoRequestDrawer({
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-70 bg-black/40" onClick={onClose} />
           <motion.aside initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="fixed right-0 top-0 z-70 flex h-svh w-full max-w-md flex-col bg-white shadow-2xl">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--ink)]/10 px-5 py-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ backgroundColor: "#0084ff" }}>
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">Consulente Web AG</p>
-                  <p className="text-xs text-slate-500">Piano {planName}</p>
+                  <p className="text-sm font-bold text-[var(--ink)]">Consulente Web AG</p>
+                  <p className="text-xs text-[var(--ink)]/55">Piano {planName}</p>
                 </div>
               </div>
-              <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:text-slate-900" aria-label="Chiudi">
+              <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ink)]/15 text-[var(--ink)]/55 transition hover:text-[var(--ink)]" aria-label="Chiudi">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
@@ -264,18 +278,18 @@ function InfoRequestDrawer({
               <div className="flex flex-col gap-3">
                 {chatMessages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "rounded-br-sm text-white" : "rounded-bl-sm border border-slate-100 bg-slate-50 text-slate-800"}`} style={msg.role === "user" ? { backgroundColor: "#0084ff" } : undefined}>
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "rounded-br-sm text-white" : "rounded-bl-sm border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] text-[var(--ink)]"}`} style={msg.role === "user" ? { backgroundColor: "#0084ff" } : undefined}>
                       {msg.content}
                     </div>
                   </div>
                 ))}
                 {chatLoading && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl rounded-bl-sm border border-slate-100 bg-slate-50 px-4 py-3">
+                    <div className="rounded-2xl rounded-bl-sm border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-slate-300" style={{ animation: "agentBounce 1.2s ease-in-out 0s infinite" }} />
-                        <span className="h-2 w-2 rounded-full bg-slate-300" style={{ animation: "agentBounce 1.2s ease-in-out 0.15s infinite" }} />
-                        <span className="h-2 w-2 rounded-full bg-slate-300" style={{ animation: "agentBounce 1.2s ease-in-out 0.3s infinite" }} />
+                        <span className="h-2 w-2 rounded-full bg-[var(--ink)]/25" style={{ animation: "agentBounce 1.2s ease-in-out 0s infinite" }} />
+                        <span className="h-2 w-2 rounded-full bg-[var(--ink)]/25" style={{ animation: "agentBounce 1.2s ease-in-out 0.15s infinite" }} />
+                        <span className="h-2 w-2 rounded-full bg-[var(--ink)]/25" style={{ animation: "agentBounce 1.2s ease-in-out 0.3s infinite" }} />
                       </div>
                     </div>
                   </div>
@@ -290,10 +304,10 @@ function InfoRequestDrawer({
             </div>
 
             {/* Input */}
-            <div className="border-t border-slate-100 px-4 py-3">
+            <div className="border-t border-[var(--ink)]/10 px-4 py-3">
               <form onSubmit={(e) => { e.preventDefault(); sendChatMessage(); }} className="flex items-center gap-2">
                 <input ref={chatInputRef} value={chatInput} onChange={(e) => setChatInput(e.target.value)} placeholder="Scrivi un messaggio..." disabled={chatLoading}
-                  className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0084ff]/50 focus:ring-2 focus:ring-[#0084ff]/10" />
+                  className="flex-1 rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/40 focus:border-[#0084ff]/50 focus:ring-2 focus:ring-[#0084ff]/10" />
                 <button type="submit" disabled={!chatInput.trim() || chatLoading} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white transition disabled:opacity-40" style={{ backgroundColor: "#0084ff" }} aria-label="Invia">
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                 </button>
@@ -356,7 +370,7 @@ export default function WebAgencyShowcase() {
       ═══════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative min-h-dvh overflow-hidden bg-white"
+        className="relative min-h-dvh overflow-hidden bg-[var(--paper)] text-[var(--ink)]"
       >
         {/* Background mask — subtle gradient veil */}
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-slate-50/80 via-white/40 to-blue-50/60" />
@@ -490,7 +504,7 @@ export default function WebAgencyShowcase() {
                     delay: 0.5,
                     ease: SPRING_EASE,
                   }}
-                  className="mt-4 max-w-xl text-base leading-relaxed text-slate-500"
+                  className="mt-4 max-w-xl text-base leading-relaxed text-[var(--ink)]/55"
                   style={{ fontFamily: "var(--font-inter)" }}
                 >
                   Siti veloci, design che colpisce, codice pulito. In 21 giorni
@@ -518,7 +532,7 @@ export default function WebAgencyShowcase() {
                       const el = document.getElementById("pricing-section");
                       el?.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="inline-flex items-center gap-3 rounded-2xl px-8 py-4 text-base font-semibold text-white shadow-[inset_0_4px_4px_rgba(255,255,255,0.35)] backdrop-blur-[2px] transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20"
+                    className="brutal-cta-ink inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.16em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                     style={{ fontFamily: "var(--font-inter)", backgroundColor: "rgba(0,132,255,0.85)" }}
                   >
                     Richiedi Preventivo
@@ -533,7 +547,7 @@ export default function WebAgencyShowcase() {
                   <button
                     type="button"
                     onClick={() => { setInfoDrawerPlan("Sito Web"); setInfoDrawerOpen(true); }}
-                    className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-base font-semibold transition-all duration-300 hover:border-[#0084ff]/30 hover:bg-blue-50"
+                    className="inline-flex items-center gap-3 border border-[var(--ink)]/25 bg-transparent px-8 py-4 text-sm font-bold uppercase tracking-[0.16em] text-[var(--ink)] transition-colors duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                     style={{ fontFamily: "var(--font-inter)", color: "#0f172a" }}
                   >
                     Avvia un progetto
@@ -548,7 +562,7 @@ export default function WebAgencyShowcase() {
                   className="mt-5 flex flex-wrap gap-1.5"
                 >
                   {techStack.map((t) => (
-                    <span key={t} className="rounded-full border border-slate-200/80 bg-white/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 backdrop-blur-sm">
+                    <span key={t} className="rounded-full border border-[var(--ink)]/15/80 bg-white/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--ink)]/40 backdrop-blur-sm">
                       {t}
                     </span>
                   ))}
@@ -567,8 +581,8 @@ export default function WebAgencyShowcase() {
                     { v: "100%", l: "Custom" },
                   ].map((s) => (
                     <div key={s.l}>
-                      <p className="text-2xl font-extrabold text-slate-900" style={{ fontFamily: "var(--font-inter)" }}>{s.v}</p>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400" style={{ fontFamily: "var(--font-inter)" }}>{s.l}</p>
+                      <p className="text-2xl font-extrabold text-[var(--ink)]" style={{ fontFamily: "var(--font-inter)" }}>{s.v}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--ink)]/40" style={{ fontFamily: "var(--font-inter)" }}>{s.l}</p>
                     </div>
                   ))}
                 </motion.div>
@@ -589,22 +603,7 @@ export default function WebAgencyShowcase() {
                 }}
                 className="relative flex items-center justify-center"
               >
-                {/* Glow behind orb */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-[80%] w-[80%] rounded-full bg-[#0084ff]/10 blur-[80px]" />
-                </div>
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="relative w-full max-w-md scale-110"
-                  style={{
-                    mixBlendMode: "screen",
-                    filter: "hue-rotate(-55deg) saturate(280%) brightness(1.25) contrast(1.1)",
-                  }}
-                  src={ORB_VIDEO_URL}
-                />
+                <LocalOrb />
               </motion.div>
             </div>
 
@@ -623,7 +622,7 @@ export default function WebAgencyShowcase() {
             transition={reduced ? undefined : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
             className="flex flex-col items-center gap-1.5"
           >
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500" style={{ fontFamily: "var(--font-inter)" }}>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--ink)]/55" style={{ fontFamily: "var(--font-inter)" }}>
               Scorri
             </span>
             <svg width="16" height="22" viewBox="0 0 14 20" fill="none">
@@ -662,7 +661,7 @@ export default function WebAgencyShowcase() {
                   delay: 0.1,
                   ease: SPRING_EASE,
                 }}
-                className="text-4xl font-bold leading-none tracking-tight text-slate-900 md:text-7xl"
+                className="text-4xl font-bold leading-none tracking-tight text-[var(--ink)] md:text-7xl"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
                 Tutto quello
@@ -701,7 +700,7 @@ export default function WebAgencyShowcase() {
               }}
               className="md:col-span-2"
             >
-              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                 <div className="relative">
                   <div className="flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0084ff]">
@@ -723,13 +722,13 @@ export default function WebAgencyShowcase() {
                     </span>
                   </div>
                   <h3
-                    className="mt-6 text-3xl font-bold text-slate-900"
+                    className="mt-6 text-3xl font-bold text-[var(--ink)]"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Performance elevata.
                   </h3>
                   <p
-                    className="mt-2 text-slate-500"
+                    className="mt-2 text-[var(--ink)]/55"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Ogni sito che costruiamo raggiunge 90+ su Google PageSpeed.
@@ -746,12 +745,12 @@ export default function WebAgencyShowcase() {
                     ).map(([label, val]) => (
                       <div key={label} className="flex items-center gap-3">
                         <span
-                          className="w-28 shrink-0 text-xs text-slate-400"
+                          className="w-28 shrink-0 text-xs text-[var(--ink)]/40"
                           style={{ fontFamily: "var(--font-inter)" }}
                         >
                           {label}
                         </span>
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--paper)_88%,white)]">
                           <motion.div
                             className="h-full rounded-full bg-linear-to-r from-[#0084ff] to-[#60B1FF]"
                             initial={{ width: 0 }}
@@ -791,7 +790,7 @@ export default function WebAgencyShowcase() {
                 ease: SPRING_EASE,
               }}
             >
-              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                 <div className="relative">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0084ff]">
                     <svg
@@ -815,7 +814,7 @@ export default function WebAgencyShowcase() {
                     </svg>
                   </div>
                   <p
-                    className="mt-6 text-6xl font-bold leading-none text-slate-900"
+                    className="mt-6 text-6xl font-bold leading-none text-[var(--ink)]"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     21
@@ -827,7 +826,7 @@ export default function WebAgencyShowcase() {
                     giorni
                   </p>
                   <p
-                    className="mt-2 text-sm text-slate-500"
+                    className="mt-2 text-sm text-[var(--ink)]/55"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Dal brief al sito online. Tempo medio garantito.
@@ -850,7 +849,7 @@ export default function WebAgencyShowcase() {
                 ease: SPRING_EASE,
               }}
             >
-              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                 <div className="relative">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0084ff]">
                     <svg
@@ -876,13 +875,13 @@ export default function WebAgencyShowcase() {
                     </svg>
                   </div>
                   <h3
-                    className="mt-6 text-xl font-bold text-slate-900"
+                    className="mt-6 text-xl font-bold text-[var(--ink)]"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Mobile-first.
                   </h3>
                   <p
-                    className="mt-2 text-sm text-slate-500"
+                    className="mt-2 text-sm text-[var(--ink)]/55"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Progettiamo prima per mobile. Il 70%+ del tuo traffico
@@ -907,7 +906,7 @@ export default function WebAgencyShowcase() {
               }}
               className="md:col-span-2"
             >
-              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                 <div className="relative">
                   <div className="flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0084ff]">
@@ -936,13 +935,13 @@ export default function WebAgencyShowcase() {
                     </span>
                   </div>
                   <h3
-                    className="mt-6 text-3xl font-bold text-slate-900"
+                    className="mt-6 text-3xl font-bold text-[var(--ink)]"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Identit&agrave; visiva coerente.
                   </h3>
                   <p
-                    className="mt-2 text-slate-500"
+                    className="mt-2 text-[var(--ink)]/55"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Font, colori, spaziatura, componenti — tutto documentato e
@@ -956,8 +955,8 @@ export default function WebAgencyShowcase() {
                       "bg-[#60B1FF]",
                       "bg-blue-300",
                       "bg-sky-200",
-                      "bg-slate-700",
-                      "bg-slate-900",
+                      "bg-[var(--ink)]",
+                      "bg-[var(--ink)]",
                     ].map((c) => (
                       <div
                         key={c}
@@ -983,7 +982,7 @@ export default function WebAgencyShowcase() {
                 ease: SPRING_EASE,
               }}
             >
-              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+              <TiltCard className="group relative h-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                 <div className="relative">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0084ff]">
                     <svg
@@ -1007,13 +1006,13 @@ export default function WebAgencyShowcase() {
                     </svg>
                   </div>
                   <h3
-                    className="mt-6 text-xl font-bold text-slate-900"
+                    className="mt-6 text-xl font-bold text-[var(--ink)]"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     SEO tecnico.
                   </h3>
                   <p
-                    className="mt-2 text-sm text-slate-500"
+                    className="mt-2 text-sm text-[var(--ink)]/55"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Struttura, meta tag, schema markup, sitemap e Core Web
@@ -1026,10 +1025,12 @@ export default function WebAgencyShowcase() {
         </Container>
       </section>
 
+      <WebAgencyPortfolioPreview />
+
       {/* ═══════════════════════════════════════
           PROCESS — Horizontal timeline
       ═══════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-slate-50/50 py-24 md:py-32">
+      <section className="relative overflow-hidden bg-[color-mix(in_srgb,var(--paper)_92%,white)] py-24 md:py-32">
         <Container>
           <div ref={processRef}>
             {/* Header */}
@@ -1057,7 +1058,7 @@ export default function WebAgencyShowcase() {
                       delay: 0.1,
                       ease: SPRING_EASE,
                     }}
-                    className="text-4xl font-bold leading-none tracking-tight text-slate-900 md:text-7xl"
+                    className="text-4xl font-bold leading-none tracking-tight text-[var(--ink)] md:text-7xl"
                     style={{ fontFamily: "var(--font-inter)" }}
                   >
                     Dal brief
@@ -1097,7 +1098,7 @@ export default function WebAgencyShowcase() {
                   delay: 0.3,
                   ease: SPRING_EASE,
                 }}
-                className="max-w-sm text-slate-500"
+                className="max-w-sm text-[var(--ink)]/55"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
                 Nessuna zona grigia tra design e sviluppo. Pipeline chiara,
@@ -1144,7 +1145,7 @@ export default function WebAgencyShowcase() {
                     </div>
 
                     {/* Card */}
-                    <div className="group relative w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
+                    <div className="group relative w-full overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-6 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/50 hover:shadow-xl">
                       <p
                         className="text-5xl font-bold leading-none text-blue-100 transition-colors group-hover:text-blue-200"
                         style={{ fontFamily: "var(--font-inter)" }}
@@ -1152,13 +1153,13 @@ export default function WebAgencyShowcase() {
                         {step.step}
                       </p>
                       <h3
-                        className="mt-4 text-base font-bold text-slate-900"
+                        className="mt-4 text-base font-bold text-[var(--ink)]"
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {step.title}
                       </h3>
                       <p
-                        className="mt-2 text-xs leading-relaxed text-slate-500"
+                        className="mt-2 text-xs leading-relaxed text-[var(--ink)]/55"
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {step.desc}
@@ -1184,7 +1185,7 @@ export default function WebAgencyShowcase() {
                       delay: 0.1 + i * 0.08,
                       ease: SPRING_EASE,
                     }}
-                    className="group relative flex gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-500 hover:border-blue-200/50 hover:shadow-xl"
+                    className="group relative flex gap-4 overflow-hidden rounded-2xl border border-[var(--ink)]/10 bg-white p-6 shadow-sm transition-all duration-500 hover:border-blue-200/50 hover:shadow-xl"
                   >
                     <p
                       className="text-4xl font-bold leading-none text-blue-100"
@@ -1194,13 +1195,13 @@ export default function WebAgencyShowcase() {
                     </p>
                     <div>
                       <h3
-                        className="text-base font-bold text-slate-900"
+                        className="text-base font-bold text-[var(--ink)]"
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {step.title}
                       </h3>
                       <p
-                        className="mt-1 text-xs leading-relaxed text-slate-500"
+                        className="mt-1 text-xs leading-relaxed text-[var(--ink)]/55"
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {step.desc}
@@ -1245,7 +1246,7 @@ export default function WebAgencyShowcase() {
                   delay: 0.1,
                   ease: SPRING_EASE,
                 }}
-                className="text-4xl font-bold leading-tight text-slate-900 md:text-6xl"
+                className="text-4xl font-bold leading-tight text-[var(--ink)] md:text-6xl"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
                 Quanto costa
@@ -1278,7 +1279,7 @@ export default function WebAgencyShowcase() {
                 delay: 0.3,
                 ease: SPRING_EASE,
               }}
-              className="mx-auto max-w-lg text-slate-500"
+              className="mx-auto max-w-lg text-[var(--ink)]/55"
               style={{ fontFamily: "var(--font-inter)" }}
             >
               Ogni progetto &egrave; su misura. Questi sono i nostri punti di partenza.
@@ -1313,7 +1314,7 @@ export default function WebAgencyShowcase() {
                     className={`relative h-full overflow-hidden rounded-2xl border p-8 ${
                       isFeatured
                         ? "border-[#0084ff]/30 bg-white shadow-xl shadow-blue-500/10"
-                        : "border-slate-100 bg-white shadow-sm"
+                        : "border-[var(--ink)]/10 bg-white shadow-sm"
                     }`}
                   >
                     {/* Glass-like top border for featured */}
@@ -1321,19 +1322,19 @@ export default function WebAgencyShowcase() {
                       <div className="absolute inset-x-0 top-0 h-[2px] w-full rounded-t-2xl bg-linear-to-r from-[#0084ff] via-[#319AFF] to-[#60B1FF]" />
                     )}
                     <p
-                      className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500"
+                      className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/55"
                       style={{ fontFamily: "var(--font-inter)" }}
                     >
                       {plan.tag}
                     </p>
                     <h3
-                      className="mt-2 text-3xl font-bold text-slate-900"
+                      className="mt-2 text-3xl font-bold text-[var(--ink)]"
                       style={{ fontFamily: "var(--font-inter)" }}
                     >
                       {plan.name}
                     </h3>
                     <p
-                      className="mt-4 text-sm leading-relaxed text-slate-600"
+                      className="mt-4 text-sm leading-relaxed text-[var(--ink)]/65"
                       style={{ fontFamily: "var(--font-inter)" }}
                     >
                       {plan.desc}
@@ -1355,7 +1356,7 @@ export default function WebAgencyShowcase() {
                             />
                           </svg>
                           <span
-                            className="text-sm font-medium text-slate-700"
+                            className="text-sm font-medium text-[var(--ink)]/65"
                             style={{ fontFamily: "var(--font-inter)" }}
                           >
                             {f}
@@ -1363,9 +1364,9 @@ export default function WebAgencyShowcase() {
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-8 border-t border-slate-100 pt-6">
+                    <div className="mt-8 border-t border-[var(--ink)]/10 pt-6">
                       <p
-                        className="text-lg font-bold text-slate-900"
+                        className="text-lg font-bold text-[var(--ink)]"
                         style={{ fontFamily: "var(--font-inter)" }}
                       >
                         {plan.price}
@@ -1460,7 +1461,7 @@ export default function WebAgencyShowcase() {
                   delay: 0.3,
                   ease: SPRING_EASE,
                 }}
-                className="mx-auto max-w-md text-slate-500"
+                className="mx-auto max-w-md text-[var(--ink)]/55"
                 style={{ fontFamily: "var(--font-inter)" }}
               >
                 Nessun impegno. Nessun preventivo nascosto. Solo una chiacchierata
@@ -1482,14 +1483,14 @@ export default function WebAgencyShowcase() {
                 <button
                   type="button"
                   onClick={() => { setInfoDrawerPlan("Sito Web"); setInfoDrawerOpen(true); }}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold transition-all duration-300 hover:border-[#0084ff]/30 hover:bg-blue-50"
+                  className="inline-flex min-h-[44px] items-center gap-2 border border-[var(--ink)]/25 bg-transparent px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition-colors duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                   style={{ fontFamily: "var(--font-inter)", color: "#0f172a" }}
                 >
                   Avvia un progetto
                 </button>
                 <Link
                   href="/contatti"
-                  className="group inline-flex min-h-[44px] items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold transition-all duration-300 hover:border-[#0084ff]/30 hover:bg-blue-50"
+                  className="brutal-cta-ink group inline-flex min-h-[44px] items-center gap-2 bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                   style={{ fontFamily: "var(--font-inter)", color: "#0f172a" }}
                 >
                   Parla con noi

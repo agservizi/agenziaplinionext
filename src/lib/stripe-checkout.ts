@@ -89,17 +89,22 @@ export async function createStripeCheckoutSession({
   invoiceDescription = "",
 }: StripeCheckoutSessionConfig): Promise<StripeCheckoutSessionResponse> {
   const body = new URLSearchParams();
-  body.set("mode", "payment");
+  body.set("mode", "payment"); // one-shot: no subscription / no auto-renewal
   body.set("success_url", successUrl);
   body.set("cancel_url", cancelUrl);
   body.set("customer_email", customerEmail);
   body.set("line_items[0][price_data][currency]", "eur");
   body.set("line_items[0][price_data][product_data][name]", productName);
-  body.set("line_items[0][price_data][product_data][description]", description);
+  body.set(
+    "line_items[0][price_data][product_data][description]",
+    `${description} | Pagamento unico (nessun rinnovo automatico)`,
+  );
   body.set("line_items[0][price_data][unit_amount]", String(amountCents));
   body.set("line_items[0][quantity]", "1");
   body.set("payment_method_types[0]", "card");
   body.set("invoice_creation[enabled]", "true");
+  body.set("metadata[billing_mode]", "one_time");
+  body.set("metadata[auto_renewal]", "false");
   if (invoiceDescription) {
     body.set("invoice_creation[invoice_data][description]", invoiceDescription);
   }

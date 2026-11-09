@@ -6,5 +6,12 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/area-clienti/:path*", "/area-admin/:path*"],
+  matcher: [
+    "/area-clienti/:path*",
+    "/area-admin",
+    "/area-admin/:path*",
+    "/keystatic",
+    "/keystatic/:path*",
+    "/api/keystatic/:path*",
+  ],
 };

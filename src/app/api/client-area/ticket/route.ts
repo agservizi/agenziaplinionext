@@ -1,10 +1,33 @@
+/**
+ * Callers: TicketPraticheWorkspace. Auth required; email from session.
+ * User: procedi con tutto al 100% (security-audit ticket IDOR).
+ */
 import fs from "fs/promises";
 import path from "path";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getPool } from "@/lib/db";
 import { notifyClientAreaEvent } from "@/lib/area-client-notifications";
+import { requireCustomerSession } from "@/lib/auth/api-guard";
+import type { SessionPayload } from "@/lib/auth/session";
 
 export const runtime = "nodejs";
+
+async function resolveCustomerEmail(session: SessionPayload): Promise<string | null> {
+  const fromUsername = String(session.username || "").trim().toLowerCase();
+  if (fromUsername.includes("@")) return fromUsername;
+  if (typeof session.userId === "number" && session.userId > 0) {
+    const pool = getPool();
+    const [rows] = await pool.query(
+      `SELECT email FROM client_portal_users WHERE id = ? LIMIT 1`,
+      [session.userId],
+    );
+    const email = String((rows as Array<{ email?: string }>)?.[0]?.email || "")
+      .trim()
+      .toLowerCase();
+    if (email.includes("@")) return email;
+  }
+  return null;
+}
 
 function hasDatabaseConfig() {
   return Boolean(
@@ -118,11 +141,9 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 async function saveAttachments(files: File[], ticketIdHint: string) {
   if (!files.length) return [] as string[];
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "ticket-pratiche");
+  // Outside public/ — serve only via authenticated download route.
+  const uploadDir = path.join(process.cwd(), ".data", "ticket-pratiche");
   await fs.mkdir(uploadDir, { recursive: true });
-  const siteUrl =
-    String(process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/$/, "") ||
-    "https://agenziaplinio.it";
   const urls: string[] = [];
 
   for (const [index, file] of files.entries()) {
@@ -148,15 +169,26 @@ async function saveAttachments(files: File[], ticketIdHint: string) {
     const absolutePath = path.join(uploadDir, storedName);
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(absolutePath, buffer);
-    urls.push(`${siteUrl}/uploads/ticket-pratiche/${storedName}`);
+    urls.push(`/api/client-area/ticket/file?name=${encodeURIComponent(storedName)}`);
   }
 
   return urls;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   if (!hasDatabaseConfig()) {
     return NextResponse.json({ message: "Database non configurato." }, { status: 503 });
+  }
+
+  const auth = requireCustomerSession(request);
+  if ("error" in auth) return auth.error;
+
+  const sessionEmail = await resolveCustomerEmail(auth.session);
+  if (!sessionEmail) {
+    return NextResponse.json(
+      { message: "Il profilo non ha un'email valida. Aggiorna i dati account." },
+      { status: 400 },
+    );
   }
 
   await ensureClientAreaTicketsTable();
@@ -173,10 +205,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: "Azione non valida." }, { status: 400 });
       }
 
-      const email = String(body?.email || "").trim().toLowerCase();
-      if (!email || !email.includes("@")) {
-        return NextResponse.json({ message: "Inserisci una email valida." }, { status: 400 });
-      }
+      // Ignore body.email — tenant bound to session identity only.
+      const email = sessionEmail;
 
       const pool = getPool();
       const [rows] = await pool.query(
@@ -234,7 +264,7 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const customerName = String(formData.get("customerName") || "").trim();
-    const email = String(formData.get("email") || "").trim().toLowerCase();
+    const email = sessionEmail;
     const phone = String(formData.get("phone") || "").trim();
     const ticketArea = String(formData.get("ticketArea") || "generale").trim();
     const subject = String(formData.get("subject") || "").trim();
@@ -246,9 +276,9 @@ export async function POST(request: Request) {
       .getAll("files")
       .filter((entry): entry is File => entry instanceof File && entry.size > 0);
 
-    if (!customerName || !email.includes("@") || !subject || !message) {
+    if (!customerName || !subject || !message) {
       return NextResponse.json(
-        { message: "Compila nome, email, oggetto e messaggio del ticket." },
+        { message: "Compila nome, oggetto e messaggio del ticket." },
         { status: 400 },
       );
     }

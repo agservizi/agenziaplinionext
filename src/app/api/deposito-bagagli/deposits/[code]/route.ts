@@ -1,11 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  DEPOSITO_API_BASE,
+  depositoApiHeaders,
+} from "@/lib/deposito-bagagli-api";
 
 export const dynamic = "force-dynamic";
-
-const API_BASE = "https://coresuite.it/api/public/deposito-bagagli";
-const API_KEY =
-  process.env.CORESUITE_API_KEY ||
-  "16e43eaa90b6c5ae75a6821b0ba2a3251aae80da7d63c25967f404a467db6635";
 
 export async function GET(
   _request: NextRequest,
@@ -14,8 +13,8 @@ export async function GET(
   try {
     const { code } = await params;
 
-    const res = await fetch(`${API_BASE}/deposits/${encodeURIComponent(code)}`, {
-      headers: { "x-api-key": API_KEY },
+    const res = await fetch(`${DEPOSITO_API_BASE}/deposits/${encodeURIComponent(code)}`, {
+      headers: depositoApiHeaders(),
     });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
@@ -41,12 +40,9 @@ export async function PATCH(
     const { code } = await params;
     const body = await request.json();
 
-    const res = await fetch(`${API_BASE}/deposits/${encodeURIComponent(code)}`, {
+    const res = await fetch(`${DEPOSITO_API_BASE}/deposits/${encodeURIComponent(code)}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": API_KEY,
-      },
+      headers: depositoApiHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(body),
     });
     const data = await res.json();

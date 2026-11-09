@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Fact-forcing: locker Stripe checkout CTA; import PaymentCheckoutNotice.
+ * Callers: deposito-bagagli / locker pages. User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
 import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -8,6 +12,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { itIT } from "@mui/x-date-pickers/locales";
+import PaymentCheckoutNotice from "@/components/compliance/PaymentCheckoutNotice";
 
 dayjs.locale("it");
 
@@ -47,6 +52,46 @@ const EMPTY_FORM: FormState = {
   expectedPickupDate: "",
   notes: "",
 };
+
+const LOCKER_CHECKOUT_DRAFT_KEY = "ag:locker-checkout-draft";
+
+type LockerCheckoutDraft = FormState & { days: number };
+
+function lockerApiMessage(json: unknown, fallback: string): string {
+  if (!json || typeof json !== "object") return fallback;
+  const o = json as Record<string, unknown>;
+  if (typeof o.message === "string" && o.message.trim()) return o.message;
+  const err = o.error;
+  if (
+    err &&
+    typeof err === "object" &&
+    typeof (err as { message?: string }).message === "string"
+  ) {
+    return (err as { message: string }).message;
+  }
+  return fallback;
+}
+
+function buildLockerReturnPath(): string {
+  if (typeof window === "undefined") return "/fermo-deposito";
+  const qs = new URLSearchParams(window.location.search);
+  qs.delete("locker_checkout");
+  qs.delete("session_id");
+  const path = window.location.pathname;
+  const q = qs.toString();
+  return q ? `${path}?${q}` : path;
+}
+
+function lockerConfermaParams(data: Record<string, unknown>): string {
+  const params = new URLSearchParams({
+    code: String(data.code ?? ""),
+  });
+  if (data.pickupUrl) params.set("pickupUrl", String(data.pickupUrl));
+  if (data.dailyRate != null) params.set("dailyRate", String(data.dailyRate));
+  if (data.expectedPickupDate)
+    params.set("date", String(data.expectedPickupDate));
+  return params.toString();
+}
 
 const datePickerTextFieldSx = {
   "& .MuiInputBase-root, & .MuiPickersInputBase-root": {
@@ -99,11 +144,71 @@ const datePickerPaperSx = {
   },
 };
 
-const inputClass =
+const inputClassPublic =
   "w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-[#22d3ee]/50 focus:ring-1 focus:ring-[#22d3ee]/30";
 
-const labelClass =
+const labelClassPublic =
   "mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-white/45";
+
+const inputClassCompact =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+
+const labelClassCompact =
+  "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45";
+
+const datePickerTextFieldSxCompact = {
+  "& .MuiInputBase-root, & .MuiPickersInputBase-root": {
+    height: 44,
+    borderRadius: 0,
+    backgroundColor: "color-mix(in srgb, var(--paper) 88%, white)",
+    color: "var(--ink)",
+    fontSize: "0.875rem",
+  },
+  "& .MuiOutlinedInput-notchedOutline, & .MuiPickersOutlinedInput-notchedOutline":
+    {
+      borderColor: "color-mix(in srgb, var(--ink) 15%, transparent)",
+    },
+  "& .MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline, & .MuiPickersInputBase-root:hover .MuiPickersOutlinedInput-notchedOutline":
+    {
+      borderColor: "color-mix(in srgb, var(--ink) 25%, transparent)",
+    },
+  "& .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline, & .MuiPickersInputBase-root.Mui-focused .MuiPickersOutlinedInput-notchedOutline":
+    {
+      borderColor: "#5E0ED7",
+    },
+  "& .MuiInputBase-input, & .MuiPickersInputBase-input, & .MuiPickersSectionList-root":
+    {
+      padding: "10px 14px",
+      color: "var(--ink)",
+      WebkitTextFillColor: "var(--ink)",
+    },
+  "& .MuiPickersSectionList-sectionContent, & .MuiPickersSectionList-sectionSeparator":
+    {
+      color: "var(--ink)",
+      WebkitTextFillColor: "var(--ink)",
+    },
+  "& .MuiSvgIcon-root": {
+    color: "color-mix(in srgb, var(--ink) 55%, transparent)",
+  },
+};
+
+const datePickerPaperSxCompact = {
+  backgroundColor: "var(--paper)",
+  border: "1px solid color-mix(in srgb, var(--ink) 15%, transparent)",
+  color: "var(--ink) !important",
+  "& .MuiPickersLayout-root *": {
+    color: "color-mix(in srgb, var(--ink) 88%, transparent) !important",
+    WebkitTextFillColor: "color-mix(in srgb, var(--ink) 88%, transparent) !important",
+  },
+  "& .MuiButtonBase-root.MuiPickersDay-root.Mui-selected": {
+    backgroundColor: "#5E0ED7",
+    color: "#fff !important",
+    WebkitTextFillColor: "#fff !important",
+  },
+};
+
+const CTA_COMPACT =
+  "brutal-cta-ink flex w-full items-center justify-center gap-2 bg-[var(--ink)] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
 
 type Props = {
   initialDate?: string;
@@ -118,6 +223,12 @@ export default function LockerPointBookingForm({
 }: Props) {
   const router = useRouter();
   const formId = useId();
+  const inputClass = compact ? inputClassCompact : inputClassPublic;
+  const labelClass = compact ? labelClassCompact : labelClassPublic;
+  const dateFieldSx = compact
+    ? datePickerTextFieldSxCompact
+    : datePickerTextFieldSx;
+  const datePaperSx = compact ? datePickerPaperSxCompact : datePickerPaperSx;
   const [form, setForm] = useState<FormState>({
     ...EMPTY_FORM,
     expectedPickupDate: initialDate,
@@ -131,6 +242,8 @@ export default function LockerPointBookingForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOptional, setShowOptional] = useState(!compact);
+  const [checkoutHandled, setCheckoutHandled] = useState(false);
+  const [verifyingCheckout, setVerifyingCheckout] = useState(false);
 
   useEffect(() => {
     if (initialDate) {
@@ -228,7 +341,140 @@ export default function LockerPointBookingForm({
     form.recipientName.trim().length > 1 &&
     Boolean(form.expectedPickupDate) &&
     availability?.available !== false &&
-    !submitting;
+    !submitting &&
+    !verifyingCheckout;
+
+  const cleanLockerCheckoutQuery = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const qs = new URLSearchParams(window.location.search);
+    qs.delete("locker_checkout");
+    qs.delete("session_id");
+    const q = qs.toString();
+    const path = window.location.pathname;
+    router.replace(q ? `${path}?${q}` : path);
+  }, [router]);
+
+  useEffect(() => {
+    if (checkoutHandled || typeof window === "undefined") return;
+    const search = new URLSearchParams(window.location.search);
+    const checkoutState = search.get("locker_checkout");
+    if (!checkoutState) return;
+
+    setCheckoutHandled(true);
+    let draft: LockerCheckoutDraft | null = null;
+    try {
+      draft = JSON.parse(
+        sessionStorage.getItem(LOCKER_CHECKOUT_DRAFT_KEY) || "null",
+      ) as LockerCheckoutDraft | null;
+    } catch {
+      draft = null;
+    }
+
+    if (checkoutState === "cancel") {
+      if (draft) setForm(draft);
+      setError("Pagamento annullato. Puoi riprovare quando vuoi.");
+      cleanLockerCheckoutQuery();
+      return;
+    }
+
+    const sessionId = search.get("session_id") || "";
+    if (checkoutState !== "success" || !sessionId) {
+      cleanLockerCheckoutQuery();
+      return;
+    }
+
+    if (!draft) {
+      setError(
+        "Sessione di pagamento scaduta. Compila di nuovo il modulo e riprova.",
+      );
+      cleanLockerCheckoutQuery();
+      return;
+    }
+
+    const verifyLockKey = `ag:locker-verify:${sessionId}`;
+    if (sessionStorage.getItem(verifyLockKey) === "done") {
+      cleanLockerCheckoutQuery();
+      return;
+    }
+    if (sessionStorage.getItem(verifyLockKey) === "pending") {
+      setForm(draft);
+      setVerifyingCheckout(true);
+      setSubmitting(true);
+      return;
+    }
+    sessionStorage.setItem(verifyLockKey, "pending");
+
+    setForm(draft);
+    setVerifyingCheckout(true);
+    setSubmitting(true);
+    setError(null);
+    void (async () => {
+      try {
+        const res = await fetch("/api/locker-point/checkout/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            recipientName: draft!.recipientName.trim(),
+            recipientEmail: draft!.recipientEmail.trim() || undefined,
+            recipientPhone: draft!.recipientPhone.trim() || undefined,
+            senderName: draft!.senderName.trim() || undefined,
+            carrier: draft!.carrier.trim() || undefined,
+            trackingCode: draft!.trackingCode.trim() || undefined,
+            expectedPickupDate: draft!.expectedPickupDate,
+            notes: draft!.notes.trim() || undefined,
+          }),
+        });
+        const json = await res.json();
+        const data = (json?.data ?? json) as Record<string, unknown>;
+        if (!res.ok || json?.success === false || !data?.code) {
+          throw new Error(
+            lockerApiMessage(
+              json,
+              "Verifica pagamento non riuscita. Contattaci.",
+            ),
+          );
+        }
+        sessionStorage.removeItem(LOCKER_CHECKOUT_DRAFT_KEY);
+        sessionStorage.setItem(verifyLockKey, "done");
+        cleanLockerCheckoutQuery();
+        router.push(`/fermo-deposito/conferma?${lockerConfermaParams(data)}`);
+      } catch (cause) {
+        sessionStorage.removeItem(verifyLockKey);
+        if (draft) setForm(draft);
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Verifica pagamento non riuscita.",
+        );
+        cleanLockerCheckoutQuery();
+        setSubmitting(false);
+        setVerifyingCheckout(false);
+      }
+    })();
+  }, [checkoutHandled, cleanLockerCheckoutQuery, router]);
+
+  const bookLockerDirect = useCallback(
+    async (body: Record<string, unknown>) => {
+      const res = await fetch("/api/locker-point/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      const data = (json?.data ?? json) as Record<string, unknown>;
+      if (!res.ok || json?.success === false || !data?.code) {
+        throw new Error(
+          lockerApiMessage(
+            json,
+            "Non siamo riusciti a completare la prenotazione. Riprova o contattaci.",
+          ),
+        );
+      }
+      router.push(`/fermo-deposito/conferma?${lockerConfermaParams(data)}`);
+    },
+    [router],
+  );
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -236,63 +482,89 @@ export default function LockerPointBookingForm({
       if (!canSubmit) return;
       setSubmitting(true);
       setError(null);
+      let redirectingToCheckout = false;
       try {
-        const res = await fetch("/api/locker-point/book", {
+        const bookBody = {
+          recipientName: form.recipientName.trim(),
+          recipientEmail: form.recipientEmail.trim() || undefined,
+          recipientPhone: form.recipientPhone.trim() || undefined,
+          senderName: form.senderName.trim() || undefined,
+          carrier: form.carrier.trim() || undefined,
+          trackingCode: form.trackingCode.trim() || undefined,
+          expectedPickupDate: form.expectedPickupDate,
+          notes: form.notes.trim() || undefined,
+        };
+
+        const draft: LockerCheckoutDraft = {
+          ...form,
+          recipientName: form.recipientName.trim(),
+          days: 1,
+        };
+
+        const checkoutRes = await fetch("/api/locker-point/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            recipientName: form.recipientName.trim(),
-            recipientEmail: form.recipientEmail.trim() || undefined,
-            recipientPhone: form.recipientPhone.trim() || undefined,
-            senderName: form.senderName.trim() || undefined,
-            carrier: form.carrier.trim() || undefined,
-            trackingCode: form.trackingCode.trim() || undefined,
-            expectedPickupDate: form.expectedPickupDate,
-            notes: form.notes.trim() || undefined,
+            ...bookBody,
+            days: 1,
+            returnPath: buildLockerReturnPath(),
           }),
         });
-        const json = await res.json();
-        const data = json?.data ?? json;
-        if (!res.ok || json?.success === false || !data?.code) {
-          setError(
-            json?.error?.message ||
-              "Non siamo riusciti a completare la prenotazione. Riprova o contattaci.",
-          );
+
+        if (checkoutRes.status === 503) {
+          await bookLockerDirect(bookBody);
           return;
         }
-        const params = new URLSearchParams({ code: String(data.code) });
-        if (data.pickupUrl) params.set("pickupUrl", String(data.pickupUrl));
-        if (data.dailyRate != null)
-          params.set("dailyRate", String(data.dailyRate));
-        if (data.expectedPickupDate)
-          params.set("date", String(data.expectedPickupDate));
-        router.push(`/fermo-deposito/conferma?${params.toString()}`);
-      } catch {
-        setError("Servizio temporaneamente non disponibile. Riprova tra poco.");
+
+        const checkoutJson = await checkoutRes.json();
+        if (!checkoutRes.ok) {
+          throw new Error(
+            lockerApiMessage(checkoutJson, "Pagamento non disponibile. Riprova."),
+          );
+        }
+
+        const checkoutUrl =
+          checkoutJson && typeof checkoutJson.url === "string"
+            ? checkoutJson.url
+            : "";
+        if (!checkoutUrl) {
+          throw new Error("URL di pagamento non disponibile.");
+        }
+
+        sessionStorage.setItem(LOCKER_CHECKOUT_DRAFT_KEY, JSON.stringify(draft));
+        redirectingToCheckout = true;
+        window.location.assign(checkoutUrl);
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Servizio temporaneamente non disponibile. Riprova tra poco.",
+        );
       } finally {
-        setSubmitting(false);
+        if (!redirectingToCheckout) setSubmitting(false);
       }
     },
-    [canSubmit, form, router],
+    [bookLockerDirect, canSubmit, form],
   );
 
   const today = dayjs().format("YYYY-MM-DD");
 
   if (!loadingPricing && pricing && !pricing.onlineIntakeEnabled) {
     return (
-      <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 p-6 text-sm text-amber-100">
+      <div
+        className={
+          compact
+            ? "border border-amber-600/25 bg-amber-500/10 p-6 text-sm text-amber-900"
+            : "rounded-2xl border border-amber-400/25 bg-amber-500/10 p-6 text-sm text-amber-100"
+        }
+      >
         Al momento le prenotazioni online sono sospese. Passa in agenzia in Via
         Plinio il Vecchio 72 oppure chiamaci.
       </div>
     );
   }
 
-  return (
-    <LocalizationProvider
-      dateAdapter={AdapterDayjs}
-      adapterLocale="it"
-      localeText={itIT.components.MuiLocalizationProvider.defaultProps.localeText}
-    >
+  const formBody = (
       <form
         id={formId}
         onSubmit={handleSubmit}
@@ -340,24 +612,30 @@ export default function LockerPointBookingForm({
                   fullWidth: true,
                   size: "small",
                   required: true,
-                  sx: datePickerTextFieldSx,
+                  sx: dateFieldSx,
                 },
-                desktopPaper: { sx: datePickerPaperSx },
-                mobilePaper: { sx: datePickerPaperSx },
+                desktopPaper: { sx: datePaperSx },
+                mobilePaper: { sx: datePaperSx },
               }}
             />
             {form.expectedPickupDate && (
               <div className="mt-2">
                 {loadingAvailability ? (
-                  <p className="text-xs text-white/40">
+                  <p
+                    className={`text-xs ${compact ? "text-[var(--ink)]/45" : "text-white/40"}`}
+                  >
                     Verifica disponibilità…
                   </p>
                 ) : availability ? (
                   <p
                     className={`text-xs ${
                       availability.available
-                        ? "text-emerald-300"
-                        : "text-red-300"
+                        ? compact
+                          ? "text-emerald-700"
+                          : "text-emerald-300"
+                        : compact
+                          ? "text-rose-700"
+                          : "text-red-300"
                     }`}
                   >
                     {availability.available
@@ -410,7 +688,11 @@ export default function LockerPointBookingForm({
           <button
             type="button"
             onClick={() => setShowOptional((v) => !v)}
-            className="text-xs font-medium text-[#22d3ee]/80 transition hover:text-[#22d3ee]"
+            className={
+              compact
+                ? "text-xs font-bold uppercase tracking-[0.12em] text-[#5E0ED7] transition hover:underline"
+                : "text-xs font-medium text-[#22d3ee]/80 transition hover:text-[#22d3ee]"
+            }
           >
             {showOptional
               ? "Nascondi dettagli opzionali"
@@ -496,7 +778,11 @@ export default function LockerPointBookingForm({
         {error && (
           <div
             role="alert"
-            className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+            className={
+              compact
+                ? "border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-800"
+                : "rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+            }
           >
             {error}
           </div>
@@ -505,24 +791,57 @@ export default function LockerPointBookingForm({
         <button
           type="submit"
           disabled={!canSubmit}
-          className={`flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all duration-300 ${
-            canSubmit
-              ? "bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] text-white shadow-lg shadow-[#5E0ED7]/25 hover:scale-[1.01] hover:shadow-xl"
-              : "cursor-not-allowed bg-white/10 text-white/35"
-          }`}
+          className={
+            compact
+              ? CTA_COMPACT
+              : `flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all duration-300 ${
+                  canSubmit
+                    ? "bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] text-white shadow-lg shadow-[#5E0ED7]/25 hover:scale-[1.01] hover:shadow-xl"
+                    : "cursor-not-allowed bg-white/10 text-white/35"
+                }`
+          }
         >
-          {submitting ? "Prenotazione in corso…" : "Prenota fermo deposito"}
+          {verifyingCheckout
+            ? "Conferma pagamento in corso…"
+            : submitting
+              ? "Reindirizzamento al pagamento…"
+              : "Prenota fermo deposito"}
         </button>
 
-        <p className="text-center text-[11px] leading-relaxed text-white/40">
+        <p
+          className={`text-center text-[11px] leading-relaxed ${
+            compact ? "text-[var(--ink)]/45" : "text-white/40"
+          }`}
+        >
           Ricevi un codice LP da mostrare al ritiro. Tariffa da{" "}
-          <span className="text-white/70">
+          <span className={compact ? "text-[var(--ink)]/70" : "text-white/70"}>
             &euro;
             {(pricing?.dailyRate ?? 0.5).toFixed(2).replace(".", ",")} al giorno
           </span>
           , per pacco.
         </p>
+        <PaymentCheckoutNotice
+          className={`text-center ${compact ? "" : "!text-white/45 [&_a]:!text-cyan-200 [&_strong]:!text-white/70"}`}
+          amountLabel={`da ${(pricing?.dailyRate ?? 0.5).toFixed(2).replace(".", ",")} €/giorno`}
+        />
       </form>
+  );
+
+  return (
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      adapterLocale="it"
+      localeText={itIT.components.MuiLocalizationProvider.defaultProps.localeText}
+    >
+      {compact ? (
+        <div className="px-5 pb-8 pt-6 md:px-8">
+          <section className="border border-[var(--ink)]/12 bg-[var(--paper)] p-5 md:p-7">
+            {formBody}
+          </section>
+        </div>
+      ) : (
+        formBody
+      )}
     </LocalizationProvider>
   );
 }

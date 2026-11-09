@@ -116,38 +116,38 @@ export default function VisuraPaymentConfirmationClient() {
 
   if (status === "loading") {
     return (
-      <div className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">
+      <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 md:p-8">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
           Pagamento in verifica
         </p>
-        <h2 className="mt-3 text-2xl font-semibold text-slate-950">
+        <h2 className="display-type mt-3 text-2xl text-[var(--ink)]">
           Sto finalizzando la richiesta visura dopo il checkout.
         </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-[var(--ink)]/55">{message}</p>
       </div>
     );
   }
 
   if (status === "error") {
     return (
-      <div className="rounded-[32px] border border-red-100 bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+      <div className="border border-red-200 bg-[var(--paper)] p-6 md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-red-500">
           Finalizzazione non riuscita
         </p>
-        <h2 className="mt-3 text-2xl font-semibold text-slate-950">
+        <h2 className="display-type mt-3 text-2xl text-[var(--ink)]">
           Il pagamento c&apos;&egrave;, ma devo controllare la richiesta.
         </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-[var(--ink)]/55">{message}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             href="/area-clienti/visure"
-            className="rounded-full border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+            className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
           >
             Torna all'area visure
           </Link>
           <Link
             href="/area-clienti/visure/storico"
-            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)]/70 transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
           >
             Apri lo storico
           </Link>
@@ -158,37 +158,37 @@ export default function VisuraPaymentConfirmationClient() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-[32px] border border-emerald-100 bg-white p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
+      <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-6 md:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#5E0ED7]">
           Pagamento confermato
         </p>
-        <h2 className="mt-3 text-3xl font-semibold text-slate-950">
+        <h2 className="display-type mt-3 text-3xl text-[var(--ink)]">
           La richiesta visura è stata registrata correttamente.
         </h2>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{message}</p>
+        <p className="mt-3 text-sm leading-7 text-[var(--ink)]/55">{message}</p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
               Pratica
             </p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">
+            <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
               {result?.requestId ? `#${result.requestId}` : "n/d"}
             </p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
               Stato
             </p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">
+            <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
               {formatProviderStatus(result?.providerStatus)}
             </p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
               Pagato
             </p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">
+            <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
               {typeof result?.payment?.amountCents === "number"
                 ? `${(result.payment.amountCents / 100).toFixed(2).replace(".", ",")} ${String(
                     result.payment.currency || "eur",
@@ -196,26 +196,26 @@ export default function VisuraPaymentConfirmationClient() {
                 : "n/d"}
             </p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
               Tariffa
             </p>
-            <p className="mt-2 text-sm font-semibold text-slate-950">
+            <p className="mt-2 text-sm font-semibold text-[var(--ink)]">
               {result?.payment?.priceLabel || "n/d"}
             </p>
           </div>
         </div>
 
-        <p className="mt-5 text-sm text-slate-600">
-          Servizio: <strong className="text-slate-900">{result?.providerService || "n/d"}</strong>
+        <p className="mt-5 text-sm text-[var(--ink)]/55">
+          Servizio: <strong className="text-[var(--ink)]">{result?.providerService || "n/d"}</strong>
           {result?.providerRequestId ? ` • riferimento ${result.providerRequestId}` : ""}
         </p>
 
         {result?.summary && Object.keys(result.summary).length > 0 ? (
           <div className="mt-4 grid gap-2 md:grid-cols-2">
             {Object.entries(result.summary).map(([key, value]) => (
-              <div key={key} className="text-sm text-slate-600">
-                <strong className="text-slate-900">{key}:</strong> {String(value)}
+              <div key={key} className="text-sm text-[var(--ink)]/55">
+                <strong className="text-[var(--ink)]">{key}:</strong> {String(value)}
               </div>
             ))}
           </div>
@@ -227,7 +227,7 @@ export default function VisuraPaymentConfirmationClient() {
               href={result.documentUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+              className="brutal-cta-ink inline-flex bg-[var(--ink)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7]"
             >
               Apri documento
             </a>
@@ -236,14 +236,14 @@ export default function VisuraPaymentConfirmationClient() {
             <a
               href={documentHref}
               download={`visura-${result?.requestId || "richiesta"}.pdf`}
-              className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+              className="brutal-cta-ink inline-flex bg-[var(--ink)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7]"
             >
               Scarica PDF
             </a>
           ) : null}
           <Link
             href="/area-clienti/visure/storico"
-            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+            className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
           >
             Vai allo storico visure
           </Link>
@@ -252,7 +252,7 @@ export default function VisuraPaymentConfirmationClient() {
               href={result.payment.invoicePdf}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+              className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
             >
               Apri invoice PDF Stripe
             </a>
@@ -262,7 +262,7 @@ export default function VisuraPaymentConfirmationClient() {
               href={result.payment.hostedInvoiceUrl}
               target="_blank"
               rel="noreferrer"
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+              className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
             >
               Apri fattura hosted
             </a>

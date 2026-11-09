@@ -1,3 +1,7 @@
+/**
+ * Fact-forcing: public cookie policy; list thirdPartyOptional (Spline/GA) after consent.
+ * User: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP".
+ */
 import Container from "@/components/Container";
 import { cookieCategories, cookiePolicy } from "@/lib/cookies";
 import { buildMetadata } from "@/lib/seo";
@@ -14,20 +18,20 @@ export function generateMetadata() {
 
 export default function CookiePolicyPage() {
   return (
-    <div className="lux-surface pb-20 pt-20 text-slate-900">
+    <div className="bg-[var(--paper)] pb-20 pt-20 text-[var(--ink)]">
       <Container className="space-y-10">
         <div className="lux-panel rounded-3xl p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-600">
             Cookie Policy
           </p>
           <h1 className="mt-3 text-3xl font-semibold">Gestione cookie</h1>
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-3 text-sm text-[var(--ink)]/65">
             Ultimo aggiornamento: {cookiePolicy.lastUpdated}. Versione policy: {cookiePolicy.version}.
           </p>
         </div>
 
         <div className="lux-panel rounded-3xl p-8">
-          <div className="space-y-4 text-sm leading-7 text-slate-600">
+          <div className="space-y-4 text-sm leading-7 text-[var(--ink)]/65">
             <p>
               Questa Cookie Policy descrive l’utilizzo dei cookie e di strumenti simili sul sito di{" "}
               <strong>{company.legalName}</strong>, con sede in <strong>{company.address}</strong>.
@@ -44,20 +48,20 @@ export default function CookiePolicyPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {cookieCategories.map((category) => (
             <div key={category.key} className="lux-card rounded-2xl p-6">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-[var(--ink)]">
                 {category.label}
               </h2>
-              <p className="mt-2 text-sm text-slate-600">{category.description}</p>
+              <p className="mt-2 text-sm text-[var(--ink)]/65">{category.description}</p>
             </div>
           ))}
         </div>
 
         <div className="lux-panel rounded-3xl p-8">
-          <h2 className="text-lg font-semibold text-slate-900">Cookie utilizzati</h2>
-          <div className="mt-4 space-y-3 text-sm text-slate-600">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Cookie utilizzati</h2>
+          <div className="mt-4 space-y-3 text-sm text-[var(--ink)]/65">
             {cookiePolicy.cookies.map((cookie) => (
-              <div key={cookie.name} className="rounded-2xl border border-slate-200 p-4">
-                <p className="font-semibold text-slate-900">{cookie.name}</p>
+              <div key={cookie.name} className="rounded-2xl border border-[var(--ink)]/15 p-4">
+                <p className="font-semibold text-[var(--ink)]">{cookie.name}</p>
                 <p>Finalità: {cookie.purpose}</p>
                 <p>Durata: {cookie.duration}</p>
                 <p>Provider: {cookie.provider}</p>
@@ -66,10 +70,28 @@ export default function CookiePolicyPage() {
           </div>
         </div>
 
+        {cookiePolicy.thirdPartyOptional?.length ? (
+          <div className="lux-panel rounded-3xl p-8">
+            <h2 className="text-lg font-semibold text-[var(--ink)]">
+              Risorse di terzi (solo dopo consenso)
+            </h2>
+            <div className="mt-4 space-y-3 text-sm text-[var(--ink)]/65">
+              {cookiePolicy.thirdPartyOptional.map((item) => (
+                <div key={item.name} className="rounded-2xl border border-[var(--ink)]/15 p-4">
+                  <p className="font-semibold text-[var(--ink)]">{item.name}</p>
+                  <p>Finalità: {item.purpose}</p>
+                  <p>Provider: {item.provider}</p>
+                  <p>Categoria consenso: {item.category}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div className="lux-panel rounded-3xl p-8">
-          <div className="space-y-6 text-sm leading-7 text-slate-600">
+          <div className="space-y-6 text-sm leading-7 text-[var(--ink)]/65">
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Gestione del consenso</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Gestione del consenso</h2>
               <p className="mt-2">
                 I cookie tecnici necessari sono sempre attivi perché indispensabili al funzionamento
                 del sito. Le altre categorie vengono attivate solo dopo il consenso espresso
@@ -78,7 +100,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Come modificare le preferenze</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Come modificare le preferenze</h2>
               <p className="mt-2">
                 L’utente può aggiornare, modificare o revocare il consenso in qualsiasi momento
                 attraverso il comando “Gestisci cookie” presente nel sito. È inoltre possibile
@@ -88,7 +110,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Cookie di terze parti</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Cookie di terze parti</h2>
               <p className="mt-2">
                 Alcuni strumenti integrati nel sito possono coinvolgere servizi di terze parti,
                 come piattaforme di analisi, tracciamento, pagamenti o servizi operativi. In questi
@@ -97,7 +119,7 @@ export default function CookiePolicyPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900">Contatti</h2>
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Contatti</h2>
               <p className="mt-2">
                 Per informazioni sul trattamento dei dati personali e sull’uso dei cookie, è
                 possibile fare riferimento anche alla{" "}

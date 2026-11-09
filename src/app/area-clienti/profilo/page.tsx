@@ -21,39 +21,23 @@ function Chevron() {
 
 export default function AreaClientiProfiloPage() {
   return (
-    <div className="min-h-full">
-      <div className="relative">
-        <div className="h-px bg-linear-to-r from-slate-400/30 via-slate-400/10 to-transparent" />
-        <div className="border-b border-white/6 bg-slate-950 px-6 pt-5 pb-6 md:px-10">
-          <nav className="mb-5 flex items-center gap-2 text-xs text-slate-600">
-            <Link href="/area-clienti" className="transition hover:text-slate-400">Dashboard</Link>
+    <div className="min-h-full bg-[var(--paper)] text-[var(--ink)]">
+        <section className="border-b border-[var(--ink)]/10 px-5 py-8 md:px-8">
+          <nav className="mb-5 flex items-center gap-2 text-xs text-[var(--ink)]/45">
+            <Link href="/area-clienti" className="transition hover:text-[var(--ink)]">Dashboard</Link>
             <Chevron />
-            <span className="text-slate-500">Profilo</span>
+            <span>Profilo</span>
           </nav>
-          <div className="flex items-start gap-4">
-            <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-300">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.6" />
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white md:text-3xl">
-                Impostazioni account
-              </h1>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-400">
-                Dati anagrafici, contatti e sicurezza del tuo accesso all&apos;area clienti.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">Area clienti</p>
+          <h1 className="display-type mt-3 text-[clamp(1.8rem,3.5vw,2.8rem)]">Impostazioni account</h1>
+          <p className="mt-2 max-w-2xl text-sm text-[var(--ink)]/55">
+            Dati anagrafici, contatti e sicurezza del tuo accesso all&apos;area clienti.
+          </p>
+        </section>
 
-      <div className="bg-slate-50 pb-16 pt-8 text-slate-950">
-        <Container>
-          <ClientProfilePanel />
-        </Container>
-      </div>
+      <Container className="py-8 pb-16">
+        <ClientProfilePanel />
+      </Container>
     </div>
   );
 }

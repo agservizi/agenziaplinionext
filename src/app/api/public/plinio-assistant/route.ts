@@ -40,7 +40,7 @@ AG SERVIZI è aperta dal 1 giugno 2016. Offre oltre 30 servizi a privati e azien
 
 ### ENERGIA — LUCE E GAS
 - Attivazione e cambio fornitore luce e gas
-- Operatori gestiti: Enel Energia, A2A Energia, Fastweb Energia
+- Operatori gestiti: Enel Energia, A2A Energia, Fastweb Energia, Plenitude, Sentra Energia
 - Documenti richiesti: bolletta recente con POD (luce) e/o PDR (gas) + documento d'identità + codice fiscale + IBAN
 - Tempi attivazione: 2–5 giorni lavorativi
 
@@ -62,12 +62,12 @@ AG SERVIZI è aperta dal 1 giugno 2016. Offre oltre 30 servizi a privati e azien
 - Documenti: documento d'identità + codice fiscale
 - Utile per: contratti, pratiche PA, gare d'appalto
 
-### SPEDIZIONI
+### SPEDIZIONI (in sede)
 - Nazionali: BRT (Bartolini), SDA (Poste), TNT/FedEx
-- Internazionali: InPost, servizi Europa e mondo
-- Ritiro pacchi in sede (fermopoint / locker InPost)
-- Tracking disponibile in chat — chiedi il numero di tracciamento
+- Ritiro pacchi presso Via Plinio 72, Castellammare di Stabia
+- Tracking: chiedi il numero di tracciamento se lo hai già
 - Preventivo indicativo: peso, dimensioni e destinazione
+- Non promuovere spedizioni self-service dall'Area Clienti (modulo legacy rimosso)
 
 ### PAGAMENTI E PRATICHE
 - PagoPA (F23, bollo auto, tributi comunali, rette universitarie...)

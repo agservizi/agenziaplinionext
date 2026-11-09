@@ -34,8 +34,8 @@ function semanticScopeScores(text) {
   const tokens = tokenizeSemantic(text);
   if (!tokens.length) return {};
   const scopeMap = {
-    telefonia: ["telefonia", "operatore", "mobile", "sim", "fibra", "portabilita", "windtre", "fastweb", "iliad"],
-    energia: ["energia", "luce", "gas", "bolletta", "pod", "pdr", "fornitore"],
+    telefonia: ["telefonia", "operatore", "mobile", "sim", "fibra", "portabilita", "fastweb", "iliad", "ho", "digi"],
+    energia: ["energia", "luce", "gas", "bolletta", "pod", "pdr", "fornitore", "enel", "a2a", "plenitude", "sentra", "fastweb"],
     pagamenti: ["pagamenti", "pagamento", "pagopa", "f24", "bollettino", "mav", "rav", "bonifico", "bollo"],
     spid: ["spid", "identita", "digitale"],
     pec: ["pec", "posta", "certificata"],
@@ -90,7 +90,7 @@ function extractTrackingCode(text) {
 
 export function detectServiceScope(text) {
   const q = normalize(text);
-  if (includesAny(q, ["windtre", "fastweb", "iliad", "telefonia", "sim", "fibra", "portabilita", "cambio operatore"])) return "telefonia";
+  if (includesAny(q, ["fastweb", "iliad", "telefonia", "sim", "fibra", "portabilita", "cambio operatore", "ho mobile", "digi"])) return "telefonia";
   if (includesAny(q, ["luce", "gas", "energia", "bolletta", "pod", "pdr", "cambio fornitore"])) return "energia";
   if (includesAny(q, ["pagopa", "f24", "bollettino", "bollettini", "mav", "rav", "bonifico", "bollo auto"])) return "pagamenti";
   if (includesAny(q, ["biglietti", "biglietto", "biglietteria", "rivendita biglietti", "trenitalia", "treno", "bus", "metro", "abbonamento", "sosta", "parcheggio", "parchi", "musei"])) return "pagamenti";
@@ -265,7 +265,7 @@ export function clientFallbackReply(question, history = []) {
       ? "pec"
       : includesAny(lastAssistant, ["firma digitale", "firma elettronica"])
         ? "firma-digitale"
-        : includesAny(lastAssistant, ["telefonia", "windtre", "fastweb", "iliad", "portabilita"])
+        : includesAny(lastAssistant, ["telefonia", "fastweb", "iliad", "portabilita"])
           ? "telefonia"
           : includesAny(lastAssistant, ["luce e gas", "energia", "pod", "pdr", "fornitore"])
             ? "energia"
@@ -510,28 +510,25 @@ export function clientFallbackReply(question, history = []) {
   if (includesAny(q, ["firma digitale", "firma elettronica"])) {
     return "Per la firma digitale in genere servono documento valido, tessera sanitaria/codice fiscale, email e cellulare attivi, con smartphone per OTP e riconoscimento.";
   }
-  if (includesAny(q, ["windtre luce", "windtre energia", "luce e gas windtre"])) {
-    return "Non gestiamo più WindTre Luce e Gas. Per luce e gas possiamo aiutarti con Enel Energia, A2A e Fastweb Energia. In genere servono documento, codice fiscale e ultima bolletta.";
-  }
-  if (includesAny(q, ["windtre"])) {
-    return "Non gestiamo più attivazioni WindTre. Per telefonia possiamo confrontare Fastweb e Iliad in base a copertura, uso e budget. Dimmi se ti interessa mobile o internet casa.";
-  }
   if (includesAny(q, ["fastweb", "iliad", "cambio operatore", "migrazione", "confront", "quale operatore", "scegliere"])) {
     return "Certo. Possiamo aiutarti a confrontare Fastweb e Iliad in base a copertura, uso (voce/dati/fibra) e budget. In genere servono documento, codice fiscale e numero da migrare (se presente). Se vuoi, dimmi se ti interessa mobile o casa.";
   }
   if (scope === "telefonia" && includesAny(q, ["quali gestori", "gestori", "operatori"])) {
-    return "Per telefonia possiamo supportarti su Fastweb e Iliad. Possiamo confrontarli in base a copertura, budget e tipo di utilizzo.";
+    return "Per telefonia possiamo supportarti su Fastweb, Iliad, Ho. Mobile e Digi Mobile. Possiamo confrontarli in base a copertura, budget e tipo di utilizzo.";
+  }
+  if (includesAny(q, ["plenitude", "sentra", "enel", "a2a"]) && includesAny(q, ["luce", "gas", "energia", "bolletta", "fornitore"])) {
+    return "Si, per luce e gas possiamo aiutarti con Enel Energia, A2A, Fastweb Energia, Plenitude e Sentra Energia. In genere servono documento, codice fiscale e ultima bolletta.";
   }
   if (includesAny(q, ["luce", "gas", "energia", "bolletta"])) {
-    return "Si, offriamo consulenza luce e gas. In genere servono documento, codice fiscale e ultima bolletta utile.";
+    return "Si, offriamo consulenza luce e gas con Enel Energia, A2A, Fastweb Energia, Plenitude e Sentra Energia. In genere servono documento, codice fiscale e ultima bolletta utile.";
   }
   if (scope === "energia" && includesAny(q, ["quali gestori", "gestori", "operatori", "fornitori"])) {
-    return "Per luce e gas ti aiutiamo a valutare la soluzione migliore in base ai tuoi consumi. In genere servono POD/PDR e ultima bolletta.";
+    return "Per luce e gas lavoriamo con Enel Energia, A2A, Fastweb Energia, Plenitude e Sentra Energia. In genere servono POD/PDR e ultima bolletta.";
   }
   if (includesAny(q, ["bolletta", "luce", "gas", "consumi", "pod", "pdr"]) && includesAny(q, ["stima", "preventivo", "analisi", "consiglio"])) {
     return "Certo. Posso fare una stima indicativa luce/gas: compila il pannello stima bolletta con spesa mensile e consumi annui (se disponibili).";
   }
-  if (includesAny(q, ["telefonia", "mobile", "sim", "fibra", "windtre", "fastweb", "iliad", "portabilita"]) && includesAny(q, ["audit", "analisi", "confronto", "consiglio", "ottimizzare"])) {
+  if (includesAny(q, ["telefonia", "mobile", "sim", "fibra", "fastweb", "iliad", "portabilita"]) && includesAny(q, ["audit", "analisi", "confronto", "consiglio", "ottimizzare"])) {
     return "Perfetto. Posso fare un controllo rapido della tua offerta telefonica: compila il pannello con spesa mensile, GB, minuti e portabilita.";
   }
   if (includesAny(q, ["pagopa", "f24", "bollettini", "bollettino", "mav", "rav", "bonifico"])) {

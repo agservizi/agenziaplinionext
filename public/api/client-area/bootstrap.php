@@ -61,9 +61,14 @@ function client_area_decode_json_value(mixed $value): array
     return is_array($decoded) ? $decoded : [];
 }
 
+// Callers: client_area_verify_client_portal_token. No default secret. User: procedi con tutto al 100%
 function client_area_client_portal_secret(): string
 {
-    return trim((string) public_api_env('CLIENT_PORTAL_SESSION_SECRET', 'ag-client-portal-dev-secret'));
+    $secret = trim((string) public_api_env('CLIENT_PORTAL_SESSION_SECRET', ''));
+    if ($secret === '') {
+        throw new RuntimeException('CLIENT_PORTAL_SESSION_SECRET non configurato');
+    }
+    return $secret;
 }
 
 function client_area_base64url_decode(string $value): string|false
@@ -600,9 +605,20 @@ function client_area_notify_event(
     }
 }
 
+// No publishable default (security-audit AUTHZ-004). User: procedi con tutto al 100%
 function client_area_visure_magic_link_secret(): string
 {
-    return trim((string) (public_api_env('VISURE_MAGIC_LINK_SECRET', public_api_env('CAF_PATRONATO_MAGIC_LINK_SECRET', public_api_env('ADMIN_PORTAL_SESSION_SECRET', public_api_env('CLIENT_PORTAL_SESSION_SECRET', 'ag-visure-magic-link')))) ?: 'ag-visure-magic-link'));
+    $secret = trim((string) public_api_env(
+        'VISURE_MAGIC_LINK_SECRET',
+        public_api_env(
+            'CAF_PATRONATO_MAGIC_LINK_SECRET',
+            public_api_env('ADMIN_PORTAL_SESSION_SECRET', public_api_env('CLIENT_PORTAL_SESSION_SECRET', '')),
+        ),
+    ));
+    if ($secret === '') {
+        throw new RuntimeException('VISURE_MAGIC_LINK_SECRET non configurato');
+    }
+    return $secret;
 }
 
 function client_area_visure_magic_link_ttl_hours(): int

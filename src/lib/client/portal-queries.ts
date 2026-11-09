@@ -1,66 +1,51 @@
 import type { RowDataPacket } from "mysql2";
 import { getPool } from "@/lib/db";
-import { ensureSaleorBridgeTables } from "@/lib/saleor/ensure-tables";
 
 function dbOk() {
   return Boolean(process.env.MYSQL_HOST);
 }
 
-export async function listCustomerOrderMirrors(userId: number, limit = 50) {
-  if (!dbOk() || !userId) return [];
-  try {
-    await ensureSaleorBridgeTables();
-    const [rows] = await getPool().query<RowDataPacket[]>(
-      `SELECT saleor_order_id, status, total_amount, currency, created_at, updated_at
-       FROM saleor_order_mirrors
-       WHERE client_user_id = ?
-       ORDER BY id DESC LIMIT ?`,
-      [userId, limit],
-    );
-    return rows;
-  } catch {
-    return [];
-  }
+async function ensureNotificationPrefsTable() {
+  if (!dbOk()) return;
+  await getPool().execute(`
+    CREATE TABLE IF NOT EXISTS client_notification_prefs (
+      client_user_id INT NOT NULL PRIMARY KEY,
+      order_confirm TINYINT(1) NOT NULL DEFAULT 1,
+      shipped TINYINT(1) NOT NULL DEFAULT 1,
+      digital_ready TINYINT(1) NOT NULL DEFAULT 1,
+      service_update TINYINT(1) NOT NULL DEFAULT 1,
+      marketing TINYINT(1) NOT NULL DEFAULT 0,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
 }
 
-export async function getCustomerOrderMirror(userId: number, orderId: string) {
-  if (!dbOk() || !userId || !orderId) return null;
-  try {
-    await ensureSaleorBridgeTables();
-    const [rows] = await getPool().query<RowDataPacket[]>(
-      `SELECT *
-       FROM saleor_order_mirrors
-       WHERE client_user_id = ? AND saleor_order_id = ?
-       LIMIT 1`,
-      [userId, orderId],
-    );
-    return rows[0] || null;
-  } catch {
-    return null;
-  }
-}
-
-export async function listCustomerEntitlements(userId: number) {
-  if (!dbOk() || !userId) return [];
-  try {
-    await ensureSaleorBridgeTables();
-    const [rows] = await getPool().query<RowDataPacket[]>(
-      `SELECT id, saleor_order_id, asset_key, download_count, max_downloads, expires_at, revoked_at
-       FROM shop_digital_entitlements
-       WHERE client_user_id = ? AND revoked_at IS NULL
-       ORDER BY id DESC LIMIT 100`,
-      [userId],
-    );
-    return rows;
-  } catch {
-    return [];
-  }
+async function ensureAddressesTable() {
+  if (!dbOk()) return;
+  await getPool().execute(`
+    CREATE TABLE IF NOT EXISTS client_shipping_addresses (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      client_user_id INT NOT NULL,
+      kind VARCHAR(32) NOT NULL DEFAULT 'shipping',
+      full_name VARCHAR(191) NOT NULL DEFAULT '',
+      line1 VARCHAR(255) NOT NULL DEFAULT '',
+      line2 VARCHAR(255) NOT NULL DEFAULT '',
+      city VARCHAR(120) NOT NULL DEFAULT '',
+      postal_code VARCHAR(32) NOT NULL DEFAULT '',
+      province VARCHAR(8) NOT NULL DEFAULT '',
+      country VARCHAR(8) NOT NULL DEFAULT 'IT',
+      phone VARCHAR(64) NOT NULL DEFAULT '',
+      is_default TINYINT(1) NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_client_addr_user (client_user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
 }
 
 export async function listCustomerAddresses(userId: number) {
   if (!dbOk() || !userId) return [];
   try {
-    await ensureSaleorBridgeTables();
+    await ensureAddressesTable();
     const [rows] = await getPool().query<RowDataPacket[]>(
       `SELECT id, kind, full_name, line1, line2, city, postal_code, province, country, phone, is_default
        FROM client_shipping_addresses
@@ -157,7 +142,7 @@ export async function getNotificationPrefs(userId: number) {
     };
   }
   try {
-    await ensureSaleorBridgeTables();
+    await ensureNotificationPrefsTable();
     const [rows] = await getPool().query<RowDataPacket[]>(
       `SELECT * FROM client_notification_prefs WHERE client_user_id = ? LIMIT 1`,
       [userId],

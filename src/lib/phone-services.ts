@@ -97,41 +97,6 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
     ],
   },
   {
-    slug: "very-mobile",
-    title: "Very Mobile",
-    shortDescription:
-      "Attivazione SIM Very Mobile e portabilita del numero, con assistenza in sede.",
-    heroDescription:
-      "Vuoi passare a Very Mobile? Vieni in agenzia: ti aiutiamo a scegliere il piano giusto, controlliamo i dati e facciamo partire la pratica.",
-    customerBenefits: [
-      "Ti guidiamo nell'attivazione, sia per nuova SIM che per cambio operatore.",
-      "Confrontiamo le offerte in base a come usi voce e dati.",
-      "Controlliamo ICCID e documenti per evitare errori nella portabilita.",
-      "Verifichiamo tutto insieme prima di confermare.",
-    ],
-    requiredInfo: [
-      "Documento di identità valido.",
-      "Codice fiscale.",
-      "Numero da trasferire e ICCID della SIM attuale (se richiesta portabilità).",
-    ],
-    notes: [
-      "L'ICCID va controllato con attenzione per evitare scarti in portabilità.",
-      "Copertura e prestazioni dipendono dall'area e dal dispositivo utilizzato.",
-      "Le offerte possono variare in base al profilo cliente e alle campagne attive.",
-      "Alcune promozioni richiedono specifici requisiti di provenienza.",
-    ],
-    officialSources: [
-      {
-        label: "Offerte Very Mobile",
-        url: "https://www.verymobile.it/offerte/",
-      },
-      {
-        label: "Sito ufficiale Very Mobile",
-        url: "https://www.verymobile.it/",
-      },
-    ],
-  },
-  {
     slug: "ho-mobile",
     title: "Ho. Mobile",
     shortDescription:
@@ -207,6 +172,7 @@ export const phoneServiceDetails: PhoneServiceDetail[] = [
   },
 ];
 
+
 export function getPhoneServiceBySlug(slug: string) {
   return phoneServiceDetails.find((item) => item.slug === slug) ?? null;
 }
@@ -214,7 +180,6 @@ export function getPhoneServiceBySlug(slug: string) {
 const phoneSlugByCatalogTitle: Record<string, string> = {
   "Iliad Space": "iliad-space",
   Fastweb: "fastweb",
-  "Very Mobile": "very-mobile",
   "Ho. Mobile": "ho-mobile",
   "Digi Mobile": "digi-mobile",
 };

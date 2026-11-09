@@ -1,6 +1,7 @@
-import { faqs } from "@/lib/faq-data";
+import { getCmsFaqs } from "@/lib/cms/server";
 
 export default function FaqJsonLd() {
+  const faqs = getCmsFaqs();
   const data = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

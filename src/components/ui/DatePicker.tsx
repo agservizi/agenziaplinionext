@@ -87,7 +87,7 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
   return (
     <div ref={containerRef} className="relative">
       {label && (
-        <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-slate-400">
+        <label htmlFor={id} className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
           {label}
         </label>
       )}
@@ -103,13 +103,13 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
         }}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="flex h-12 w-full items-center gap-3 rounded-[0.9rem] bg-white/[0.045] px-4 text-left text-sm text-white outline-none ring-1 ring-inset ring-white/[0.09] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/[0.06] hover:ring-white/[0.14] focus:ring-cyan-300/35"
+        className="flex h-11 w-full items-center gap-3 border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 text-left text-sm text-[var(--ink)] outline-none transition hover:border-[var(--ink)]/25 focus:border-[#5E0ED7]"
       >
-        <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-white/40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-[var(--ink)]/45" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <path d="M16 2v4M8 2v4M3 10h18" />
         </svg>
-        <span className={displayValue ? "text-white" : "text-white/40"}>
+        <span className={displayValue ? "text-[var(--ink)]" : "text-[var(--ink)]/40"}>
           {displayValue || placeholder}
         </span>
       </button>
@@ -118,7 +118,7 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
         <div
           role="dialog"
           aria-label="Seleziona una data"
-          className="absolute left-0 bottom-full z-50 mb-2 w-[280px] rounded-xl border border-white/15 bg-[#0f1d32]/98 p-4 shadow-2xl backdrop-blur-xl"
+          className="absolute bottom-full left-0 z-50 mb-2 w-[280px] border border-[var(--ink)]/15 bg-[var(--paper)] p-4 shadow-lg"
         >
           <div className="mb-3 flex items-center justify-between">
             <button
@@ -126,20 +126,20 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
               onClick={prevMonth}
               disabled={!canGoPrev}
               aria-label="Mese precedente"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed"
+              className="flex h-8 w-8 items-center justify-center text-[var(--ink)]/50 transition hover:bg-[var(--ink)]/5 hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-25"
             >
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 15l-5-5 5-5" />
               </svg>
             </button>
-            <span className="text-sm font-semibold text-white">
+            <span className="text-sm font-semibold text-[var(--ink)]">
               {MONTHS[viewMonth]} {viewYear}
             </span>
             <button
               type="button"
               onClick={nextMonth}
               aria-label="Mese successivo"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition hover:bg-white/10 hover:text-white"
+              className="flex h-8 w-8 items-center justify-center text-[var(--ink)]/50 transition hover:bg-[var(--ink)]/5 hover:text-[var(--ink)]"
             >
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M7 5l5 5-5 5" />
@@ -149,7 +149,7 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
 
           <div className="mb-1 grid grid-cols-7 gap-0">
             {WEEKDAYS.map((wd) => (
-              <div key={wd} className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-white/30">
+              <div key={wd} className="py-1 text-center text-[10px] font-bold uppercase tracking-wider text-[var(--ink)]/35">
                 {wd}
               </div>
             ))}
@@ -169,14 +169,14 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
                   type="button"
                   disabled={isDisabled}
                   onClick={() => { onChange(dateStr); setOpen(false); }}
-                  className={`flex h-9 w-full items-center justify-center rounded-lg text-sm transition ${
+                  className={`flex h-9 w-full items-center justify-center text-sm transition ${
                     isSelected
-                      ? "bg-cyan-500 font-bold text-slate-950"
+                      ? "bg-[var(--ink)] font-bold text-white"
                       : isToday
-                        ? "font-semibold text-cyan-400 hover:bg-white/10"
+                        ? "font-semibold text-[#5E0ED7] hover:bg-[var(--ink)]/5"
                         : isDisabled
-                          ? "cursor-not-allowed text-white/15"
-                          : "text-white/70 hover:bg-white/10 hover:text-white"
+                          ? "cursor-not-allowed text-[var(--ink)]/20"
+                          : "text-[var(--ink)]/70 hover:bg-[var(--ink)]/5 hover:text-[var(--ink)]"
                   }`}
                 >
                   {cell.getDate()}
@@ -185,12 +185,12 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
             })}
           </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+          <div className="mt-3 flex items-center justify-between border-t border-[var(--ink)]/10 pt-3">
             <button
               type="button"
               onClick={() => { onChange(toDateStr(today)); setOpen(false); }}
               disabled={today < min}
-              className="text-xs font-medium text-cyan-400 transition hover:text-cyan-300 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="text-xs font-medium text-[#5E0ED7] transition hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-30"
             >
               Oggi
             </button>
@@ -198,7 +198,7 @@ export default function DatePicker({ value, onChange, minDate, label, id, placeh
               <button
                 type="button"
                 onClick={() => { onChange(""); setOpen(false); }}
-                className="text-xs font-medium text-white/40 transition hover:text-white/60"
+                className="text-xs font-medium text-[var(--ink)]/45 transition hover:text-[var(--ink)]"
               >
                 Cancella
               </button>

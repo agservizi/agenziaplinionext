@@ -1,11 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  DEPOSITO_API_BASE,
+  depositoApiHeaders,
+} from "@/lib/deposito-bagagli-api";
 
 export const dynamic = "force-dynamic";
-
-const API_BASE = "https://coresuite.it/api/public/deposito-bagagli";
-const API_KEY =
-  process.env.CORESUITE_API_KEY ||
-  "16e43eaa90b6c5ae75a6821b0ba2a3251aae80da7d63c25967f404a467db6635";
 
 export async function POST(
   _request: NextRequest,
@@ -15,10 +14,10 @@ export async function POST(
     const { code } = await params;
 
     const res = await fetch(
-      `${API_BASE}/deposits/${encodeURIComponent(code)}/cancel`,
+      `${DEPOSITO_API_BASE}/deposits/${encodeURIComponent(code)}/cancel`,
       {
         method: "POST",
-        headers: { "x-api-key": API_KEY },
+        headers: depositoApiHeaders(),
       }
     );
     const data = await res.json();

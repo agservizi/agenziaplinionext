@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import Container from "@/components/Container";
 import VisuraPaymentConfirmationClient from "@/components/client-area/VisuraPaymentConfirmationClient";
 import { buildMetadata } from "@/lib/seo";
 
@@ -13,32 +12,19 @@ export function generateMetadata() {
 
 export default function AreaClientiVisureConfermaPagamentoPage() {
   return (
-    <div className="pb-24">
-      <section className="hero-gradient bg-slate-950 pt-40 pb-16 text-white">
-        <Container className="space-y-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
-            Conferma pagamento
-          </p>
-          <h1 className="text-4xl font-semibold md:text-5xl">
-            Sto chiudendo il pagamento e aprendo la tua richiesta.
-          </h1>
-          <p className="max-w-3xl text-base text-slate-300 md:text-lg">
-            Dopo il checkout verifico l&apos;esito, poi finalizzo la richiesta visura e ti mostro
-            subito il riepilogo.
-          </p>
-        </Container>
+    <div className="bg-[var(--paper)] text-[var(--ink)]">
+      <section className="border-b border-[var(--ink)]/10 px-5 py-8 md:px-8">
+        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">Area clienti · Visure</p>
+        <h1 className="display-type mt-3 text-[clamp(1.8rem,3.5vw,2.8rem)]">Conferma pagamento</h1>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--ink)]/55">
+          Dopo il checkout verifico l&apos;esito, finalizzo la richiesta visura e ti mostro il riepilogo.
+        </p>
       </section>
-
-      <div className="lux-surface pt-10 text-slate-900">
-        <section className="py-10">
-          <Container>
-            <Suspense fallback={<p className="text-sm text-slate-500">Caricamento...</p>}>
-              <VisuraPaymentConfirmationClient />
-            </Suspense>
-          </Container>
-        </section>
+      <div className="px-5 py-8 md:px-8">
+        <Suspense fallback={<p className="text-sm text-[var(--ink)]/50">Caricamento…</p>}>
+          <VisuraPaymentConfirmationClient />
+        </Suspense>
       </div>
     </div>
   );
 }
-

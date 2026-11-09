@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import type { RowDataPacket } from "mysql2";
 import { requireCustomerSession } from "@/lib/auth/api-guard";
 import { getPool } from "@/lib/db";
-import { ensureSaleorBridgeTables } from "@/lib/saleor/ensure-tables";
 
 export async function GET(request: NextRequest) {
   const auth = requireCustomerSession(request);
@@ -10,8 +9,7 @@ export async function GET(request: NextRequest) {
   if (!auth.session.userId) {
     return NextResponse.json({ ok: true, rows: [] });
   }
-  await ensureSaleorBridgeTables();
-  const [rows] = await getPool().query<RowDataPacket[]>(
+    const [rows] = await getPool().query<RowDataPacket[]>(
     `SELECT * FROM client_shipping_addresses WHERE client_user_id = ? ORDER BY is_default DESC, id DESC`,
     [auth.session.userId],
   );
@@ -40,8 +38,7 @@ export async function POST(request: NextRequest) {
     isDefault?: boolean;
   };
 
-  await ensureSaleorBridgeTables();
-  const pool = getPool();
+    const pool = getPool();
   const userId = auth.session.userId;
 
   if (body.action === "delete" && body.id) {

@@ -3,7 +3,13 @@ import { notFound } from "next/navigation";
 import Container from "@/components/Container";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
-import { getWebAgencyServiceBySlug, webAgencyServiceDetails } from "@/lib/web-agency-services";
+import { getCmsWebAgencyServices } from "@/lib/cms/server";
+
+function getWebAgencyServiceBySlug(slug: string) {
+  return getCmsWebAgencyServices().find((item) => item.slug === slug) ?? null;
+}
+
+const webAgencyServiceDetails = getCmsWebAgencyServices();
 
 type WebAgencyServiceDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -49,10 +55,10 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
     ]} />
     <div className="pb-24">
       <section
-        className={`relative overflow-hidden pt-40 pb-24 md:pb-28 text-white ${
+        className={`relative overflow-hidden border-b border-[var(--ink)]/10 pt-40 pb-24 md:pb-28 ${
           isWebsiteProject
-            ? "bg-[radial-gradient(circle_at_15%_15%,rgba(14,165,233,0.24),transparent_44%),radial-gradient(circle_at_85%_0%,rgba(45,212,191,0.16),transparent_40%),linear-gradient(150deg,#020617_0%,#0f172a_50%,#111827_100%)]"
-            : "bg-slate-950"
+            ? "bg-[radial-gradient(circle_at_15%_15%,rgba(14,165,233,0.24),transparent_44%),radial-gradient(circle_at_85%_0%,rgba(45,212,191,0.16),transparent_40%),linear-gradient(150deg,#020617_0%,#0f172a_50%,#111827_100%)] text-white"
+            : "bg-[var(--paper)] text-[var(--ink)]"
         }`}
       >
         <div className="pointer-events-none absolute inset-0">
@@ -66,13 +72,19 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
               {isWebsiteProject ? "Web Agency" : "Web Agency"}
             </p>
             <h1
-              className={`font-semibold leading-[0.95] text-white ${
-                isWebsiteProject ? "text-5xl md:text-6xl lg:text-7xl" : "text-4xl md:text-5xl"
+              className={`font-semibold leading-[0.95] ${
+                isWebsiteProject ? "text-5xl text-white md:text-6xl lg:text-7xl" : "text-4xl text-[var(--ink)] md:text-5xl"
               }`}
             >
               {service.title}
             </h1>
-            <p className="max-w-2xl text-base text-slate-200 md:text-lg">{service.heroDescription}</p>
+            <p
+              className={`max-w-2xl text-base md:text-lg ${
+                isWebsiteProject ? "text-white/75" : "text-[var(--ink)]/65"
+              }`}
+            >
+              {service.heroDescription}
+            </p>
             {isWebsiteProject ? (
               <p className="max-w-2xl text-sm font-medium uppercase tracking-[0.18em] text-cyan-200/90">
                 Strategia digitale, performance tecnica, conversione.
@@ -105,19 +117,19 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
             </p>
             <div className={`mt-5 grid gap-3 sm:grid-cols-2 ${isWebsiteProject ? "md:gap-4" : ""}`}>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.14em] text-slate-300">Focus</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--ink)]/40">Focus</p>
                 <p className="mt-2 text-sm font-semibold text-white">
                   {isWebsiteProject ? "Conversione + performance" : "Automazione + controllo"}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.14em] text-slate-300">Approccio</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--ink)]/40">Approccio</p>
                 <p className="mt-2 text-sm font-semibold text-white">
                   {isWebsiteProject ? "Brand UX + CRO + SEO tecnico" : "UX + sviluppo su misura"}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
-                <p className="text-xs uppercase tracking-[0.14em] text-slate-300">Output</p>
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--ink)]/40">Output</p>
                 <p className="mt-2 text-sm font-semibold text-white">
                   {isWebsiteProject
                     ? "Website scalabile, tracciato e orientato alla crescita commerciale."
@@ -141,25 +153,25 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
         </Container>
       </section>
 
-      <div className="lux-surface relative z-30 -mt-10 pb-20 text-slate-900 md:-mt-14">
+      <div className="bg-[var(--paper)] relative z-30 -mt-10 pb-20 text-[var(--ink)] md:-mt-14">
         <section className="py-14 md:py-16">
           <Container className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
             <article
               className={`rounded-3xl border p-7 shadow-[0_20px_60px_rgba(2,6,23,0.07)] ${
                 isWebsiteProject
                   ? "border-cyan-100 bg-gradient-to-br from-white via-cyan-50/40 to-white"
-                  : "border-slate-200 bg-white"
+                  : "border-[var(--ink)]/15 bg-white"
               }`}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                 Perche scegliere questo servizio
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900 md:text-3xl">Vantaggi concreti</h2>
-              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)] md:text-3xl">Vantaggi concreti</h2>
+              <ul className="mt-6 space-y-3 text-sm text-[var(--ink)]/65">
                 {service.customerBenefits.map((item) => (
                   <li
                     key={item}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50"
+                    className="rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50"
                   >
                     {item}
                   </li>
@@ -168,14 +180,14 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
             </article>
             <aside
               className={`rounded-3xl border p-7 shadow-[0_20px_60px_rgba(2,6,23,0.07)] ${
-                isWebsiteProject ? "border-cyan-100 bg-white" : "border-slate-200 bg-white"
+                isWebsiteProject ? "border-cyan-100 bg-white" : "border-[var(--ink)]/15 bg-white"
               }`}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                 Preparazione
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Informazioni iniziali</h2>
-              <ul className="mt-5 space-y-3 text-sm text-slate-700">
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Informazioni iniziali</h2>
+              <ul className="mt-5 space-y-3 text-sm text-[var(--ink)]/65">
                 {service.requiredInfo.map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-cyan-600" />
@@ -197,13 +209,13 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
               className={`rounded-3xl border p-7 shadow-[0_20px_60px_rgba(2,6,23,0.07)] ${
                 isWebsiteProject
                   ? "border-cyan-100 bg-gradient-to-br from-white via-cyan-50/40 to-white"
-                  : "border-slate-200 bg-white"
+                  : "border-[var(--ink)]/15 bg-white"
               }`}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                 Metodo
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Come lavoriamo</h2>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Come lavoriamo</h2>
               <div className="mt-6 space-y-4">
                 {(isWebsiteProject
                   ? [
@@ -219,10 +231,10 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
                     ]
                 ).map((step, index) => (
                   <div key={step} className="flex items-start gap-3">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--ink)] text-xs font-bold text-white">
                       {index + 1}
                     </span>
-                    <p className="pt-1 text-sm text-slate-700">{step}</p>
+                    <p className="pt-1 text-sm text-[var(--ink)]/65">{step}</p>
                   </div>
                 ))}
               </div>
@@ -230,7 +242,7 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
                 {service.notes.map((item) => (
                   <li
                     key={item}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                    className="rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)]/65"
                   >
                     {item}
                   </li>
@@ -240,14 +252,14 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
 
             <article
               className={`rounded-3xl border p-7 shadow-[0_20px_60px_rgba(2,6,23,0.07)] ${
-                isWebsiteProject ? "border-cyan-100 bg-white" : "border-slate-200 bg-white"
+                isWebsiteProject ? "border-cyan-100 bg-white" : "border-[var(--ink)]/15 bg-white"
               }`}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                 Altri servizi utili
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Espandi il progetto</h2>
-              <p className="mt-3 text-sm text-slate-600">
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Espandi il progetto</h2>
+              <p className="mt-3 text-sm text-[var(--ink)]/65">
                 Puoi attivare altri moduli web agency in continuita con questo servizio.
               </p>
               <div className="mt-6 grid gap-3 md:grid-cols-2">
@@ -255,17 +267,17 @@ export default async function WebAgencyServiceDetailPage({ params }: WebAgencySe
                   <Link
                     key={item.slug}
                     href={`/servizi/web-agency/${item.slug}`}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700"
+                    className="rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm font-medium text-[var(--ink)]/65 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700"
                   >
                     {item.title}
                   </Link>
                 ))}
               </div>
-              <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-950 px-5 py-4 text-white">
+              <div className="mt-7 rounded-2xl border border-[var(--ink)]/15 bg-[var(--ink)] px-5 py-4 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
                   Consulenza guidata
                 </p>
-                <p className="mt-2 text-sm text-slate-200">
+                <p className="mt-2 text-sm text-white/70">
                   Ti aiutiamo a scegliere la roadmap migliore in base alla fase del tuo business.
                 </p>
                 <Link

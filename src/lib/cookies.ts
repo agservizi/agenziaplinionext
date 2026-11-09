@@ -1,3 +1,8 @@
+/**
+ * Fact-forcing: CookiePreferencesModal + cookie-policy page.
+ * Preferences copy now covers remote Spline 3D gated by consent.
+ * User: "procedi su tutto al 100% … chiudiamo questo GAP".
+ */
 import { CONSENT_POLICY_VERSION } from "@/lib/consent";
 
 export const cookieCategories = [
@@ -11,7 +16,7 @@ export const cookieCategories = [
     key: "preferences",
     label: "Cookie di preferenza",
     description:
-      "Ricordano le tue scelte (es. lingua, impostazioni) per non doverle ripetere.",
+      "Ricordano le tue scelte e abilitano contenuti avanzati opzionali (es. scena 3D da fornitore esterno solo dopo il consenso).",
   },
   {
     key: "analytics",
@@ -29,7 +34,7 @@ export const cookieCategories = [
 
 export const cookiePolicy = {
   version: CONSENT_POLICY_VERSION,
-  lastUpdated: "2026-02-06",
+  lastUpdated: "2026-11-08",
   cookies: [
     {
       name: "ag_consent",
@@ -37,6 +42,21 @@ export const cookiePolicy = {
       duration: "6 mesi",
       provider: "AG SERVIZI",
       category: "necessary",
+    },
+  ],
+  thirdPartyOptional: [
+    {
+      name: "Spline (scena 3D)",
+      purpose:
+        "Carica una scena 3D da prod.spline.design solo se accetti i cookie di preferenza.",
+      provider: "Spline / prod.spline.design",
+      category: "preferences",
+    },
+    {
+      name: "Google Analytics (gtag)",
+      purpose: "Statistiche di navigazione anonimizzate, solo con consenso analytics.",
+      provider: "Google",
+      category: "analytics",
     },
   ],
 };

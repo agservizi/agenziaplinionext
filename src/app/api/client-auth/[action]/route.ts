@@ -7,6 +7,17 @@ function normalizeBase(input: string) {
 }
 
 function resolveUpstreamBase() {
+  // Callers: ClientLoginForm → /api/client-auth/* . User: "in locale dice login non riuscito".
+  const bookingBackend = normalizeBase(
+    String(process.env.BOOKING_BACKEND_URL || "").trim(),
+  );
+  const isDev = process.env.NODE_ENV !== "production";
+
+  // In locale non riproxare a produzione (Cloudflare 502).
+  if (isDev || bookingBackend.includes("localhost") || bookingBackend.includes("127.0.0.1")) {
+    return bookingBackend || "http://localhost:3001";
+  }
+
   const configured = normalizeBase(
     String(
       process.env.NEXT_PUBLIC_CLIENT_PORTAL_API_BASE ||
@@ -15,7 +26,15 @@ function resolveUpstreamBase() {
     ),
   );
 
-  return configured || "https://agenziaplinio.it";
+  if (
+    configured === "https://agenziaplinio.it" ||
+    configured === "https://www.agenziaplinio.it" ||
+    !configured
+  ) {
+    return bookingBackend || configured || "https://agenziaplinio.it";
+  }
+
+  return configured;
 }
 
 async function proxyClientAuth(request: NextRequest, action: string) {

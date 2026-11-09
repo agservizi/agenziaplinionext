@@ -69,6 +69,17 @@ const scenarios: ContactScenario[] = [
 
 const whatsappBase = "https://wa.me/393773798570";
 
+const fieldOverrides =
+  "[&_input]:rounded-none [&_select]:rounded-none [&_textarea]:rounded-none " +
+  "[&_input]:border-[var(--ink)]/15 [&_select]:border-[var(--ink)]/15 [&_textarea]:border-[var(--ink)]/15 " +
+  "[&_input]:bg-[color-mix(in_srgb,var(--paper)_92%,white)] [&_select]:bg-[color-mix(in_srgb,var(--paper)_92%,white)] [&_textarea]:bg-[color-mix(in_srgb,var(--paper)_92%,white)] " +
+  "[&_input]:text-[var(--ink)] [&_select]:text-[var(--ink)] [&_textarea]:text-[var(--ink)] " +
+  "[&_input]:focus:border-[#5E0ED7] [&_select]:focus:border-[#5E0ED7] [&_textarea]:focus:border-[#5E0ED7] " +
+  "[&_label]:text-[var(--ink)]/70 " +
+  "[&_button[type=submit]]:rounded-none [&_button[type=submit]]:bg-[var(--ink)] [&_button[type=submit]]:font-bold " +
+  "[&_button[type=submit]]:uppercase [&_button[type=submit]]:tracking-[0.18em] [&_button[type=submit]]:text-white " +
+  "[&_button[type=submit]]:hover:bg-[#5E0ED7]";
+
 export default function ContactInteractiveSection() {
   const [selectedId, setSelectedId] = useState(scenarios[0].id);
 
@@ -81,10 +92,12 @@ export default function ContactInteractiveSection() {
   const whatsappLink = `${whatsappBase}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <div className="space-y-8 text-slate-900">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Scegli la tua esigenza</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
+    <div className="space-y-8 text-[var(--ink)]">
+      <div className="border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_92%,white)] p-5 sm:p-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
+          Scegli la tua esigenza
+        </p>
+        <div className="mt-4 grid gap-px bg-[var(--ink)]/10 md:grid-cols-4">
           {scenarios.map((scenario) => {
             const isActive = scenario.id === activeScenario.id;
             return (
@@ -92,14 +105,22 @@ export default function ContactInteractiveSection() {
                 key={scenario.id}
                 type="button"
                 onClick={() => setSelectedId(scenario.id)}
-                className={`rounded-2xl border px-4 py-3 text-left transition ${
+                className={`border border-[var(--ink)]/10 px-4 py-3 text-left transition ${
                   isActive
-                    ? "border-cyan-400 bg-cyan-50 text-cyan-900 shadow-[0_10px_30px_rgba(14,165,233,0.2)]"
-                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-cyan-300 hover:bg-cyan-50/60"
+                    ? "border-[#5E0ED7] bg-[var(--ink)] text-white"
+                    : "bg-[var(--paper)] text-[var(--ink)] hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                 }`}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.15em]">{scenario.label}</p>
-                <p className="mt-1 text-sm font-semibold">{scenario.title}</p>
+                <p
+                  className={`text-[10px] font-bold uppercase tracking-[0.18em] ${
+                    isActive ? "text-white/55" : "text-[var(--ink)]/40"
+                  }`}
+                >
+                  {scenario.label}
+                </p>
+                <p className={`mt-1 text-sm font-semibold ${isActive ? "text-white" : ""}`}>
+                  {scenario.title}
+                </p>
               </button>
             );
           })}
@@ -107,11 +128,13 @@ export default function ContactInteractiveSection() {
       </div>
 
       <div className="grid gap-8 md:grid-cols-[1.15fr_0.85fr]">
-        <div className="lux-panel rounded-3xl p-6">
-          <div className="mb-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
-            <p className="text-sm font-semibold text-cyan-800">{activeScenario.title}</p>
-            <p className="mt-1 text-sm text-slate-700">{activeScenario.description}</p>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-[0.15em] text-cyan-700">{activeScenario.eta}</p>
+        <div className={`border border-[var(--ink)]/10 bg-[var(--paper)] p-5 sm:p-6 ${fieldOverrides}`}>
+          <div className="mb-5 border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-4">
+            <p className="text-sm font-semibold text-[var(--ink)]">{activeScenario.title}</p>
+            <p className="mt-1 text-sm text-[var(--ink)]/65">{activeScenario.description}</p>
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#5E0ED7]">
+              {activeScenario.eta}
+            </p>
           </div>
 
           <ContactForm
@@ -124,50 +147,59 @@ export default function ContactInteractiveSection() {
         </div>
 
         <div className="space-y-6">
-          <div className="lux-panel rounded-3xl p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Canali rapidi</p>
+          <div className="border border-[var(--ink)]/10 bg-[var(--paper)] p-5 sm:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
+              Canali rapidi
+            </p>
             <div className="mt-4 grid gap-3">
               <a
                 href={whatsappLink}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-2xl border border-emerald-400 bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-200"
+                className="brutal-cta-ink border border-[var(--ink)]/10 bg-[var(--ink)] px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7]"
               >
                 Apri WhatsApp con messaggio precompilato
               </a>
               <a
                 href="tel:+393773798570"
-                className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:border-cyan-400 hover:bg-cyan-50"
+                className="border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
               >
                 Chiama ora: +39 377 379 8570
               </a>
               <Link
                 href="/prenota"
-                className="rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:border-cyan-400 hover:bg-cyan-50"
+                className="border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
               >
                 Prenota appuntamento in sede
               </Link>
             </div>
           </div>
 
-          <div className="lux-panel rounded-3xl p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Percorso assistito</p>
-            <ul className="mt-4 space-y-3 text-sm text-slate-700">
+          <div className="border border-[var(--ink)]/10 bg-[var(--paper)] p-5 sm:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
+              Percorso assistito
+            </p>
+            <ul className="mt-4 space-y-0 border border-[var(--ink)]/10">
               {activeScenario.highlights.map((item, index) => (
-                <li key={item} className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
-                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cyan-600 text-xs font-bold text-white">
+                <li
+                  key={item}
+                  className="flex items-center gap-3 border-b border-[var(--ink)]/10 px-3 py-2.5 last:border-b-0"
+                >
+                  <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center border border-[var(--ink)]/15 bg-[var(--ink)] text-[10px] font-bold text-white">
                     {index + 1}
                   </span>
-                  <span>{item}</span>
+                  <span className="text-sm text-[var(--ink)]/75">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="lux-panel rounded-3xl p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Dove siamo</p>
-            <p className="mt-2 text-sm text-slate-700">{company.address}</p>
-            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="border border-[var(--ink)]/10 bg-[var(--paper)] p-5 sm:p-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
+              Dove siamo
+            </p>
+            <p className="mt-2 text-sm text-[var(--ink)]/70">{company.address}</p>
+            <div className="mt-4 overflow-hidden border border-[var(--ink)]/10 bg-[var(--paper)]">
               <iframe
                 title="Mappa AG SERVIZI"
                 src="https://www.google.com/maps?q=Via%20Plinio%20il%20Vecchio%2072%2C%2080053%20Castellammare%20di%20Stabia%20(NA)&output=embed"
@@ -181,7 +213,7 @@ export default function ContactInteractiveSection() {
                 href={company.googleBusinessUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-action btn-action-primary cta-glass-sm mt-4 inline-flex"
+                className="brutal-cta-ink mt-4 inline-flex min-h-[44px] items-center justify-center bg-[var(--ink)] px-6 py-3 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#5E0ED7]"
               >
                 Apri navigazione su Google Maps
               </Link>

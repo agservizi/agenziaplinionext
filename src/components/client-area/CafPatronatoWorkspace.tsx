@@ -75,19 +75,19 @@ export default function CafPatronatoWorkspace() {
   }, []);
 
   return (
-    <section className="py-10">
-      <div className="grid gap-8 xl:grid-cols-[0.92fr_1.08fr]">
-        <div className="space-y-6 xl:sticky xl:top-28 xl:self-start">
-          <div className="lux-card rounded-3xl p-4 md:p-5">
-            <div className="rounded-3xl border border-slate-200 bg-white p-3">
-              <div className="grid grid-cols-2 gap-2 rounded-3xl border border-slate-200 bg-slate-100 p-2">
+    <section className="px-5 py-8 md:px-8">
+      <div className="grid gap-px bg-[var(--ink)]/10 xl:grid-cols-[0.92fr_1.08fr]">
+        <div className="space-y-px bg-[var(--ink)]/10 xl:sticky xl:top-28 xl:self-start">
+          <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-4 md:p-5">
+            <div className="border border-[var(--ink)]/12 bg-[var(--paper)] p-3">
+              <div className="grid grid-cols-2 gap-px border border-[var(--ink)]/12 bg-[var(--ink)]/10">
                 <button
                   type="button"
                   onClick={() => setActivePanel("setup")}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  className={`px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] transition ${
                     activePanel === "setup"
-                      ? "bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)]"
-                      : "text-slate-600 hover:bg-white"
+                      ? "bg-[var(--ink)] text-white"
+                      : "bg-[var(--paper)] text-[var(--ink)]/60 hover:text-[var(--ink)]"
                   }`}
                 >
                   Impostazione pratica
@@ -95,10 +95,10 @@ export default function CafPatronatoWorkspace() {
                 <button
                   type="button"
                   onClick={() => setActivePanel("services")}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  className={`px-4 py-3 text-[11px] font-bold uppercase tracking-[0.12em] transition ${
                     activePanel === "services"
-                      ? "bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.18)]"
-                      : "text-slate-600 hover:bg-white"
+                      ? "bg-[var(--ink)] text-white"
+                      : "bg-[var(--paper)] text-[var(--ink)]/60 hover:text-[var(--ink)]"
                   }`}
                 >
                   Servizi disponibili
@@ -107,76 +107,76 @@ export default function CafPatronatoWorkspace() {
 
               {activePanel === "setup" ? (
                 <div className="p-3 md:p-4">
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
                     Impostazione pratica
                   </p>
-                  <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+                  <h2 className="display-type mt-3 text-2xl text-[var(--ink)]">
                     Riepilogo chiaro della pratica che stai aprendo
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink)]/55">
                     Qui vedi subito come stai impostando la richiesta: ambito, servizio scelto,
                     quanti documenti hai già allegato e come preferisci essere ricontattato.
                   </p>
 
                   <div className="mt-6 grid gap-3">
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                         Ambito attivo
                       </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
+                      <p className="mt-2 text-base font-semibold text-[var(--ink)]">
                         {getCafPatronatoScopeLabel(summary.scope)}
                       </p>
-                      <p className="mt-1 text-sm text-slate-600">{summary.categoryLabel}</p>
+                      <p className="mt-1 text-sm text-[var(--ink)]/55">{summary.categoryLabel}</p>
                     </div>
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                         Servizio selezionato
                       </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
+                      <p className="mt-2 text-base font-semibold text-[var(--ink)]">
                         {summary.serviceLabel}
                       </p>
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className="mt-1 text-sm text-[var(--ink)]/55">
                         Prezzo attivo: {selectedPriceText} €{" "}
-                        <span className="font-medium text-slate-500">
+                        <span className="font-medium text-[var(--ink)]/45">
                           · {selectedPricingRule?.label || "Prezzo base del catalogo"}
                         </span>
                       </p>
                     </div>
                     <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                           Allegati pronti
                         </p>
-                        <p className="mt-2 text-3xl font-semibold text-slate-900">
+                        <p className="display-type mt-2 text-3xl text-[var(--ink)]">
                           {summary.filesCount}
                         </p>
-                        <p className="mt-1 text-sm text-slate-600">Documenti caricati nel form</p>
+                        <p className="mt-1 text-sm text-[var(--ink)]/55">Documenti caricati nel form</p>
                       </div>
-                      <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                           Urgenza
                         </p>
-                        <p className="mt-2 text-base font-semibold text-slate-900">
+                        <p className="mt-2 text-base font-semibold text-[var(--ink)]">
                           {summary.urgency}
                         </p>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <p className="mt-1 text-sm text-[var(--ink)]/55">
                           La priorità viene mostrata subito in presa in carico
                         </p>
                       </div>
                     </div>
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
                         Contatto preferito
                       </p>
-                      <p className="mt-2 text-base font-semibold text-slate-900">
+                      <p className="mt-2 text-base font-semibold text-[var(--ink)]">
                         {summary.preferredContact || "Lo decidi dal modulo quando vuoi"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-3xl border border-cyan-100 bg-cyan-50 p-5">
-                    <p className="text-sm font-semibold text-cyan-900">Cosa succede appena invii</p>
-                    <ul className="mt-3 space-y-2 text-sm leading-6 text-cyan-900/90">
+                  <div className="mt-6 border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-5">
+                    <p className="text-sm font-semibold text-[var(--ink)]">Cosa succede appena invii</p>
+                    <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--ink)]/70">
                       <li>Riceviamo subito la tua richiesta con i documenti che hai allegato.</li>
                       <li>Il patronato riceve una mail operativa con un link diretto alla pratica.</li>
                       <li>
@@ -186,7 +186,7 @@ export default function CafPatronatoWorkspace() {
                     <div className="mt-4">
                       <Link
                         href="/area-clienti/caf-patronato/storico"
-                        className="inline-flex rounded-full border border-cyan-200 bg-white px-5 py-2.5 text-sm font-semibold text-cyan-800 transition hover:bg-cyan-100"
+                        className="inline-flex border border-[var(--ink)]/15 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--ink)] transition-colors hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                       >
                         Vedi lo storico pratiche
                       </Link>
@@ -195,28 +195,28 @@ export default function CafPatronatoWorkspace() {
                 </div>
               ) : (
                 <div className="p-3 md:p-4">
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
                     Servizi disponibili
                   </p>
                   <div className="mt-5 grid gap-5 xl:grid-cols-2">
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-900">🧾 Servizi CAF</h3>
+                      <h3 className="text-lg font-semibold text-[var(--ink)]">Servizi CAF</h3>
                       {groupedCatalog.caf.map((category) => (
                         <div
                           key={category.id}
-                          className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                          className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4"
                         >
-                          <p className="text-sm font-semibold text-slate-900">
-                            {category.icon} {category.title}
+                          <p className="text-sm font-semibold text-[var(--ink)]">
+                            {category.title}
                           </p>
-                          <ul className="mt-3 space-y-2 text-sm text-slate-600">
+                          <ul className="mt-3 space-y-2 text-sm text-[var(--ink)]/55">
                             {category.services.map((service) => (
                               <li
                                 key={service.value}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2"
+                                className="flex items-center justify-between gap-3 border border-[var(--ink)]/10 bg-[var(--paper)] px-3 py-2"
                               >
                                 <span>{service.label}</span>
-                                <span className="shrink-0 rounded-full border border-cyan-100 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-900">
+                                <span className="shrink-0 border border-[var(--ink)]/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--ink)]">
                                   {(pricingMap.get(service.value)?.priceEUR ?? service.priceEUR)
                                     .toFixed(2)
                                     .replace(".", ",")} €
@@ -228,23 +228,23 @@ export default function CafPatronatoWorkspace() {
                       ))}
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-slate-900">🏛️ Servizi Patronato</h3>
+                      <h3 className="text-lg font-semibold text-[var(--ink)]">Servizi Patronato</h3>
                       {groupedCatalog.patronato.map((category) => (
                         <div
                           key={category.id}
-                          className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                          className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_90%,white)] p-4"
                         >
-                          <p className="text-sm font-semibold text-slate-900">
-                            {category.icon} {category.title}
+                          <p className="text-sm font-semibold text-[var(--ink)]">
+                            {category.title}
                           </p>
-                          <ul className="mt-3 space-y-2 text-sm text-slate-600">
+                          <ul className="mt-3 space-y-2 text-sm text-[var(--ink)]/55">
                             {category.services.map((service) => (
                               <li
                                 key={service.value}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2"
+                                className="flex items-center justify-between gap-3 border border-[var(--ink)]/10 bg-[var(--paper)] px-3 py-2"
                               >
                                 <span>{service.label}</span>
-                                <span className="shrink-0 rounded-full border border-cyan-100 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-900">
+                                <span className="shrink-0 border border-[var(--ink)]/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--ink)]">
                                   {(pricingMap.get(service.value)?.priceEUR ?? service.priceEUR)
                                     .toFixed(2)
                                     .replace(".", ",")} €

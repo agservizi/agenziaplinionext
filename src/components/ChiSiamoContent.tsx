@@ -41,124 +41,54 @@ const VALUE_ICONS = [
   <svg key="users" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" /><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /><circle cx="19" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" /><path d="M22 21v-1.5a3 3 0 00-2.5-2.96" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
 ];
 
-const ICON_COLORS = [
-  { bg: "bg-emerald-50", text: "text-emerald-600" },
-  { bg: "bg-amber-50", text: "text-amber-600" },
-  { bg: "bg-blue-50", text: "text-blue-600" },
-];
-
 /* ─── Main component ────────────────────────────────────────────────── */
-const NOISE_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`;
-
 export default function ChiSiamoContent() {
   const reduced = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const contentY = useTransform(scrollYProgress, [0, 0.5], [0, 60]);
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
       {/* ══════════════════════════════════════
-          HERO
+          HERO — brutal editorial (VideoHero)
       ══════════════════════════════════════ */}
-      <section ref={heroRef} className="relative min-h-dvh overflow-hidden bg-black">
-        {/* Video background */}
-        <motion.div
-          className="pointer-events-none absolute inset-0"
-          style={{ y: reduced ? 0 : videoY }}
-        >
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="none"
-            className="h-[120%] w-full object-cover"
-            style={{ opacity: 0.35 }}
-          >
-            <source src="https://assets.mixkit.co/videos/42617/42617-720.mp4" type="video/mp4" />
-          </video>
-        </motion.div>
-
-        {/* Cinematic overlay */}
-        <div className="absolute inset-0 bg-linear-to-b from-black/50 via-black/30 to-black/70" />
-        <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
-
-        {/* Film grain */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: NOISE_SVG, backgroundRepeat: "repeat", backgroundSize: "128px 128px" }}
-        />
-
-        {/* Floating orbs */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="orb-float-1 absolute -left-40 top-1/4 h-[350px] w-[350px] rounded-full bg-[#5E0ED7]/20 opacity-20 blur-[120px]" />
-          <div className="orb-float-2 absolute -right-24 bottom-1/3 h-[280px] w-[280px] rounded-full bg-[#22d3ee]/15 opacity-15 blur-[100px]" />
-        </div>
-
-        <div className="shrink-0 pt-24 sm:pt-28 md:pt-32" />
-
-        <motion.div
-          className="relative flex min-h-[60vh] flex-col justify-end px-6 pb-16 sm:pb-20 md:px-14 md:pb-24"
-          style={reduced ? undefined : { opacity: contentOpacity, y: contentY }}
-        >
-        <Container>
+      <section
+        ref={heroRef}
+        className="relative grid min-h-dvh overflow-hidden border-b border-[var(--ink)]/10 lg:grid-cols-[42fr_58fr]"
+      >
+        <div className="relative z-10 flex flex-col justify-end bg-[var(--paper)] px-6 pb-14 pt-28 sm:px-10 md:px-12 md:pb-20 md:pt-32">
           <FadeUp>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#5E0ED7]" />
-              Chi siamo
-            </span>
+            <p className="mb-auto text-[10px] font-bold uppercase tracking-[0.35em] text-[var(--ink)]/40 sm:text-xs">
+              Chi siamo / Dal 2016
+            </p>
           </FadeUp>
 
-          <div className="mt-8">
+          <div className="mt-10">
             <TextReveal>
-              <h1
-                className="text-white"
-                style={{
-                  fontSize: "clamp(3rem, 8vw, 7rem)",
-                  lineHeight: 0.92,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <h1 className="display-type m-0 p-0 text-[clamp(3rem,9vw,7.5rem)] text-[var(--ink)]">
                 Dal 2016,
               </h1>
             </TextReveal>
             <FadeUp delay={0.1}>
-              <span
-                className="inline-block"
-                style={{
-                  fontSize: "clamp(3rem, 8vw, 7rem)",
-                  lineHeight: 1.2,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
-                  backgroundSize: "300% 100%",
-                  animation: reduced ? "none" : "heroGradientShift 5s ease infinite",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
+              <h1 className="display-type m-0 p-0 text-[clamp(3rem,9vw,7.5rem)] text-[#5E0ED7]">
                 siamo ancora qui.
-              </span>
+              </h1>
             </FadeUp>
           </div>
 
           <FadeUp delay={0.25}>
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/50">
+            <p className="mt-6 max-w-md text-sm leading-relaxed text-[var(--ink)]/65 sm:text-base">
               Dal 2016 al tuo fianco, ogni giorno. Nella nostra agenzia trovi
               le giuste persone che risolvono i veri problemi.
             </p>
           </FadeUp>
 
           <FadeUp delay={0.35}>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/contatti"
-                className="group inline-flex items-center gap-3 rounded-full bg-[#5E0ED7] px-9 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(94,14,215,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(94,14,215,0.4)]"
-                style={{ color: "#ffffff" }}
+                className="brutal-cta-ink group inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
               >
                 Vieni a trovarci
                 <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none">
@@ -167,15 +97,15 @@ export default function ChiSiamoContent() {
               </Link>
               <Link
                 href="/servizi"
-                className="rounded-full border border-white/20 bg-white/10 px-9 py-4 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20"
+                className="inline-flex items-center border border-[var(--ink)]/15 bg-[var(--paper)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--ink)] transition-colors duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
               >
                 Vedi i servizi
               </Link>
             </div>
           </FadeUp>
 
-          {/* Stats row */}
-          <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {/* Stats — mobile / under copy */}
+          <div className="mt-12 flex flex-wrap gap-8 border-t border-[var(--ink)]/10 pt-8 lg:hidden">
             {[
               { value: `${getYearsActive()}+`, label: "Anni aperti" },
               { value: "500+", label: "Clienti attivi" },
@@ -183,79 +113,88 @@ export default function ChiSiamoContent() {
               { value: "5★", label: "su Google" },
             ].map((stat, i) => (
               <ScaleCard key={stat.label} delay={0.2 + i * 0.08}>
-                <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-8 backdrop-blur-sm">
-                  <p className="text-4xl font-black text-white md:text-5xl">{stat.value}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/40">
+                <div>
+                  <p className="display-type text-3xl text-[var(--ink)]">{stat.value}</p>
+                  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/50">
                     {stat.label}
                   </p>
                 </div>
               </ScaleCard>
             ))}
           </div>
-        </Container>
-        </motion.div>
+        </div>
 
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 0.8 }}
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:bottom-8"
-        >
-          <motion.div
-            animate={reduced ? undefined : { y: [0, 6, 0] }}
-            transition={reduced ? undefined : { repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-            className="flex flex-col items-center gap-1.5"
-          >
-            <span className="text-[9px] font-semibold uppercase tracking-[0.3em] text-white/30">
-              Scorri
-            </span>
-            <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
-              <path d="M7 3v14M2 12l5 5 5-5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
-            </svg>
+        {/* Video panel — sharp, no glass/orbs */}
+        <div className="relative hidden min-h-[52vh] overflow-hidden border-l border-[var(--ink)]/10 lg:block">
+          <motion.div className="absolute inset-0" style={{ y: reduced ? 0 : videoY }}>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="none"
+              className="h-[115%] w-full object-cover contrast-[1.02] saturate-[0.92]"
+            >
+              <source src="https://assets.mixkit.co/videos/42617/42617-720.mp4" type="video/mp4" />
+            </video>
           </motion.div>
-        </motion.div>
+          <div className="absolute inset-0 bg-linear-to-r from-[var(--paper)] via-[var(--paper)]/25 to-transparent" />
+          <div className="absolute inset-0 bg-[var(--ink)]/6" />
+          <div className="absolute bottom-10 left-10 flex gap-10 text-[var(--ink)]">
+            {[
+              { value: `${getYearsActive()}+`, label: "Anni aperti" },
+              { value: "500+", label: "Clienti attivi" },
+              { value: "30+", label: "Servizi" },
+            ].map((stat, i) => (
+              <ScaleCard key={stat.label} delay={0.2 + i * 0.08}>
+                <div>
+                  <p className="display-type text-4xl">{stat.value}</p>
+                  <p className="mt-1 whitespace-pre-line text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/55">
+                    {stat.label}
+                  </p>
+                </div>
+              </ScaleCard>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ══════════════════════════════════════
           CHI SIAMO DAVVERO
       ══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="relative overflow-hidden border-b border-[var(--ink)]/10 bg-[var(--paper)] py-24 md:py-32">
         <Container>
           <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-            {/* Statement card */}
+            {/* Statement panel */}
             <ScaleCard>
-              <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-10 text-white">
+              <div className="relative overflow-hidden border border-[var(--ink)]/10 bg-[var(--ink)] p-10 text-[var(--paper)]">
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-6 -top-6 select-none text-[10rem] font-black leading-none text-white/4"
+                  className="pointer-events-none absolute -right-4 -top-4 select-none text-[10rem] font-black leading-none text-[var(--paper)]/5"
                 >
                   AG
                 </div>
-                <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute -left-12 top-0 h-56 w-56 rounded-full bg-[#5E0ED7]/20 blur-[80px]" />
-                </div>
                 <div className="relative space-y-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5E0ED7]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#5E0ED7]">
                     La nostra storia
                   </p>
-                  <h2 className="text-3xl font-black leading-tight md:text-4xl">
+                  <h2 className="display-type text-3xl leading-tight md:text-4xl">
                     Non siamo una catena.
                     <br />
                     Siamo qui.
                   </h2>
-                  <p className="text-base text-slate-300">
+                  <p className="text-base text-[var(--paper)]/70">
                     Apriamo alle 8:45, chiudiamo alle 19:00. Nel mezzo risolviamo
                     bollette, attiviamo contratti, facciamo SPID, spediamo pacchi e
                     costruiamo siti web. Dal 1 giugno 2016, ogni giorno.
                   </p>
                   <div className="flex flex-wrap gap-2 pt-2">
-                    {["Castellammare di Stabia", "Dal 2016", "Risposta in giornata"].map((pill) => (
+                    {["Castellammare di Stabia", "Dal 2016", "Risposta in giornata"].map((tag) => (
                       <span
-                        key={pill}
-                        className="rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-semibold text-slate-300"
+                        key={tag}
+                        className="border border-[var(--paper)]/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--paper)]/70"
                       >
-                        {pill}
+                        {tag}
                       </span>
                     ))}
                   </div>
@@ -266,16 +205,16 @@ export default function ChiSiamoContent() {
             {/* 4 reasons grid */}
             <div className="grid grid-cols-2 gap-4">
               {[
-                { n: "01", title: "SPID in 20 min", desc: "Non in tre settimane.", color: "text-cyan-600 bg-cyan-50 border-cyan-100" },
-                { n: "02", title: "Rispondiamo noi", desc: "Non un bot, non un menu vocale.", color: "text-violet-600 bg-violet-50 border-violet-100" },
-                { n: "03", title: "Via Plinio 72", desc: "Puoi venire quando vuoi.", color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
-                { n: "04", title: "Sempre gratis", desc: "Consulenza senza impegno.", color: "text-amber-600 bg-amber-50 border-amber-100" },
+                { n: "01", title: "SPID in 20 min", desc: "Non in tre settimane." },
+                { n: "02", title: "Rispondiamo noi", desc: "Non un bot, non un menu vocale." },
+                { n: "03", title: "Via Plinio 72", desc: "Puoi venire quando vuoi." },
+                { n: "04", title: "Sempre gratis", desc: "Consulenza senza impegno." },
               ].map((item, i) => (
                 <ScaleCard key={item.n} delay={0.1 + i * 0.1}>
-                  <div className={`group h-full rounded-2xl border p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${item.color}`}>
-                    <p className="text-3xl font-black opacity-20">{item.n}</p>
-                    <p className="mt-3 text-base font-black text-slate-900">{item.title}</p>
-                    <p className="mt-1 text-sm text-slate-600">{item.desc}</p>
+                  <div className="group h-full border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-5 transition-colors duration-300 hover:border-[#5E0ED7]/40">
+                    <p className="text-3xl font-black text-[var(--ink)]/15">{item.n}</p>
+                    <p className="mt-3 text-base font-black text-[var(--ink)]">{item.title}</p>
+                    <p className="mt-1 text-sm text-[var(--ink)]/55">{item.desc}</p>
                   </div>
                 </ScaleCard>
               ))}
@@ -287,44 +226,28 @@ export default function ChiSiamoContent() {
       {/* ══════════════════════════════════════
           COME LAVORIAMO
       ══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="relative overflow-hidden border-b border-[var(--ink)]/10 bg-[var(--paper)] py-24 md:py-32">
         <Container className="relative">
           <div className="mb-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div>
               <FadeUp>
-                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5E0ED7]">
+                <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.25em] text-[#5E0ED7]">
                   Come lavoriamo
                 </p>
               </FadeUp>
               <TextReveal>
-                <h2
-                  className="text-slate-900"
-                  style={{
-                    fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                    lineHeight: 0.92,
-                    fontWeight: 900,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
+                <h2 className="display-type text-[clamp(2.5rem,7vw,5rem)] text-[var(--ink)]">
                   Tre cose.
                 </h2>
               </TextReveal>
               <TextReveal delay={0.1}>
-                <h2
-                  className="text-slate-900"
-                  style={{
-                    fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                    lineHeight: 0.92,
-                    fontWeight: 900,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
+                <h2 className="display-type text-[clamp(2.5rem,7vw,5rem)] text-[var(--ink)]">
                   Ogni giorno.
                 </h2>
               </TextReveal>
             </div>
             <FadeUp delay={0.3}>
-              <p className="max-w-sm text-sm leading-relaxed text-slate-500 md:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-[var(--ink)]/55 md:text-base">
                 Non valori aziendali da cornice. Cose concrete che succedono ogni giorno
                 in questa agenzia.
               </p>
@@ -334,15 +257,12 @@ export default function ChiSiamoContent() {
           <div className="grid gap-5 md:grid-cols-3">
             {values.map((val, i) => (
               <ScaleCard key={val.title} delay={0.1 + i * 0.12}>
-                <div className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-[#5E0ED7]/20 hover:shadow-xl">
-                  <div className="h-[2px] absolute inset-x-0 top-0 w-full rounded-t-2xl bg-linear-to-r from-[#5E0ED7] via-purple-400 to-[#22d3ee] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                  <div className={`mb-5 inline-flex rounded-xl p-3 ${ICON_COLORS[i].bg} ${ICON_COLORS[i].text}`}>
+                <div className="group relative h-full border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-8 transition-colors duration-300 hover:border-[#5E0ED7]/40">
+                  <div className="mb-5 inline-flex border border-[var(--ink)]/10 p-3 text-[#5E0ED7]">
                     {VALUE_ICONS[i]}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">{val.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-500">{val.description}</p>
-                  {/* Bottom line reveal */}
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-linear-to-r from-[#5E0ED7] to-[#22d3ee] transition-transform duration-500 group-hover:scale-x-100" />
+                  <h3 className="text-xl font-bold text-[var(--ink)]">{val.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]/55">{val.description}</p>
                 </div>
               </ScaleCard>
             ))}
@@ -353,37 +273,21 @@ export default function ChiSiamoContent() {
       {/* ══════════════════════════════════════
           TIMELINE
       ══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-24 md:py-32">
+      <section className="relative overflow-hidden border-b border-[var(--ink)]/10 bg-[var(--paper)] py-24 md:py-32">
         <Container>
           <div className="mb-16">
             <FadeUp>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5E0ED7]">
+              <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.25em] text-[#5E0ED7]">
                 Come siamo arrivati fin qui
               </p>
             </FadeUp>
             <TextReveal>
-              <h2
-                className="text-slate-900"
-                style={{
-                  fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                  lineHeight: 0.92,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <h2 className="display-type text-[clamp(2.5rem,7vw,5rem)] text-[var(--ink)]">
                 {getYearsActive()} anni.
               </h2>
             </TextReveal>
             <TextReveal delay={0.1}>
-              <h2
-                className="text-slate-900"
-                style={{
-                  fontSize: "clamp(2.5rem, 7vw, 5rem)",
-                  lineHeight: 0.92,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <h2 className="display-type text-[clamp(2.5rem,7vw,5rem)] text-[var(--ink)]">
                 Faccia a faccia.
               </h2>
             </TextReveal>
@@ -392,27 +296,24 @@ export default function ChiSiamoContent() {
           {/* Desktop timeline */}
           <div className="hidden md:block">
             <div className="relative">
-              {/* Connecting line */}
               <GradientDraw
                 delay={0.2}
-                className="absolute left-0 right-0 -top-px h-px bg-linear-to-r from-[#5E0ED7]/20 to-[#22d3ee]/20"
+                className="absolute left-0 right-0 top-0 h-px bg-[var(--ink)]/15"
               />
 
               <div className="grid grid-cols-4 gap-8">
                 {timeline.map((item, i) => (
                   <ScaleCard key={item.year} delay={0.15 + i * 0.12}>
                     <div className="relative pt-8">
-                      {/* Dot */}
+                      {/* Sharp marker */}
                       <div
-                        className="absolute top-0 left-0 h-6 w-6 -translate-y-3 rounded-full border-2 border-white shadow-lg"
-                        style={{
-                          background: i === 0 ? "#5E0ED7" : `linear-gradient(135deg, #5E0ED7, #22d3ee)`,
-                          boxShadow: i === 0 ? "0 4px 14px rgba(94,14,215,0.4)" : "0 4px 14px rgba(34,211,238,0.3)",
-                        }}
+                        className={`absolute left-0 top-0 h-3 w-3 -translate-y-1.5 border border-[var(--ink)] ${
+                          i === 0 ? "bg-[#5E0ED7]" : "bg-[var(--paper)]"
+                        }`}
                       />
                       <p className="text-2xl font-black text-[#5E0ED7]">{item.year}</p>
-                      <p className="mt-2 text-base font-black text-slate-900">{item.title}</p>
-                      <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.desc}</p>
+                      <p className="mt-2 text-base font-black text-[var(--ink)]">{item.title}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-[var(--ink)]/55">{item.desc}</p>
                     </div>
                   </ScaleCard>
                 ))}
@@ -424,17 +325,15 @@ export default function ChiSiamoContent() {
           <div className="space-y-0 md:hidden">
             {timeline.map((item, i) => (
               <ScaleCard key={item.year} delay={0.1 + i * 0.1}>
-                <div className="relative border-l-2 border-slate-200 pb-10 pl-8 last:border-transparent last:pb-0">
+                <div className="relative border-l border-[var(--ink)]/15 pb-10 pl-8 last:border-transparent last:pb-0">
                   <div
-                    className="absolute -left-2 top-0 h-4 w-4 rounded-full border-2 border-white shadow-md"
-                    style={{
-                      background: i === 0 ? "#5E0ED7" : `linear-gradient(135deg, #5E0ED7, #22d3ee)`,
-                      boxShadow: i === 0 ? "0 4px 10px rgba(94,14,215,0.4)" : "0 4px 10px rgba(34,211,238,0.3)",
-                    }}
+                    className={`absolute -left-1.5 top-0 h-3 w-3 border border-[var(--ink)] ${
+                      i === 0 ? "bg-[#5E0ED7]" : "bg-[var(--paper)]"
+                    }`}
                   />
                   <p className="text-xl font-black text-[#5E0ED7]">{item.year}</p>
-                  <p className="mt-1 text-lg font-black text-slate-900">{item.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-500">{item.desc}</p>
+                  <p className="mt-1 text-lg font-black text-[var(--ink)]">{item.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-[var(--ink)]/55">{item.desc}</p>
                 </div>
               </ScaleCard>
             ))}
@@ -445,65 +344,38 @@ export default function ChiSiamoContent() {
       {/* ══════════════════════════════════════
           CTA FINALE
       ══════════════════════════════════════ */}
-      <section className="lux-surface relative overflow-hidden py-28 md:py-36">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#5E0ED7]/5 blur-[100px]" />
-          <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-[#22d3ee]/4 blur-[100px]" />
-        </div>
-
+      <section className="relative overflow-hidden bg-[var(--paper)] py-28 md:py-36">
         <Container className="relative">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-8 py-16 text-center sm:px-12">
             <FadeUp>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#5E0ED7]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#5E0ED7]">
                 Hai 5 minuti?
               </p>
             </FadeUp>
 
             <TextReveal delay={0.1} className="mt-6">
-              <h2
-                className="text-slate-900"
-                style={{
-                  fontSize: "clamp(2.5rem, 8vw, 5.5rem)",
-                  lineHeight: 0.88,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <h2 className="display-type text-[clamp(2.5rem,8vw,5.5rem)] text-[var(--ink)]">
                 Te lo spieghiamo tutto.
               </h2>
             </TextReveal>
             <TextReveal delay={0.2}>
-              <span
-                className="inline-block bg-clip-text text-transparent"
-                style={{
-                  fontSize: "clamp(2.5rem, 8vw, 5.5rem)",
-                  lineHeight: 0.88,
-                  fontWeight: 900,
-                  letterSpacing: "-0.02em",
-                  backgroundImage: "linear-gradient(90deg, #5E0ED7, #a855f7, #22d3ee, #5E0ED7)",
-                  backgroundSize: "300% 100%",
-                  animation: reduced ? "none" : "heroGradientShift 5s ease infinite",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
+              <h2 className="display-type text-[clamp(2.5rem,8vw,5.5rem)] text-[#5E0ED7]">
                 Gratis.
-              </span>
+              </h2>
             </TextReveal>
 
             <FadeUp delay={0.35}>
-              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-slate-500">
+              <p className="mx-auto mt-7 max-w-md text-base leading-relaxed text-[var(--ink)]/55">
                 Consulenza senza impegno. Vieni in agenzia o scrivici su WhatsApp.
                 Rispondiamo entro l&apos;ora.
               </p>
             </FadeUp>
 
             <FadeUp delay={0.45}>
-              <div className="mt-10 flex flex-wrap justify-center gap-4">
+              <div className="mt-10 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/contatti"
-                  className="group inline-flex items-center gap-3 rounded-full bg-[#5E0ED7] px-9 py-4 text-sm font-semibold text-white shadow-[0_0_30px_rgba(94,14,215,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(94,14,215,0.4)]"
-                  style={{ color: "#ffffff" }}
+                  className="brutal-cta-ink group inline-flex items-center gap-3 bg-[var(--ink)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
                 >
                   Scrivici ora
                   <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none">
@@ -512,8 +384,7 @@ export default function ChiSiamoContent() {
                 </Link>
                 <Link
                   href="/servizi"
-                  className="rounded-full border border-slate-200 bg-white px-9 py-4 text-sm font-semibold shadow-sm transition-all duration-300 hover:border-[#5E0ED7]/30 hover:shadow-md"
-                  style={{ color: "#0f172a" }}
+                  className="inline-flex items-center border border-[var(--ink)]/15 bg-[var(--paper)] px-8 py-4 text-sm font-bold uppercase tracking-[0.18em] text-[var(--ink)] transition-colors duration-300 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
                 >
                   Vedi i servizi
                 </Link>

@@ -1,7 +1,15 @@
 "use client";
 
+/**
+ * Fact-forcing:
+ * - Callers: /area-clienti magic-link visure pages.
+ * - Change: PrivateUploadNotice under file input (DSA notice).
+ * - Schema/API: unchanged.
+ * - User: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP".
+ */
 import { useEffect, useState, type DragEvent, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import PrivateUploadNotice from "@/components/compliance/PrivateUploadNotice";
 
 type MagicRequest = {
   requestId: number;
@@ -274,6 +282,7 @@ export default function VisuraPracticeMagicLinkClient() {
             <span className="mt-2 text-sm text-slate-400">
               Se chiudi la pratica come evasa, serve almeno un documento finale.
             </span>
+            <PrivateUploadNotice className="mt-3 !text-slate-400 [&_a]:!text-cyan-300" />
           </label>
 
           {files.length ? (

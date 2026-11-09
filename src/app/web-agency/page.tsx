@@ -8,7 +8,7 @@ export function generateMetadata() {
   return buildMetadata({
     title: "Web Agency creativa su misura a Castellammare di Stabia",
     description:
-      "AG SERVIZI Web Agency: UI/UX, sviluppo e crescita digitale con uno stile creativo e ad alto impatto.",
+      "AG SERVIZI Web Agency: UI/UX, sviluppo, portfolio progetti e crescita digitale a Castellammare di Stabia.",
     path: "/web-agency",
   });
 }

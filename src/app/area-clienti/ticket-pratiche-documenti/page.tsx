@@ -22,39 +22,24 @@ function Chevron() {
 
 export default function TicketPraticheDocumentiPage() {
   return (
-    <div className="min-h-full">
-      <div className="relative">
-        <div className="h-px bg-linear-to-r from-sky-500/50 via-sky-400/20 to-transparent" />
-        <div className="border-b border-white/6 bg-slate-950 px-6 pt-5 pb-6 md:px-10">
-          <nav className="mb-5 flex items-center gap-2 text-xs text-slate-600">
-            <Link href="/area-clienti" className="transition hover:text-slate-400">Dashboard</Link>
-            <Chevron />
-            <span className="text-slate-500">Ticket</span>
-          </nav>
-          <div className="flex items-start gap-4">
-            <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10 text-sky-400">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white md:text-3xl">
-                Ticket Pratiche & Documenti
-              </h1>
-              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-400">
-                Gestisci integrazioni documentali e richieste su pratiche già avviate. Il team riceve
-                notifica immediata e aggiorna lo stato direttamente nel tuo storico.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-full bg-[var(--paper)] text-[var(--ink)]">
+      <section className="border-b border-[var(--ink)]/10 px-5 py-8 md:px-8">
+        <nav className="mb-5 flex items-center gap-2 text-xs text-[var(--ink)]/45">
+          <Link href="/area-clienti" className="transition hover:text-[var(--ink)]">Dashboard</Link>
+          <Chevron />
+          <span>Ticket</span>
+        </nav>
+        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">Area clienti</p>
+        <h1 className="display-type mt-3 text-[clamp(1.8rem,3.5vw,2.8rem)]">Ticket pratiche & documenti</h1>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--ink)]/55">
+          Gestisci integrazioni documentali e richieste su pratiche già avviate. Il team riceve notifica
+          immediata e aggiorna lo stato nel tuo storico.
+        </p>
+      </section>
 
-      <div className="lux-surface text-slate-900">
-        <Container className="py-8">
-          <TicketPraticheWorkspace />
-        </Container>
-      </div>
+      <Container className="py-8">
+        <TicketPraticheWorkspace />
+      </Container>
     </div>
   );
 }

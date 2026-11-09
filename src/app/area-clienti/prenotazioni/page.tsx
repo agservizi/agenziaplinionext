@@ -19,10 +19,12 @@ export default async function ClientPrenotazioniPage() {
       tone="client"
       eyebrow="Account"
       title="Prenotazioni"
-      description="Le tue booking_requests. Cancel solo se policy API lo consente."
+      description="Appuntamenti presi in sede o online. Puoi annullare solo se la prenotazione è ancora modificabile."
     >
       {rows.length === 0 ? (
-        <ModuleNotice tone="client" variant="empty">Nessuna prenotazione trovata.</ModuleNotice>
+        <ModuleNotice tone="client" variant="empty">
+          Non hai ancora prenotazioni. Quando fissi un appuntamento, lo trovi qui con data e stato.
+        </ModuleNotice>
       ) : (
         <ModuleTable
           tone="client"

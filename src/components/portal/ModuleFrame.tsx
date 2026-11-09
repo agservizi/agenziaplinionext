@@ -19,30 +19,46 @@ export function ModuleFrame({
 }) {
   const isClient = tone === "client";
   return (
-    <div className={`space-y-6 p-6 ${isClient ? "text-white" : "text-slate-900"}`}>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className={isClient ? "bg-[var(--paper)] text-[var(--ink)]" : "space-y-6 p-6 text-slate-900 md:p-8"}>
+      <div
+        className={`flex flex-wrap items-end justify-between gap-4 ${
+          isClient
+            ? "border-b border-[var(--ink)]/10 px-5 py-8 md:px-8"
+            : "border-b border-[var(--ink)]/10 pb-6"
+        }`}
+      >
         <div>
           {eyebrow ? (
             <p
-              className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${
-                isClient ? "text-cyan-400/80" : "text-cyan-700"
+              className={`text-[10px] font-bold uppercase tracking-[0.28em] ${
+                isClient ? "text-[var(--ink)]/40" : "text-cyan-700"
               }`}
             >
               {eyebrow}
             </p>
           ) : null}
-          <h1 className={`mt-1 text-2xl font-bold ${isClient ? "text-white" : "text-slate-900"}`}>
+          <h1
+            className={`mt-2 ${
+              isClient
+                ? "display-type text-[clamp(1.5rem,3vw,2.25rem)]"
+                : "text-2xl font-bold text-slate-900"
+            }`}
+          >
             {title}
           </h1>
           {description ? (
-            <p className={`mt-2 max-w-2xl text-sm ${isClient ? "text-white/50" : "text-slate-600"}`}>
+            <p
+              className={`mt-2 max-w-2xl text-sm leading-relaxed ${
+                isClient ? "text-[var(--ink)]/55" : "text-slate-600"
+              }`}
+            >
               {description}
             </p>
           ) : null}
         </div>
         {actions}
       </div>
-      {children}
+      <div className={isClient ? "space-y-6 px-5 py-6 md:px-8" : undefined}>{children}</div>
     </div>
   );
 }
@@ -60,18 +76,25 @@ export function ModuleNotice({
   const styles =
     variant === "warning"
       ? isClient
-        ? "border-amber-400/30 bg-amber-400/10 text-amber-100"
+        ? "border-amber-700/25 bg-amber-50 text-amber-900"
         : "border-amber-200 bg-amber-50 text-amber-900"
       : variant === "error"
         ? isClient
-          ? "border-rose-400/30 bg-rose-400/10 text-rose-100"
+          ? "border-rose-700/25 bg-rose-50 text-rose-900"
           : "border-rose-200 bg-rose-50 text-rose-900"
         : isClient
-          ? "border-white/10 bg-white/5 text-white/50"
+          ? "border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_92%,white)] text-[var(--ink)]/55"
           : "border-slate-200 bg-white text-slate-500";
 
+  const isEmpty = variant === "empty" && isClient;
+
   return (
-    <div className={`rounded-xl border p-6 text-sm ${styles}`}>{children}</div>
+    <div className={`border p-6 text-sm ${styles}`}>
+      {isEmpty ? (
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/35">Vuoto</p>
+      ) : null}
+      <div className={isEmpty ? "mt-3" : undefined}>{children}</div>
+    </div>
   );
 }
 
@@ -87,15 +110,17 @@ export function ModuleTable({
   const isClient = tone === "client";
   return (
     <div
-      className={`overflow-x-auto rounded-xl border ${
-        isClient ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"
+      className={`overflow-x-auto border ${
+        isClient
+          ? "border-[var(--ink)]/12 bg-[var(--paper)]"
+          : "rounded-xl border-slate-200 bg-white"
       }`}
     >
       <table className="min-w-full text-left text-sm">
         <thead
-          className={`border-b text-xs uppercase tracking-wider ${
+          className={`border-b text-[10px] font-bold uppercase tracking-[0.18em] ${
             isClient
-              ? "border-white/10 text-white/40"
+              ? "border-[var(--ink)]/10 text-[var(--ink)]/45"
               : "border-slate-100 text-slate-500"
           }`}
         >
@@ -112,11 +137,11 @@ export function ModuleTable({
             <tr
               key={i}
               className={`border-b last:border-0 ${
-                isClient ? "border-white/5" : "border-slate-50"
+                isClient ? "border-[var(--ink)]/8" : "border-slate-50"
               }`}
             >
               {row.map((cell, j) => (
-                <td key={j} className="px-4 py-3 align-top">
+                <td key={j} className="px-4 py-3 align-top text-[var(--ink)]">
                   {cell}
                 </td>
               ))}

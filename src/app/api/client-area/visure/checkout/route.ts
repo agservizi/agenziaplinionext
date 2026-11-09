@@ -1,40 +1,48 @@
 import { NextResponse } from "next/server";
-import { createStripeCheckoutSession, isStripeConfigured } from "@/lib/stripe-checkout";
-import { resolveDatabaseVisuraPrice } from "@/lib/visure-pricing-engine";
+import {
+  createStripeCheckoutSession,
+  isStripeConfigured,
+} from "@/lib/stripe-checkout";
 import {
   supportedVisuraServices,
   type SupportedVisuraService,
 } from "@/lib/openapi-visure";
+import { resolveDatabaseVisuraPrice } from "@/lib/visure-pricing-engine";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-function requireString(value: unknown) {
-  return String(value || "").trim();
-}
-
+/**
+ * Callers: OpenApiVisureWorkspace checkout submit.
+ * Schema: { url, amountCents, priceLabel, message }. Replaces PHP checkout rewrite.
+ * User: /area-clienti/visure Servizio visure non disponibile.
+ */
 export async function POST(request: Request) {
   if (!isStripeConfigured()) {
     return NextResponse.json({ message: "Stripe non configurato." }, { status: 503 });
   }
 
-  const body = await request.json();
-  const serviceType = requireString(body?.serviceType);
-  const customerName = requireString(body?.customerName);
-  const email = requireString(body?.email).toLowerCase();
+  const body = await request.json().catch(() => ({}));
+  const serviceType = String(body?.serviceType || "").trim() as SupportedVisuraService;
+  const customerName = String(body?.customerName || "").trim();
+  const email = String(body?.email || "").trim().toLowerCase();
 
   if (
-    !supportedVisuraServices.includes(serviceType as SupportedVisuraService) ||
+    !supportedVisuraServices.includes(serviceType) ||
     !customerName ||
     !email.includes("@")
   ) {
     return NextResponse.json(
-      { message: "Compila almeno nome, email e tipologia di visura prima del pagamento." },
+      {
+        message:
+          "Compila almeno nome, email e tipologia di visura prima del pagamento.",
+      },
       { status: 400 },
     );
   }
 
   try {
-    const price = await resolveDatabaseVisuraPrice(serviceType as SupportedVisuraService);
+    const price = await resolveDatabaseVisuraPrice(serviceType);
     const origin = new URL(request.url).origin;
     const checkout = await createStripeCheckoutSession({
       amountCents: price.amountCents,
@@ -54,20 +62,19 @@ export async function POST(request: Request) {
       throw new Error("URL checkout Stripe non disponibile.");
     }
 
-    return NextResponse.json(
-      {
-        url: checkout.url,
-        amountCents: price.amountCents,
-        priceLabel: price.label,
-        message: "Reindirizzamento a Stripe per completare il pagamento della visura.",
-      },
-      { status: 200 },
-    );
+    return NextResponse.json({
+      url: checkout.url,
+      amountCents: price.amountCents,
+      priceLabel: price.label,
+      message: "Reindirizzamento a Stripe per completare il pagamento della visura.",
+    });
   } catch (error) {
     return NextResponse.json(
       {
         message:
-          error instanceof Error ? error.message : "Creazione checkout Stripe non riuscita.",
+          error instanceof Error && error.message
+            ? error.message
+            : "Creazione checkout Stripe non riuscita.",
       },
       { status: 502 },
     );

@@ -14,7 +14,7 @@ export default async function ClientNotifichePage() {
       tone="client"
       eyebrow="Account"
       title="Notifiche"
-      description="Preferenze email ownership-scoped. Nessun marketing senza consenso."
+      description="Scegli quali email vuoi ricevere. Le novità promozionali restano disattive finché non le abiliti."
     >
       <ApiForm
         tone="client"
@@ -23,28 +23,48 @@ export default async function ClientNotifichePage() {
         fields={[
           {
             name: "order_confirm",
-            label: "Conferma ordine (true|false)",
+            label: "Conferma ordine",
             defaultValue: prefs.order_confirm ? "true" : "false",
+            options: [
+              { value: "true", label: "Sì" },
+              { value: "false", label: "No" },
+            ],
           },
           {
             name: "shipped",
-            label: "Spedizione inviata (true|false)",
+            label: "Spedizione inviata",
             defaultValue: prefs.shipped ? "true" : "false",
+            options: [
+              { value: "true", label: "Sì" },
+              { value: "false", label: "No" },
+            ],
           },
           {
             name: "digital_ready",
-            label: "Download pronto (true|false)",
+            label: "Download digitale pronto",
             defaultValue: prefs.digital_ready ? "true" : "false",
+            options: [
+              { value: "true", label: "Sì" },
+              { value: "false", label: "No" },
+            ],
           },
           {
             name: "service_update",
-            label: "Aggiornamento servizio (true|false)",
+            label: "Aggiornamenti sulle pratiche",
             defaultValue: prefs.service_update ? "true" : "false",
+            options: [
+              { value: "true", label: "Sì" },
+              { value: "false", label: "No" },
+            ],
           },
           {
             name: "marketing",
-            label: "Novità e promo (true|false)",
+            label: "Novità e promozioni",
             defaultValue: prefs.marketing ? "true" : "false",
+            options: [
+              { value: "true", label: "Sì" },
+              { value: "false", label: "No" },
+            ],
           },
         ]}
       />

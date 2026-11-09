@@ -3,7 +3,13 @@ import { notFound } from "next/navigation";
 import Container from "@/components/Container";
 import BreadcrumbJsonLd from "@/components/seo/BreadcrumbJsonLd";
 import { buildMetadata } from "@/lib/seo";
-import { getPhoneServiceBySlug, phoneServiceDetails } from "@/lib/phone-services";
+import { getCmsPhoneServices } from "@/lib/cms/server";
+
+function getPhoneServiceBySlug(slug: string) {
+  return getCmsPhoneServices().find((item) => item.slug === slug) ?? null;
+}
+
+const phoneServiceDetails = getCmsPhoneServices();
 
 type PhoneServiceDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -91,21 +97,6 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
       relatedCard: "bg-[#FFFBEC] hover:border-[#F5C400]/40 hover:bg-[#FFF4CB] hover:text-[#8A6900]",
       backHover: "hover:border-white/85 hover:text-white",
     },
-    "very-mobile": {
-      heroBg: "bg-[#00A651]",
-      heroTag: "text-[#E6FFEF]",
-      heroBody: "text-[#F0FFF6]",
-      accentText: "text-[#00A651]",
-      accentBg: "bg-[#00A651]",
-      accentBgHover: "hover:bg-[#009349]",
-      dot: "bg-[#00A651]",
-      linkHover: "hover:border-[#00A651]/45 hover:text-[#00A651]",
-      sourceBorder: "border-[#00A651]/35",
-      sourceBg: "bg-[#ECFFF4]",
-      sourceLink: "text-[#007E3E] decoration-[#00A651]/40 hover:text-[#00A651]",
-      relatedCard: "bg-[#F5FFF9] hover:border-[#00A651]/40 hover:bg-[#EFFFF5] hover:text-[#00A651]",
-      backHover: "hover:border-white/85 hover:text-white",
-    },
     "ho-mobile": {
       heroBg: "bg-[#00AFAA]",
       heroTag: "text-[#DDFDFC]",
@@ -139,9 +130,9 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
   };
 
   const theme = themeBySlug[service.slug] ?? {
-        heroBg: "bg-slate-950",
+        heroBg: "bg-[var(--ink)]",
         heroTag: "text-cyan-400",
-        heroBody: "text-slate-300",
+        heroBody: "text-white/70",
         accentText: "text-cyan-700",
         accentBg: "bg-cyan-500",
         accentBgHover: "hover:bg-cyan-400",
@@ -150,7 +141,7 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
         sourceBorder: "border-cyan-200",
         sourceBg: "bg-cyan-50/60",
         sourceLink: "text-cyan-800 decoration-cyan-300 hover:text-cyan-700",
-        relatedCard: "bg-slate-50 hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700",
+        relatedCard: "bg-[color-mix(in_srgb,var(--paper)_88%,white)] hover:border-cyan-300 hover:bg-cyan-50 hover:text-cyan-700",
         backHover: "hover:border-cyan-400 hover:text-cyan-200",
       };
 
@@ -171,40 +162,40 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/consulenza?service=telefonia"
-                className={`rounded-full px-6 py-3 text-sm font-semibold text-white transition ${theme.accentBg} ${theme.accentBgHover}`}
+                className={`brutal-cta-ink px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition ${theme.accentBg} ${theme.accentBgHover}`}
               >
                 Richiedi consulenza
               </Link>
               <Link
                 href="/servizi/telefonia"
-                className={`rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition ${theme.backHover}`}
+                className={`border border-white/35 px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition ${theme.backHover}`}
               >
                 Torna a telefonia
               </Link>
             </div>
           </div>
           <div className="glass-card rounded-4xl p-8">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">Info rapide</p>
-            <p className="mt-3 text-sm text-slate-200">{service.shortDescription}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/40">Info rapide</p>
+            <p className="mt-3 text-sm text-[var(--ink)]/55">{service.shortDescription}</p>
           </div>
         </Container>
       </section>
 
-      <div className="lux-surface pb-20 text-slate-900">
+      <div className="bg-[var(--paper)] pb-20 text-[var(--ink)]">
         <section className="-mt-8 py-6">
           <Container>
-            <div className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:grid-cols-3">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Categoria</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">Telefonia</p>
+            <div className="grid gap-4 rounded-3xl border border-[var(--ink)]/15 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] md:grid-cols-3">
+              <div className="rounded-2xl bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/55">Categoria</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">Telefonia</p>
               </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Modalità</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">Attivazione assistita</p>
+              <div className="rounded-2xl bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/55">Modalità</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">Attivazione assistita</p>
               </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Supporto</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">In sede</p>
+              <div className="rounded-2xl bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink)]/55">Supporto</p>
+                <p className="mt-2 text-lg font-semibold text-[var(--ink)]">In sede</p>
               </div>
             </div>
           </Container>
@@ -212,26 +203,26 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
 
         <section className="py-10">
           <Container className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <article className="rounded-3xl border border-slate-200 bg-white p-7">
+            <article className="rounded-3xl border border-[var(--ink)]/15 bg-white p-7">
               <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${theme.accentText}`}>
                 Vantaggi cliente finale
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Perché scegliere questa soluzione</h2>
-              <ul className="mt-5 space-y-3 text-sm text-slate-700">
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Perché scegliere questa soluzione</h2>
+              <ul className="mt-5 space-y-3 text-sm text-[var(--ink)]/65">
                 {service.customerBenefits.map((item) => (
-                  <li key={item} className="rounded-xl bg-slate-50 px-4 py-3">
+                  <li key={item} className="rounded-xl bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3">
                     {item}
                   </li>
                 ))}
               </ul>
             </article>
 
-            <aside className="rounded-3xl border border-slate-200 bg-white p-7">
+            <aside className="rounded-3xl border border-[var(--ink)]/15 bg-white p-7">
               <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${theme.accentText}`}>
                 Cosa portare
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Checklist attivazione</h2>
-              <ul className="mt-5 space-y-3 text-sm text-slate-700">
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Checklist attivazione</h2>
+              <ul className="mt-5 space-y-3 text-sm text-[var(--ink)]/65">
                 {service.requiredInfo.map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className={`mt-1 h-1.5 w-1.5 rounded-full ${theme.dot}`} />
@@ -259,9 +250,9 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
                 text: "Attivazione o portabilità con assistenza operativa locale.",
               },
             ].map((step) => (
-              <article key={step.title} className="rounded-2xl border border-slate-200 bg-white p-5">
-                <h3 className="text-base font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{step.text}</p>
+              <article key={step.title} className="rounded-2xl border border-[var(--ink)]/15 bg-white p-5">
+                <h3 className="text-base font-semibold text-[var(--ink)]">{step.title}</h3>
+                <p className="mt-2 text-sm text-[var(--ink)]/65">{step.text}</p>
               </article>
             ))}
           </Container>
@@ -269,12 +260,12 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
 
         <section className="py-10">
           <Container>
-            <div className="rounded-3xl border border-slate-200 bg-white p-7">
+            <div className="rounded-3xl border border-[var(--ink)]/15 bg-white p-7">
               <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${theme.accentText}`}>Note operative</p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Prima di confermare</h2>
+              <h2 className="mt-3 text-2xl font-semibold text-[var(--ink)]">Prima di confermare</h2>
               <ul className="mt-5 grid gap-3 md:grid-cols-2">
                 {service.notes.map((item) => (
-                  <li key={item} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <li key={item} className="rounded-xl border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm text-[var(--ink)]/65">
                     {item}
                   </li>
                 ))}
@@ -306,15 +297,15 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
 
         <section className="py-4">
           <Container>
-            <div className="rounded-3xl border border-slate-200 bg-white p-7">
+            <div className="rounded-3xl border border-[var(--ink)]/15 bg-white p-7">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <p className={`text-xs font-semibold uppercase tracking-[0.2em] ${theme.accentText}`}>Operatori collegati</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-900">Altre tipologie telefonia</h2>
+                  <h2 className="mt-2 text-2xl font-semibold text-[var(--ink)]">Altre tipologie telefonia</h2>
                 </div>
                 <Link
                   href="/servizi/telefonia"
-                  className={`rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition ${theme.linkHover}`}
+                  className={`rounded-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-2 text-sm font-semibold text-[var(--ink)]/65 transition ${theme.linkHover}`}
                 >
                   Vedi tutti
                 </Link>
@@ -324,7 +315,7 @@ export default async function PhoneServiceDetailPage({ params }: PhoneServiceDet
                   <Link
                     key={item.slug}
                     href={`/servizi/telefonia/${item.slug}`}
-                    className={`rounded-2xl border border-slate-200 px-4 py-4 text-sm font-medium text-slate-700 transition ${theme.relatedCard}`}
+                    className={`rounded-2xl border border-[var(--ink)]/15 px-4 py-4 text-sm font-medium text-[var(--ink)]/65 transition ${theme.relatedCard}`}
                   >
                     {item.title}
                   </Link>

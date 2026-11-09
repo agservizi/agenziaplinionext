@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+  DEPOSITO_API_BASE,
+  depositoApiHeaders,
+} from "@/lib/deposito-bagagli-api";
 
 export const dynamic = "force-dynamic";
-
-const API_BASE = "https://coresuite.it/api/public/deposito-bagagli";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +17,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const res = await fetch(`${API_BASE}/verify?token=${encodeURIComponent(token)}`);
+    const res = await fetch(`${DEPOSITO_API_BASE}/verify?token=${encodeURIComponent(token)}`, {
+      headers: depositoApiHeaders(),
+    });
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch {

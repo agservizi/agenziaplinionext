@@ -26,6 +26,14 @@ type Step3Config = {
 
 type Step3FieldKey = "objective" | "currentProvider" | "budgetRange" | "timeline" | "notes";
 
+const STEP_LABELS = ["Servizio", "Contatto", "Dettagli"] as const;
+
+const fieldClass =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+const fieldErrorClass =
+  "w-full border border-red-700/40 bg-[color-mix(in_srgb,var(--paper)_92%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-red-700";
+const labelClass = "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/45";
+
 function getStep3Config(serviceType: string, customerType: string): Step3Config {
   const profile = customerType === "azienda" ? "azienda" : "privato";
   const byProfile = (privato: string, azienda: string) => (profile === "azienda" ? azienda : privato);
@@ -195,6 +203,58 @@ function getStep3RequiredFields(serviceType: string, customerType: string): Step
   return ["objective"];
 }
 
+function StepIndicator({ currentStep }: { currentStep: number }) {
+  return (
+    <div className="flex shrink-0 items-center justify-center gap-0 border-y border-[var(--ink)]/10 px-2 py-4">
+      {STEP_LABELS.map((label, index) => {
+        const stepNum = index + 1;
+        const isActive = stepNum === currentStep;
+        const isCompleted = stepNum < currentStep;
+
+        return (
+          <div key={label} className="flex items-center">
+            {index > 0 && (
+              <div className="mx-1 h-px w-8 sm:w-12 md:w-16">
+                <div
+                  className={`h-full transition-colors duration-300 ${
+                    isCompleted || isActive ? "bg-[#5E0ED7]" : "bg-[var(--ink)]/15"
+                  }`}
+                />
+              </div>
+            )}
+            <div className="flex flex-col items-center gap-1">
+              <div
+                className={`flex h-8 w-8 items-center justify-center text-xs font-bold transition-all duration-300 ${
+                  isCompleted
+                    ? "bg-[var(--ink)] text-white"
+                    : isActive
+                      ? "border-2 border-[#5E0ED7] text-[#5E0ED7]"
+                      : "border border-[var(--ink)]/15 text-[var(--ink)]/35"
+                }`}
+              >
+                {isCompleted ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  stepNum
+                )}
+              </div>
+              <span
+                className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300 ${
+                  isActive ? "text-[#5E0ED7]" : isCompleted ? "text-[var(--ink)]/55" : "text-[var(--ink)]/30"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function InteractiveConsultingWizard({ initialService }: Props) {
   const searchParams = useSearchParams();
   const safeInitialService = getPublicConsultingService(initialService || "")?.key || "telefonia";
@@ -338,203 +398,219 @@ export default function InteractiveConsultingWizard({ initialService }: Props) {
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
-      <div className="rounded-3xl border border-cyan-200 bg-gradient-to-br from-cyan-50 via-white to-sky-100/70 p-7">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+    <div className="grid gap-0 border border-[var(--ink)]/10 lg:grid-cols-[1fr_1fr]">
+      <div className="border-b border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] p-7 lg:border-b-0 lg:border-r">
+        <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40">
           Consulenza interattiva
         </p>
-        <h2 className="mt-3 text-3xl font-semibold text-slate-900">
+        <h2 className="display-type mt-3 text-3xl text-[var(--ink)] md:text-4xl">
           Scegli il servizio e ricevi una consulenza su misura
         </h2>
-        <p className="mt-3 text-sm text-slate-700">
+        <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]/65">
           Flusso guidato in 3 step. Al termine inviamo conferma sia al backoffice sia alla tua email
           con codice richiesta.
         </p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {[1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className={`rounded-xl border px-3 py-2 text-center text-xs font-semibold ${
-                step === item
-                  ? "border-cyan-400 bg-cyan-500/10 text-cyan-800"
-                  : "border-slate-200 bg-white text-slate-500"
-              }`}
-            >
-              Step {item}
-            </div>
-          ))}
+
+        <div className="mt-6">
+          <StepIndicator currentStep={step} />
         </div>
+
         {requestCode ? (
-          <div className="mt-5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            Codice richiesta: <strong>{requestCode}</strong>
+          <div className="mt-5 border border-[var(--ink)]/15 bg-[var(--paper)] px-4 py-3 text-sm text-[var(--ink)]">
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
+              Codice richiesta
+            </span>
+            <p className="mt-1 font-bold text-[var(--ink)]">{requestCode}</p>
           </div>
         ) : null}
       </div>
 
-      <form onSubmit={onSubmit} className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+      <form onSubmit={onSubmit} className="bg-[var(--paper)] p-7">
         {step === 1 ? (
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-slate-900">Step 1 · Servizio e profilo</h3>
-            <select
-              value={form.serviceType}
-              onChange={(event) => update("serviceType", event.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-            >
-              {publicConsultingServices.map((entry) => (
-                <option key={entry.key} value={entry.key}>
-                  {entry.label}
-                </option>
-              ))}
-            </select>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-sm font-semibold text-slate-900">{service?.label}</p>
-              <p className="mt-1 text-xs text-slate-600">{service?.description}</p>
+            <h3 className="display-type text-2xl text-[var(--ink)]">Step 1 · Servizio e profilo</h3>
+            <label className="block">
+              <span className={labelClass}>Servizio</span>
+              <select
+                value={form.serviceType}
+                onChange={(event) => update("serviceType", event.target.value)}
+                className={fieldClass}
+              >
+                {publicConsultingServices.map((entry) => (
+                  <option key={entry.key} value={entry.key}>
+                    {entry.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="border border-[var(--ink)]/10 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3">
+              <p className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">{service?.label}</p>
+              <p className="mt-1 text-xs leading-relaxed text-[var(--ink)]/60">{service?.description}</p>
             </div>
             {requiresCustomerType ? (
-              <select
-                value={form.customerType}
-                onChange={(event) => update("customerType", event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-              >
-                <option value="privato">Privato</option>
-                <option value="azienda">Azienda</option>
-              </select>
+              <label className="block">
+                <span className={labelClass}>Profilo</span>
+                <select
+                  value={form.customerType}
+                  onChange={(event) => update("customerType", event.target.value)}
+                  className={fieldClass}
+                >
+                  <option value="privato">Privato</option>
+                  <option value="azienda">Azienda</option>
+                </select>
+              </label>
             ) : null}
           </div>
         ) : null}
 
         {step === 2 ? (
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-slate-900">Step 2 · Dati contatto</h3>
-            <input
-              value={form.customerName}
-              onChange={(event) => update("customerName", event.target.value)}
-              placeholder="Nome e cognome"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-              required
-            />
-            <input
-              value={form.email}
-              onChange={(event) => update("email", event.target.value)}
-              type="email"
-              placeholder="Email"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-              required
-            />
-            <input
-              value={form.phone}
-              onChange={(event) => update("phone", event.target.value)}
-              placeholder="Telefono"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-              required
-            />
-            <input
-              value={form.city}
-              onChange={(event) => update("city", event.target.value)}
-              placeholder="Città"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none"
-            />
+            <h3 className="display-type text-2xl text-[var(--ink)]">Step 2 · Dati contatto</h3>
+            <label className="block">
+              <span className={labelClass}>Nome e cognome</span>
+              <input
+                value={form.customerName}
+                onChange={(event) => update("customerName", event.target.value)}
+                placeholder="Nome e cognome"
+                className={fieldClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className={labelClass}>Email</span>
+              <input
+                value={form.email}
+                onChange={(event) => update("email", event.target.value)}
+                type="email"
+                placeholder="Email"
+                className={fieldClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className={labelClass}>Telefono</span>
+              <input
+                value={form.phone}
+                onChange={(event) => update("phone", event.target.value)}
+                placeholder="Telefono"
+                className={fieldClass}
+                required
+              />
+            </label>
+            <label className="block">
+              <span className={labelClass}>Città</span>
+              <input
+                value={form.city}
+                onChange={(event) => update("city", event.target.value)}
+                placeholder="Città"
+                className={fieldClass}
+              />
+            </label>
           </div>
         ) : null}
 
         {step === 3 ? (
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold text-slate-900">Step 3 · Obiettivi e dettagli</h3>
-            <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-              {step3Config.objectiveLabel}
-              {requiredStep3Fields.includes("objective") ? " *" : ""}
+            <h3 className="display-type text-2xl text-[var(--ink)]">Step 3 · Obiettivi e dettagli</h3>
+            <label className="block">
+              <span className={labelClass}>
+                {step3Config.objectiveLabel}
+                {requiredStep3Fields.includes("objective") ? " *" : ""}
+              </span>
+              <input
+                value={form.objective}
+                onChange={(event) => update("objective", event.target.value)}
+                onBlur={() => markStep3Touched("objective")}
+                placeholder={step3Config.objectivePlaceholder}
+                className={hasStep3FieldError("objective") ? fieldErrorClass : fieldClass}
+                required={requiredStep3Fields.includes("objective")}
+              />
             </label>
-            <input
-              value={form.objective}
-              onChange={(event) => update("objective", event.target.value)}
-              onBlur={() => markStep3Touched("objective")}
-              placeholder={step3Config.objectivePlaceholder}
-              className={`w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none ${
-                hasStep3FieldError("objective") ? "border border-red-300" : "border border-slate-200"
-              }`}
-              required={requiredStep3Fields.includes("objective")}
-            />
             {hasStep3FieldError("objective") ? (
-              <p className="text-xs text-red-600">Campo obbligatorio.</p>
+              <p className="text-xs text-red-700">Campo obbligatorio.</p>
             ) : null}
-            <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-              {step3Config.contextLabel}
-              {requiredStep3Fields.includes("currentProvider") ? " *" : ""}
+            <label className="block">
+              <span className={labelClass}>
+                {step3Config.contextLabel}
+                {requiredStep3Fields.includes("currentProvider") ? " *" : ""}
+              </span>
+              <input
+                value={form.currentProvider}
+                onChange={(event) => update("currentProvider", event.target.value)}
+                onBlur={() => markStep3Touched("currentProvider")}
+                placeholder={step3Config.contextPlaceholder}
+                className={hasStep3FieldError("currentProvider") ? fieldErrorClass : fieldClass}
+                required={requiredStep3Fields.includes("currentProvider")}
+              />
             </label>
-            <input
-              value={form.currentProvider}
-              onChange={(event) => update("currentProvider", event.target.value)}
-              onBlur={() => markStep3Touched("currentProvider")}
-              placeholder={step3Config.contextPlaceholder}
-              className={`w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none ${
-                hasStep3FieldError("currentProvider") ? "border border-red-300" : "border border-slate-200"
-              }`}
-              required={requiredStep3Fields.includes("currentProvider")}
-            />
             {hasStep3FieldError("currentProvider") ? (
-              <p className="text-xs text-red-600">Campo obbligatorio.</p>
+              <p className="text-xs text-red-700">Campo obbligatorio.</p>
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-                  {step3Config.budgetLabel}
-                  {requiredStep3Fields.includes("budgetRange") ? " *" : ""}
+                <label className="block">
+                  <span className={labelClass}>
+                    {step3Config.budgetLabel}
+                    {requiredStep3Fields.includes("budgetRange") ? " *" : ""}
+                  </span>
+                  <input
+                    value={form.budgetRange}
+                    onChange={(event) => update("budgetRange", event.target.value)}
+                    onBlur={() => markStep3Touched("budgetRange")}
+                    placeholder={step3Config.budgetPlaceholder}
+                    className={hasStep3FieldError("budgetRange") ? fieldErrorClass : fieldClass}
+                    required={requiredStep3Fields.includes("budgetRange")}
+                  />
                 </label>
-                <input
-                  value={form.budgetRange}
-                  onChange={(event) => update("budgetRange", event.target.value)}
-                  onBlur={() => markStep3Touched("budgetRange")}
-                  placeholder={step3Config.budgetPlaceholder}
-                  className={`w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none ${
-                    hasStep3FieldError("budgetRange") ? "border border-red-300" : "border border-slate-200"
-                  }`}
-                  required={requiredStep3Fields.includes("budgetRange")}
-                />
                 {hasStep3FieldError("budgetRange") ? (
-                  <p className="text-xs text-red-600">Campo obbligatorio.</p>
+                  <p className="text-xs text-red-700">Campo obbligatorio.</p>
                 ) : null}
               </div>
               <div className="space-y-1">
-                <label className="block text-xs font-semibold uppercase tracking-[0.08em] text-slate-600">
-                  {step3Config.timelineLabel}
-                  {requiredStep3Fields.includes("timeline") ? " *" : ""}
+                <label className="block">
+                  <span className={labelClass}>
+                    {step3Config.timelineLabel}
+                    {requiredStep3Fields.includes("timeline") ? " *" : ""}
+                  </span>
+                  <input
+                    value={form.timeline}
+                    onChange={(event) => update("timeline", event.target.value)}
+                    onBlur={() => markStep3Touched("timeline")}
+                    placeholder={step3Config.timelinePlaceholder}
+                    className={hasStep3FieldError("timeline") ? fieldErrorClass : fieldClass}
+                    required={requiredStep3Fields.includes("timeline")}
+                  />
                 </label>
-                <input
-                  value={form.timeline}
-                  onChange={(event) => update("timeline", event.target.value)}
-                  onBlur={() => markStep3Touched("timeline")}
-                  placeholder={step3Config.timelinePlaceholder}
-                  className={`w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none ${
-                    hasStep3FieldError("timeline") ? "border border-red-300" : "border border-slate-200"
-                  }`}
-                  required={requiredStep3Fields.includes("timeline")}
-                />
                 {hasStep3FieldError("timeline") ? (
-                  <p className="text-xs text-red-600">Campo obbligatorio.</p>
+                  <p className="text-xs text-red-700">Campo obbligatorio.</p>
                 ) : null}
               </div>
             </div>
-            <textarea
-              value={form.notes}
-              onChange={(event) => update("notes", event.target.value)}
-              onBlur={() => markStep3Touched("notes")}
-              rows={4}
-              placeholder={step3Config.notesPlaceholder}
-              className={`w-full rounded-2xl px-4 py-3 text-sm text-slate-900 outline-none ${
-                hasStep3FieldError("notes") ? "border border-red-300" : "border border-slate-200"
-              }`}
-              required={requiredStep3Fields.includes("notes")}
-            />
+            <label className="block">
+              <span className={labelClass}>
+                Note
+                {requiredStep3Fields.includes("notes") ? " *" : ""}
+              </span>
+              <textarea
+                value={form.notes}
+                onChange={(event) => update("notes", event.target.value)}
+                onBlur={() => markStep3Touched("notes")}
+                rows={4}
+                placeholder={step3Config.notesPlaceholder}
+                className={hasStep3FieldError("notes") ? fieldErrorClass : fieldClass}
+                required={requiredStep3Fields.includes("notes")}
+              />
+            </label>
             {hasStep3FieldError("notes") ? (
-              <p className="text-xs text-red-600">Campo obbligatorio.</p>
+              <p className="text-xs text-red-700">Campo obbligatorio.</p>
             ) : null}
             {!canStepThree ? (
-              <p className="text-xs text-amber-700">
+              <p className="text-xs text-[var(--ink)]/55">
                 Completa i campi contrassegnati con <strong>*</strong> per continuare.
               </p>
             ) : null}
             {service?.focusQuestions?.length ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--ink)]/45">
                 Focus consulenza: {service.focusQuestions.join(" · ")}
               </p>
             ) : null}
@@ -543,8 +619,12 @@ export default function InteractiveConsultingWizard({ initialService }: Props) {
 
         {message ? (
           <p
-            className={`mt-4 text-sm font-medium ${
-              status === "success" ? "text-emerald-700" : status === "error" ? "text-red-600" : "text-slate-700"
+            className={`mt-4 border px-3 py-2.5 text-sm font-medium ${
+              status === "success"
+                ? "border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] text-[var(--ink)]"
+                : status === "error"
+                  ? "border-red-700/25 bg-red-50 text-red-900"
+                  : "border-[var(--ink)]/10 text-[var(--ink)]/70"
             }`}
           >
             {message}
@@ -556,7 +636,7 @@ export default function InteractiveConsultingWizard({ initialService }: Props) {
             <button
               type="button"
               onClick={() => setStep((current) => (current - 1) as Step)}
-              className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center border border-[var(--ink)]/20 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
             >
               Indietro
             </button>
@@ -569,7 +649,7 @@ export default function InteractiveConsultingWizard({ initialService }: Props) {
               (step === 3 && !canStepThree) ||
               status === "sending"
             }
-            className="rounded-full bg-cyan-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-60"
+            className="brutal-cta-ink inline-flex min-h-[44px] items-center bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {step < 3 ? "Continua" : status === "sending" ? "Invio..." : "Invia richiesta"}
           </button>

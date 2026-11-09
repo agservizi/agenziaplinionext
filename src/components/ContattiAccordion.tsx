@@ -9,7 +9,7 @@ export default function ContattiAccordion() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="divide-y divide-slate-100">
+    <div className="divide-y divide-[var(--ink)]/10">
       {faqs.map((faq, i) => {
         const isOpen = open === i;
         return (
@@ -19,14 +19,16 @@ export default function ContattiAccordion() {
               onClick={() => setOpen(isOpen ? null : i)}
               aria-expanded={isOpen}
               aria-controls={`faq-panel-${i}`}
-              className="flex w-full items-center justify-between gap-6 py-5 text-left transition hover:text-cyan-700"
+              className={`flex w-full items-center justify-between gap-6 py-5 text-left transition ${
+                isOpen ? "text-[#5E0ED7]" : "text-[var(--ink)] hover:text-[#5E0ED7]"
+              }`}
             >
-              <span className="text-base font-bold text-slate-900">{faq.q}</span>
+              <span className="text-base font-bold">{faq.q}</span>
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center border transition ${
                   isOpen
-                    ? "border-cyan-400 bg-cyan-500 text-white"
-                    : "border-slate-200 bg-white text-slate-500"
+                    ? "border-[#5E0ED7] bg-[#5E0ED7] text-white"
+                    : "border-[var(--ink)]/15 bg-[var(--paper)] text-[var(--ink)]/50"
                 }`}
               >
                 <svg
@@ -54,7 +56,7 @@ export default function ContattiAccordion() {
                   transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
                   className="overflow-hidden"
                 >
-                  <p className="pb-5 pr-14 text-sm leading-relaxed text-slate-600">
+                  <p className="pb-5 pr-14 text-sm leading-relaxed text-[var(--ink)]/60">
                     {faq.a}
                   </p>
                 </motion.div>

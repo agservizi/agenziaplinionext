@@ -3,6 +3,11 @@ import {
   gestiioSendRequest,
   markSendCheckoutPaid,
 } from "@/lib/gestiio-send";
+import { gestiioUpdatePractice } from "@/lib/gestiio-client-portal";
+import {
+  syncClientAreaRequestByGestiioUuid,
+  updateLinkedGestiioPracticeStatus,
+} from "@/lib/gestiio-client-portal-link";
 
 export const dynamic = "force-dynamic";
 
@@ -54,30 +59,49 @@ export async function POST(request: NextRequest) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object;
+      const amountCents = Number(session.amount_total);
+      const expectedAmount = Number(session?.metadata?.amount_cents);
+      const amountOk =
+        Number.isInteger(amountCents) &&
+        amountCents > 0 &&
+        amountCents === expectedAmount &&
+        String(session.currency || "").toLowerCase() === "eur";
+
       if (
         session?.payment_status === "paid" &&
         session?.metadata?.service === "send" &&
-        session?.metadata?.send_uuid
+        session?.metadata?.send_uuid &&
+        amountOk
       ) {
-        const amountCents = Number(session.amount_total);
-        const expectedAmount = Number(session.metadata.amount_cents);
-        if (
-          Number.isInteger(amountCents) &&
-          amountCents > 0 &&
-          amountCents === expectedAmount &&
-          String(session.currency || "").toLowerCase() === "eur"
-        ) {
-          await markSendCheckoutPaid({
-            uuid: String(session.metadata.send_uuid),
-            sessionId: String(session.id),
-            amountCents,
-            currency: String(session.currency),
-          });
-          await gestiioSendRequest(
-            `/richieste/${encodeURIComponent(String(session.metadata.send_uuid))}/invia`,
-            { method: "POST" },
-          ).catch(() => undefined);
-        }
+        await markSendCheckoutPaid({
+          uuid: String(session.metadata.send_uuid),
+          sessionId: String(session.id),
+          amountCents,
+          currency: String(session.currency),
+        });
+        await gestiioSendRequest(
+          `/richieste/${encodeURIComponent(String(session.metadata.send_uuid))}/invia`,
+          { method: "POST" },
+        ).catch(() => undefined);
+      }
+
+      if (
+        session?.payment_status === "paid" &&
+        session?.metadata?.service === "gestiio-client-portal" &&
+        session?.metadata?.gestiio_practice_uuid &&
+        amountOk
+      ) {
+        const uuid = String(session.metadata.gestiio_practice_uuid);
+        await gestiioUpdatePractice(uuid, {
+          payment_status: "paid",
+          status: "in_lavorazione",
+          stripe_session_id: String(session.id),
+          amount: amountCents / 100,
+        }).catch(() => undefined);
+        await updateLinkedGestiioPracticeStatus(uuid, "in_lavorazione", "paid").catch(
+          () => undefined,
+        );
+        await syncClientAreaRequestByGestiioUuid(uuid, "paid").catch(() => undefined);
       }
       break;
     }

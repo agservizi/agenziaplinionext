@@ -1,9 +1,0 @@
-mutation CheckoutCustomerDetach($id: ID!) {
-	checkoutCustomerDetach(id: $id) {
-		errors {
-			message
-			field
-			code
-		}
-	}
-}

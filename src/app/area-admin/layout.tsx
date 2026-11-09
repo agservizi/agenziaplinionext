@@ -1,24 +1,11 @@
 import type { Metadata } from "next";
-import AdminPortalGuard from "@/components/admin-area/AdminPortalGuard";
-import AdminSidebarShell from "@/components/admin-area/AdminSidebarShell";
-import SessionCookieBridge from "@/components/auth/SessionCookieBridge";
-import { PRIVATE_AREA_ROBOTS } from "@/lib/seo";
+import CmsShell from "@/components/cms/CmsShell";
 
 export const metadata: Metadata = {
-  robots: PRIVATE_AREA_ROBOTS,
+  title: "Editor sito | AG SERVIZI",
+  robots: { index: false, follow: false },
 };
 
-export default function AreaAdminLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <>
-      <SessionCookieBridge kind="staff" />
-      <AdminPortalGuard>
-        <AdminSidebarShell>{children}</AdminSidebarShell>
-      </AdminPortalGuard>
-    </>
-  );
+export default function AreaAdminLayout({ children }: { children: React.ReactNode }) {
+  return <CmsShell>{children}</CmsShell>;
 }

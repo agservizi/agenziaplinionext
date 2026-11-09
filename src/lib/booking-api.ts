@@ -68,9 +68,10 @@ export function resolveClientBookingApiBase() {
   }
 
   const hostname = window.location.hostname;
+  // Local: always same-origin so Next.js /api/booking/* can proxy to Express.
+  // Avoids CORS and avoids hitting a wrong process that happens to own :3001.
   if (hostname === "localhost" || hostname === "127.0.0.1") {
-    const base = resolveBookingApiBase(hostname);
-    return base || window.location.origin;
+    return window.location.origin;
   }
 
   // In production, use the booking tunnel

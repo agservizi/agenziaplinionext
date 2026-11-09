@@ -21,6 +21,7 @@ export function ApiForm({
     required?: boolean;
     placeholder?: string;
     defaultValue?: string;
+    options?: Array<{ value: string; label: string }>;
   }>;
   submitLabel: string;
   buildBody?: (values: Record<string, string>) => Record<string, unknown>;
@@ -77,39 +78,72 @@ export function ApiForm({
   return (
     <form
       onSubmit={onSubmit}
-      className={`space-y-3 rounded-xl border p-4 ${
-        isClient ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"
+      className={`space-y-3 border p-4 ${
+        isClient
+          ? "border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_92%,white)]"
+          : "rounded-xl border-slate-200 bg-white"
       }`}
     >
       {fields.map((field) => (
         <label key={field.name} className="block text-sm">
-          <span className={isClient ? "text-white/60" : "text-slate-600"}>{field.label}</span>
-          <input
-            type={field.type || "text"}
-            required={field.required}
-            placeholder={field.placeholder}
-            value={values[field.name] || ""}
-            onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
-            className={`mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-cyan-500/40 ${
+          <span
+            className={
               isClient
-                ? "border-white/10 bg-black/30 text-white"
-                : "border-slate-200 bg-white text-slate-900"
-            }`}
-          />
+                ? "text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45"
+                : "text-slate-600"
+            }
+          >
+            {field.label}
+          </span>
+          {field.options && field.options.length > 0 ? (
+            <select
+              required={field.required}
+              value={values[field.name] || ""}
+              onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
+              className={`mt-1.5 w-full border px-3 py-2 text-sm outline-none ${
+                isClient
+                  ? "border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] text-[var(--ink)] focus:border-[#5E0ED7]"
+                  : "rounded-lg border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-cyan-500/40"
+              }`}
+            >
+              {field.options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={field.type || "text"}
+              required={field.required}
+              placeholder={field.placeholder}
+              value={values[field.name] || ""}
+              onChange={(e) => setValues((v) => ({ ...v, [field.name]: e.target.value }))}
+              className={`mt-1.5 w-full border px-3 py-2 text-sm outline-none ${
+                isClient
+                  ? "border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] text-[var(--ink)] focus:border-[#5E0ED7]"
+                  : "rounded-lg border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-cyan-500/40"
+              }`}
+            />
+          )}
         </label>
       ))}
       <button
         type="submit"
         disabled={loading}
-        className="rounded-full bg-[#5E0ED7] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-50"
+        className={
+          isClient
+            ? "brutal-cta-ink bg-[var(--ink)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white hover:bg-[#5E0ED7] disabled:opacity-50"
+            : "rounded-full bg-[#5E0ED7] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-50"
+        }
       >
         {loading ? "Attendi…" : submitLabel}
       </button>
       {message ? (
-        <p className={`text-sm ${isClient ? "text-emerald-300" : "text-emerald-700"}`}>{message}</p>
+        <p className={`text-sm ${isClient ? "text-emerald-800" : "text-emerald-700"}`}>{message}</p>
       ) : null}
       {error ? (
-        <p className={`text-sm ${isClient ? "text-rose-300" : "text-rose-700"}`}>{error}</p>
+        <p className={`text-sm ${isClient ? "text-rose-800" : "text-rose-700"}`}>{error}</p>
       ) : null}
     </form>
   );
@@ -161,10 +195,10 @@ export function ActionButton({
         type="button"
         disabled={loading}
         onClick={run}
-        className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+        className={`border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
           tone === "client"
-            ? "border-white/20 text-white hover:bg-white/10"
-            : "border-slate-200 text-slate-700 hover:bg-slate-50"
+            ? "border-[var(--ink)]/20 text-[var(--ink)] hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+            : "rounded-full border-slate-200 text-slate-700 hover:bg-slate-50"
         }`}
       >
         {loading ? "…" : label}

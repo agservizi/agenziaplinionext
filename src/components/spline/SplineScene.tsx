@@ -1,7 +1,14 @@
 "use client";
 
+/**
+ * Fact-forcing:
+ * - Callers: HomeSplinePanel, home-online-bento, CinematicChapter (home/web 3D).
+ * - Change: gate remote prod.spline.design load behind consent.preferences.
+ * - User instruction: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP"
+ */
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { useConsent } from "@/components/cookies/ConsentProvider";
 
 const Spline = dynamic(
   () =>
@@ -17,7 +24,7 @@ const Spline = dynamic(
 
 const DEFAULT_SCENE = "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode";
 
-function SplineFallback({ state = "idle" }: { state?: "idle" | "loading" }) {
+function SplineFallback({ state = "idle" }: { state?: "idle" | "loading" | "blocked" }) {
   return (
     <div className="spline-fallback relative h-full min-h-[220px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/80">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_25%,rgba(34,211,238,0.22),transparent_32%),radial-gradient(circle_at_74%_68%,rgba(94,14,215,0.28),transparent_36%)]" />
@@ -26,7 +33,11 @@ function SplineFallback({ state = "idle" }: { state?: "idle" | "loading" }) {
       <div className="absolute bottom-[18%] right-[16%] h-14 w-14 rounded-2xl border border-white/12 bg-violet-400/16 motion-safe:animate-[heroFloat_7s_ease-in-out_infinite_0.4s]" />
       <div className="absolute inset-x-0 bottom-0 p-5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/80">
-          {state === "loading" ? "Caricamento scena 3D" : "Esperienza 3D ottimizzata"}
+          {state === "loading"
+            ? "Caricamento scena 3D"
+            : state === "blocked"
+              ? "3D remoto disattivato (preferenze cookie)"
+              : "Esperienza 3D ottimizzata"}
         </p>
       </div>
     </div>
@@ -40,12 +51,16 @@ export default function SplineScene({
   className?: string;
   scene?: string;
 }) {
+  const { consent } = useConsent();
   const [canRenderSpline, setCanRenderSpline] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const sceneUrl = useMemo(
     () => scene || process.env.NEXT_PUBLIC_SPLINE_HOME_SCENE || DEFAULT_SCENE,
     [scene],
   );
+
+  // Remote Spline loads from prod.spline.design — only after "preferences" consent.
+  const allowRemote3d = Boolean(consent?.preferences);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px) and (prefers-reduced-motion: no-preference)");
@@ -55,12 +70,20 @@ export default function SplineScene({
     return () => media.removeEventListener("change", update);
   }, []);
 
+  const showRemote = canRenderSpline && allowRemote3d;
+
   return (
     <div className={`relative ${className}`}>
-      {!canRenderSpline ? <SplineFallback /> : null}
-      {canRenderSpline ? (
+      {!showRemote ? (
+        <SplineFallback state={canRenderSpline && !allowRemote3d ? "blocked" : "idle"} />
+      ) : null}
+      {showRemote ? (
         <div className="relative h-full min-h-[220px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/80">
-          {!loaded ? <div className="absolute inset-0"><SplineFallback state="loading" /></div> : null}
+          {!loaded ? (
+            <div className="absolute inset-0">
+              <SplineFallback state="loading" />
+            </div>
+          ) : null}
           <Spline
             scene={sceneUrl}
             renderOnDemand
