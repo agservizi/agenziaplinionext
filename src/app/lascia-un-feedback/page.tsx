@@ -38,9 +38,14 @@ export default function LasciaUnFeedbackPage() {
             </p>
           </header>
 
-          <section className="grid gap-8 border border-[var(--ink)]/15 bg-white p-6 md:grid-cols-[1.1fr_0.9fr] md:p-8">
+          <section className="grid gap-8 border border-[var(--ink)]/15 bg-[var(--paper)] p-6 md:grid-cols-[1.1fr_0.9fr] md:p-8">
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-[var(--ink)]">Recensione su Google</h2>
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/40">
+                Pubblico
+              </p>
+              <h2 className="display-type text-2xl text-[var(--ink)] md:text-3xl">
+                Recensione su Google
+              </h2>
               <p className="text-sm leading-relaxed text-[var(--ink)]/65">
                 Apri la scheda Google Business Profile e lascia un commento onesto. Il QR qui a
                 fianco punta allo stesso link.
