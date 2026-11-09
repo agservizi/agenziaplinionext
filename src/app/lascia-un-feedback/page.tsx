@@ -4,7 +4,6 @@
  * User plan: “Creare /recensioni e /lascia-un-feedback + QR/GBP + link trust”.
  */
 import Image from "next/image";
-import Link from "next/link";
 import type { Metadata } from "next";
 import Container from "@/components/Container";
 import ContactForm from "@/components/ContactForm";
@@ -18,13 +17,6 @@ export const metadata: Metadata = buildMetadata({
     "Racconta la tua esperienza su Google o inviaci un feedback privato. Nessun incentivo a stelle: solo ascolto.",
   path: "/lascia-un-feedback",
 });
-
-const waLink = `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(
-  "Ciao, vorrei lasciare un feedback su AG SERVIZI.",
-)}`;
-const smsLink = `sms:${company.phone.replace(/\s/g, "")}?body=${encodeURIComponent(
-  "Feedback AG SERVIZI: ",
-)}`;
 
 export default function LasciaUnFeedbackPage() {
   return (
@@ -91,47 +83,6 @@ export default function LasciaUnFeedbackPage() {
               initialMessage="Vorrei lasciare un feedback su: "
               submitLabel="Invia feedback"
             />
-          </section>
-
-          <section className="space-y-4 border border-[var(--ink)]/15 p-6 print:border-black">
-            <h2 className="text-xl font-semibold text-[var(--ink)]">
-              Script WA / SMS / email (per stampa o staff)
-            </h2>
-            <p className="text-sm leading-relaxed text-[var(--ink)]/65">
-              Messaggio policy-safe da inviare dopo un servizio riuscito (24–48h), senza chiedere
-              stelle:
-            </p>
-            <blockquote className="border-l-2 border-[#5E0ED7] bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-4 py-3 text-sm italic text-[var(--ink)]/75">
-              “Ciao, grazie di essere passato da AG SERVIZI. Se vuoi, puoi raccontare la tua
-              esperienza su Google o scriverci in privato da agenziaplinio.it/lascia-un-feedback.
-              Solo se ti va.”
-            </blockquote>
-            <ul className="space-y-2 text-sm text-[var(--ink)]/70">
-              <li>
-                WhatsApp:{" "}
-                <a href={waLink} className="text-[#5E0ED7] underline" target="_blank" rel="noopener noreferrer">
-                  apri chat
-                </a>
-              </li>
-              <li>
-                SMS:{" "}
-                <a href={smsLink} className="text-[#5E0ED7] underline">
-                  {company.phone}
-                </a>
-              </li>
-              <li>
-                Email:{" "}
-                <a href={`mailto:${company.email}`} className="text-[#5E0ED7] underline">
-                  {company.email}
-                </a>
-              </li>
-              <li>
-                Pagina pubblica:{" "}
-                <Link href="/recensioni" className="text-[#5E0ED7] underline">
-                  /recensioni
-                </Link>
-              </li>
-            </ul>
           </section>
         </Container>
       </div>

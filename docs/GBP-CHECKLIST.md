@@ -28,3 +28,15 @@ User plan: “Docs operativi GBP: docs/GBP-CHECKLIST.md … esecuzione dashboard
 ## Policy
 
 Nessun incentivo a stelle o sconti legati alle recensioni Google.
+
+## Script follow-up staff (interno — non pubblicare sul sito)
+
+Messaggio policy-safe da inviare 24–48h dopo un servizio riuscito, senza chiedere stelle:
+
+> Ciao, grazie di essere passato da AG SERVIZI. Se vuoi, puoi raccontare la tua esperienza su Google o scriverci in privato da agenziaplinio.it/lascia-un-feedback. Solo se ti va.
+
+- WhatsApp: `https://wa.me/393773798570`
+- SMS / telefono: +39 377 379 8570
+- Email: info@agenziaplinio.it
+- Pagina pubblica recensioni: `/recensioni`
+- Pagina feedback cliente: `/lascia-un-feedback`
