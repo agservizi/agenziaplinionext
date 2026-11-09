@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Fact-forcing:
+ * - Callers: root layout via ConsentProvider wrap; useConsent in SplineScene/ConsentScripts.
+ * - Change: ignore cookie if version ≠ CONSENT_POLICY_VERSION (re-prompt after 1.1).
+ * - User: "procedi su tutto al 100% non mancare niente chiudiamo questo GAP".
+ */
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import CookieBanner from "@/components/cookies/CookieBanner";
 import CookiePreferencesModal from "@/components/cookies/CookiePreferencesModal";
@@ -65,7 +71,7 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const existing = parseConsentCookie();
-    if (existing) {
+    if (existing && existing.version === CONSENT_POLICY_VERSION) {
       setConsent(existing);
       updateConsentMode(existing);
     } else {
