@@ -182,10 +182,16 @@ export async function updateClientPortalProfile(input: {
   };
 }
 
+/**
+ * Callers: Header.tsx (~207), ClientLoginForm, ClientPortalLoginForm.
+ * API: POST /api/client-auth/register JSON { fullName, email, password, ageConfirmed? }.
+ * User: "le cta e le card non sono uguali da dev a prod"
+ */
 export async function submitClientPortalRegistrationRequest(input: {
   fullName: string;
   email: string;
   password: string;
+  ageConfirmed?: boolean;
 }) {
   const response = await fetch(buildApiUrl("/api/client-auth/register"), {
     method: "POST",
