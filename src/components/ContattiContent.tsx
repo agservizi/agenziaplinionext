@@ -11,7 +11,8 @@ import {
 import Container from "./Container";
 import ContactInteractiveSection from "@/components/ContactInteractiveSection";
 import ContattiAccordion from "@/components/ContattiAccordion";
-import { company } from "@/lib/site-data";
+import { company, getOpeningHours } from "@/lib/site-data";
+/* Callers: /contatti page. Plan: SEO hours from getOpeningHours. */
 import { TextReveal } from "@/components/motion/TextReveal";
 import { FadeUp } from "@/components/motion/FadeUp";
 
@@ -96,11 +97,11 @@ const channels = [
   },
 ];
 
-const schedule = [
-  { day: "Lunedi - Venerdi", hours: "08:45-13:20 / 16:20-19:00", closed: false },
-  { day: "Sabato", hours: "09:20-12:30", closed: false },
-  { day: "Domenica", hours: "Chiuso", closed: true },
-];
+const schedule = getOpeningHours().map((row) => ({
+  day: row.day,
+  hours: row.hours,
+  closed: row.hours === "Chiuso",
+}));
 
 export default function ContattiContent() {
   const reduced = useReducedMotion();

@@ -54,9 +54,10 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
   {
     slug: "deposito-bagagli",
     title: "Deposito bagagli",
-    shortDescription: "Prenota online il deposito bagagli e ritira in agenzia a Castellammare di Stabia.",
+    shortDescription:
+      "Informazioni sul deposito bagagli in agenzia: orari, documenti e come funziona. La prenotazione è sul modulo dedicato.",
     heroDescription:
-      "Devi lasciare le valigie per qualche ora? Prenota online, deposita in Via Plinio il Vecchio 72 e ritira quando vuoi. Paghi a giornata.",
+      "Qui trovi come funziona il deposito in Via Plinio 72. Per prenotare e pagare usa il modulo prodotto dedicato.",
     customerBenefits: [
       "Prenoti online in un minuto, senza chiamare.",
       "Depositi e ritiri in agenzia, negli orari di apertura.",
@@ -77,9 +78,9 @@ export const logisticsServiceDetails: LogisticsServiceDetail[] = [
     slug: "invio-pratiche-send",
     title: "Invio pratiche SEND",
     shortDescription:
-      "Leggiamo l'avviso, prepariamo i documenti e inviamo la pratica per te. Pagamento online.",
+      "Guida al servizio SEND: documenti, IUN e cosa controlliamo. L'invio e il pagamento sono sul modulo /send.",
     heroDescription:
-      "Hai ricevuto un avviso con IUN o scadenze da rispettare? Carica i documenti, paghi online e seguiamo la pratica fino all'invio.",
+      "Questa pagina spiega il servizio. Per caricare documenti e completare il pagamento vai al modulo SEND dedicato.",
     customerBenefits: [
       "Controlliamo IUN, scadenze e documenti richiesti.",
       "Verifichiamo identità e deleghe prima dell'invio.",

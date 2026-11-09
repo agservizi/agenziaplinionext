@@ -327,7 +327,7 @@ export function clientFallbackReply(question, history = []) {
   }
 
   if (humanOperatorIntent) {
-    return "Certo. Ti metto in contatto con un operatore umano. Puoi contattarci via email (info@agenziaplinio.it) o telefono (081 0584542). Se preferisci, posso anche raccogliere qui nome e telefono/email per farti richiamare.";
+    return "Certo. Ti metto in contatto con un operatore umano. Puoi contattarci via email (info@agenziaplinio.it) o telefono (+39 377 379 8570). Se preferisci, posso anche raccogliere qui nome e telefono/email per farti richiamare.";
   }
 
   if (asksHowCanYouHelp) {
@@ -559,7 +559,7 @@ export function clientFallbackReply(question, history = []) {
     return "Orari indicativi: Lunedi - Venerdi 08:45 - 13:20 / 16:20 - 19:00. Sabato 09:20 - 12:30. Domenica: Chiuso. Per conferma aggiornata contatta direttamente l'agenzia.";
   }
   if (includesAny(q, ["operatore", "contatto", "contattare", "telefono", "whatsapp"])) {
-    return "Puoi contattare AG Servizi via email (info@agenziaplinio.it) o telefono (081 0584542). Se vuoi posso anche guidarti sul servizio giusto.";
+    return "Puoi contattare AG Servizi via email (info@agenziaplinio.it) o telefono (+39 377 379 8570). Se vuoi posso anche guidarti sul servizio giusto.";
   }
 
   const lastAssistantNormalized = normalize(lastAssistant);

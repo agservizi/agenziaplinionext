@@ -9,9 +9,23 @@ export const company = {
   openedDay: 1,
   phone: "+39 377 379 8570",
   whatsapp: "393773798570",
+  email: "info@agenziaplinio.it",
   googleBusinessUrl:
     "https://maps.app.goo.gl/FDVRXDWNp7J5dRrk8",
 };
+
+/** Callers: LocalBusinessJsonLd, zone pages. User plan: SEO NAP + areaServed. */
+export const serviceAreaCities = [
+  "Castellammare di Stabia",
+  "Gragnano",
+  "Pompei",
+  "Torre Annunziata",
+  "Vico Equense",
+  "Piano di Sorrento",
+  "Meta",
+  "Sant'Agnello",
+  "Torre del Greco",
+] as const;
 
 export function getYearsActive(): number {
   const now = new Date();

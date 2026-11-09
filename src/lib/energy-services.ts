@@ -72,6 +72,50 @@ export const energyServiceDetails: EnergyServiceDetail[] = [
       "Controlla che email e telefono siano corretti per ricevere le notifiche.",
     ],
   },
+  {
+    slug: "plenitude",
+    title: "Plenitude",
+    shortDescription:
+      "Offerte luce e gas Plenitude. Confrontiamo la bolletta e gestiamo il cambio fornitore.",
+    heroDescription:
+      "Porta la bolletta in Via Plinio 72: confrontiamo Plenitude con i tuoi consumi reali e, se conviene, prepariamo la pratica.",
+    customerBenefits: [
+      "Confronto chiaro su costi e condizioni prima di firmare.",
+      "Gestione attivazione, subentro o voltura con controllo documenti.",
+      "Aggiornamenti sullo stato della pratica in sede o al telefono.",
+    ],
+    requiredInfo: [
+      "Documento di identità e codice fiscale.",
+      "POD/PDR e indirizzo di fornitura.",
+      "Ultima bolletta, se disponibile.",
+    ],
+    notes: [
+      "Le condizioni dipendono dal profilo di consumo e dal periodo.",
+      "Dati anagrafici e fornitura devono corrispondere.",
+    ],
+  },
+  {
+    slug: "sentra",
+    title: "Sentra Energia",
+    shortDescription:
+      "Sentra Energia per luce e gas: analisi bolletta e cambio fornitore assistito in sede.",
+    heroDescription:
+      "Ti interessa Sentra? Vediamo insieme se conviene rispetto alla tua bolletta attuale e gestiamo i documenti per il passaggio.",
+    customerBenefits: [
+      "Analisi dei consumi prima di proporre un cambio.",
+      "Controllo POD/PDR e anagrafica per ridurre scarti.",
+      "Supporto fino all'attivazione.",
+    ],
+    requiredInfo: [
+      "Documento di identità e codice fiscale.",
+      "POD/PDR o bolletta attuale.",
+      "Email e telefono per le comunicazioni.",
+    ],
+    notes: [
+      "Tempi di switching dipendono dal distributore e dai dati inviati.",
+      "Eventuali cambi intestatario possono richiedere documenti extra.",
+    ],
+  },
 ];
 
 export function getEnergyServiceBySlug(slug: string) {
@@ -82,6 +126,8 @@ const energySlugByCatalogTitle: Record<string, string> = {
   "Enel Energia": "enel-energia",
   "A2A Energia": "a2a-energia",
   "Fastweb Energia": "fastweb-energia",
+  Plenitude: "plenitude",
+  "Sentra Energia": "sentra",
 };
 
 export function getEnergyServiceSlugByCatalogTitle(title: string) {

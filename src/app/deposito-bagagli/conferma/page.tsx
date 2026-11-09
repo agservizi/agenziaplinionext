@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import Container from "@/components/Container";
+import ReviewInvite from "@/components/ReviewInvite";
+/* Callers: deposito success. User: micro-copy recensioni conferma deposito. */
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -78,6 +80,8 @@ function ConfermaContent() {
               I miei depositi
             </Link>
           </div>
+
+          <ReviewInvite tone="dark" className="mx-auto mt-8 max-w-sm" />
         </motion.div>
       </Container>
     </main>

@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import ReviewInvite from "@/components/ReviewInvite";
 import { BOOKING_SERVICE_OPTIONS, resolveClientBookingApiBase } from "@/lib/booking-api";
+/* Callers: prenota UI. User: micro-copy recensioni su conferme prenota. */
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -776,6 +778,7 @@ export default function PublicBookingDrawer({
                       </p>
                     )}
                   </div>
+                  <ReviewInvite tone="light" className="mx-auto max-w-sm" />
                   <button
                     type="button"
                     onClick={onClose}

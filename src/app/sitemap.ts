@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
 import { digitalServiceDetails } from "@/lib/digital-services";
 import { energyServiceDetails } from "@/lib/energy-services";
+import { guideArticles } from "@/lib/guide-articles";
 import { logisticsServiceDetails } from "@/lib/logistics-services";
 import { paymentServiceDetails } from "@/lib/payment-services";
 import { phoneServiceDetails } from "@/lib/phone-services";
 import { absoluteImageUrl, SITE_URL, isIndexablePath } from "@/lib/seo";
+import { seoZones } from "@/lib/seo-zones";
 import { webAgencyServiceDetails } from "@/lib/web-agency-services";
+/* Sitemap callers: Next MetadataRoute. User: silo + URL nuove. */
 
 export const dynamic = "force-static";
 
@@ -24,9 +27,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/servizi/web-agency",
     "/servizi/spid-pec-firma-digitale",
     "/web-agency",
+    "/web-agency/lavori",
     "/consulenza",
     "/prenota",
     "/contatti",
+    "/recensioni",
+    "/lascia-un-feedback",
+    "/prezzi",
+    "/zone",
+    "/guide",
+    "/diritti-consumatore",
     "/cookie-policy",
     "/privacy-policy",
     "/deposito-bagagli",
@@ -36,6 +46,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/fermo-deposito/i-miei-pacchi",
     "/send",
   ];
+
+  const zoneRoutes = seoZones.map((zone) => `/zone/${zone.slug}`);
+  const guideRoutes = guideArticles.map((article) => `/guide/${article.slug}`);
 
   const paymentRoutes = paymentServiceDetails.map(
     (service) => `/servizi/pagamenti/${service.slug}`,
@@ -59,6 +72,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = Array.from(
     new Set([
       ...publicRoutes,
+      ...zoneRoutes,
+      ...guideRoutes,
       ...paymentRoutes,
       ...phoneRoutes,
       ...energyRoutes,

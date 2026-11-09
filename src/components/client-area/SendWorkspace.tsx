@@ -9,6 +9,8 @@ import { getClientPortalToken } from "@/lib/client-portal-auth";
 import DatePicker from "@/components/ui/DatePicker";
 import PaymentCheckoutNotice from "@/components/compliance/PaymentCheckoutNotice";
 import PrivateUploadNotice from "@/components/compliance/PrivateUploadNotice";
+import ReviewInvite from "@/components/ReviewInvite";
+/* User plan: micro-copy recensioni su conferma SEND. */
 
 type ApplicantType = "destinatario" | "delegato" | "impresa" | "delegato_impresa";
 type Step = "details" | "documents" | "status";
@@ -691,6 +693,9 @@ export default function SendWorkspace({ guest = false }: { guest?: boolean }) {
             {error || message}
           </div>
         )}
+        {!error && message.includes("Pagamento confermato") ? (
+          <ReviewInvite tone="light" className="mb-6" />
+        ) : null}
 
         {step === "details" && (
           <form onSubmit={createDraft} className="space-y-6">

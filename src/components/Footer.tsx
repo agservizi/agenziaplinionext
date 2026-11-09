@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Link } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 import Container from "./Container";
-import { company, navigation, getYearsActive } from "@/lib/site-data";
+import { company, navigation, getYearsActive, getOpeningHours } from "@/lib/site-data";
+/* Callers: AppShell. Plan: SEO NAP hours + reputation links. */
 import { useConsent } from "@/components/cookies/ConsentProvider";
 
 const WHATSAPP_URL = `https://wa.me/${company.whatsapp}?text=${encodeURIComponent("Ciao! Vorrei ricevere informazioni sui vostri servizi.")}`;
@@ -114,6 +115,15 @@ export default function Footer() {
               <Link href="/consulenza" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
                 Consulenza
               </Link>
+              <Link href="/prezzi" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                Prezzi
+              </Link>
+              <Link href="/zone" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                Zone
+              </Link>
+              <Link href="/guide" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                Guide
+              </Link>
             </div>
           </div>
 
@@ -122,11 +132,7 @@ export default function Footer() {
               Orari di apertura
             </p>
             <div className="space-y-2">
-              {[
-                { day: "Lun – Ven", hours: "08:45–13:20 / 16:20–19:00" },
-                { day: "Sabato", hours: "09:20–12:30" },
-                { day: "Domenica", hours: "Chiuso" },
-              ].map((r) => (
+              {getOpeningHours().map((r) => (
                 <div key={r.day} className="flex items-center justify-between gap-4 text-sm">
                   <span className="text-[var(--ink)]/55">{r.day}</span>
                   <span className={`font-mono text-xs ${r.hours === "Chiuso" ? "text-[var(--ink)]/35" : "text-[var(--ink)]/80"}`}>
@@ -163,6 +169,15 @@ export default function Footer() {
               <Link href="/disiscriviti" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
                 Disiscrizione email
               </Link>
+              <Link href="/recensioni" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                Recensioni
+              </Link>
+              <Link href="/lascia-un-feedback" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                Lascia un feedback
+              </Link>
+              <a href={`mailto:${company.email}`} className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
+                {company.email}
+              </a>
               {company.googleBusinessUrl && (
                 <a href={company.googleBusinessUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--ink)]/65 transition hover:text-[#5E0ED7]">
                   Google Business

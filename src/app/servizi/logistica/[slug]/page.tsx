@@ -67,6 +67,10 @@ export default async function LogisticsServiceDetailPage({ params }: LogisticsSe
               <Link href="/deposito-bagagli" className="cta-glass cta-glass-md cta-glass-primary-light">
                 Prenota deposito bagagli
               </Link>
+            ) : service.slug === "invio-pratiche-send" ? (
+              <Link href="/send" className="cta-glass cta-glass-md cta-glass-primary-light">
+                Avvia pratica SEND
+              </Link>
             ) : (
               <Link href="/consulenza?service=logistica" className="cta-glass cta-glass-md cta-glass-primary-light">
                 Richiedi supporto

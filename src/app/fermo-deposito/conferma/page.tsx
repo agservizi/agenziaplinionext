@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import Container from "@/components/Container";
+import ReviewInvite from "@/components/ReviewInvite";
+/* Callers: fermo success. User: micro-copy recensioni conferma fermo. */
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -106,6 +108,8 @@ function ConfermaContent() {
               Nuova prenotazione
             </Link>
           </div>
+
+          <ReviewInvite tone="dark" className="mx-auto mt-8 max-w-sm" />
 
           <p className="mt-8 text-xs text-slate-600">
             Via Plinio il Vecchio 72 · Castellammare di Stabia

@@ -1,4 +1,4 @@
-import { company, serviceCategories } from "@/lib/site-data";
+import { company, serviceAreaCities, serviceCategories } from "@/lib/site-data";
 import { absoluteImageUrl, absoluteUrl, SITE_URL, SITE_NAME, GEO } from "@/lib/seo";
 import { googleReviews, googleReviewsCount } from "@/lib/google-reviews";
 
@@ -47,6 +47,7 @@ export default function LocalBusinessJsonLd() {
         legalName: company.legalName,
         url: SITE_URL,
         telephone: company.phone,
+        email: company.email,
         logo: {
           "@type": "ImageObject",
           "@id": `${SITE_URL}/#logo`,
@@ -62,6 +63,7 @@ export default function LocalBusinessJsonLd() {
           "@type": "ContactPoint",
           contactType: "customer service",
           telephone: company.phone,
+          email: company.email,
           availableLanguage: "Italian",
           areaServed: GEO.country,
         },
@@ -97,6 +99,7 @@ export default function LocalBusinessJsonLd() {
         image: absoluteImageUrl("/og-default.svg"),
         logo: { "@id": `${SITE_URL}/#logo` },
         telephone: company.phone,
+        email: company.email,
         address,
         geo,
         hasMap: company.googleBusinessUrl,
@@ -104,31 +107,31 @@ export default function LocalBusinessJsonLd() {
           {
             "@type": "OpeningHoursSpecification",
             dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-            opens: "09:00",
-            closes: "13:00",
+            opens: "08:45",
+            closes: "13:20",
           },
           {
             "@type": "OpeningHoursSpecification",
             dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-            opens: "15:30",
+            opens: "16:20",
             closes: "19:00",
           },
           {
             "@type": "OpeningHoursSpecification",
             dayOfWeek: "Saturday",
-            opens: "09:00",
-            closes: "13:00",
+            opens: "09:20",
+            closes: "12:30",
           },
         ],
         areaServed: [
-          {
-            "@type": "City",
-            name: GEO.placename,
+          ...serviceAreaCities.map((name) => ({
+            "@type": "City" as const,
+            name,
             containedInPlace: {
-              "@type": "AdministrativeArea",
+              "@type": "AdministrativeArea" as const,
               name: GEO.addressRegion,
             },
-          },
+          })),
           {
             "@type": "AdministrativeArea",
             name: "Provincia di Napoli",

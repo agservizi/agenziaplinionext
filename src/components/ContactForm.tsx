@@ -91,6 +91,7 @@ export default function ContactForm({
         Servizio di interesse
         <select name="service" className={inputClass} defaultValue={initialService}>
           <option value="">Seleziona un servizio</option>
+          <option>Feedback privato</option>
           <option>Bollettini (123 – 451 – 674 – 896)</option>
           <option>Bonifici bancari</option>
           <option>F24</option>

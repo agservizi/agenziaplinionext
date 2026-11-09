@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import Container from "@/components/Container";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import { googleReviews as reviews } from "@/lib/google-reviews";
+/* Callers: HomeContent. Trust CTAs → /recensioni + /lascia-un-feedback. User: link trust. */
 
 function StarIcon({ filled }: { filled: boolean }) {
   return (
@@ -212,20 +214,26 @@ export default function HomeReviews() {
         <Reveal delay={0.1}>
           <div className="flex flex-col items-center gap-3 text-center">
             <p className="text-sm text-[var(--ink)]/65">
-              Sei stato da noi? Raccontalo su Google.
+              Sei stato da noi? Leggi le recensioni o lascia la tua.
             </p>
-            <a
-              href="https://www.google.com/maps/place/AG+SERVIZI+VIA+PLINIO+72+DI+CAVALIERE+CARMINE/@40.7004667,14.4853708,17z/data=!3m1!5s0x133bbd4640846007:0x127e51d71a00ab80!4m6!3m5!1s0x133bbd463f76daab:0xcb56bc8d70daedc5!8m2!3d40.7004667!4d14.4853708!16s%2Fg%2F11cn8yvt32?entry=ttu&g_ep=EgoyMDI2MDQxMi4wIKXMDSoASAFQAw%3D%3D"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="brutal-cta-ink group inline-flex items-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
-            >
-              <GoogleLogo />
-              Lascia una recensione su Google
-              <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" aria-hidden="true">
-                <path d="M4.5 10h11M10.5 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/recensioni"
+                className="brutal-cta-ink group inline-flex items-center gap-2 bg-[var(--ink)] px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-[#5E0ED7]"
+              >
+                <GoogleLogo />
+                Vedi le recensioni
+                <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" aria-hidden="true">
+                  <path d="M4.5 10h11M10.5 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+              <Link
+                href="/lascia-un-feedback"
+                className="inline-flex items-center border border-[var(--ink)]/20 bg-white px-6 py-3 text-sm font-bold uppercase tracking-[0.18em] text-[var(--ink)] transition hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+              >
+                Lascia un feedback
+              </Link>
+            </div>
           </div>
         </Reveal>
       </Container>
