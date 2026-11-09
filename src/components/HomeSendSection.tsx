@@ -126,10 +126,10 @@ export default function HomeSendSection() {
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/* Caller: HomeContent; no API. User: "il pulsante in home sezione send è tutto bianco e testo bianco" */}
               <Link
                 href="/send"
-                className="brutal-cta-ink group inline-flex min-h-12 items-center justify-center gap-3 bg-white px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-colors hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
-                style={{ color: "#21134f" }}
+                className="group inline-flex min-h-12 items-center justify-center gap-3 bg-white px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#21134f] transition-colors hover:bg-cyan-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
               >
                 Avvia la pratica SEND
                 <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none">
