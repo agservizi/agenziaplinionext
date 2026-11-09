@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * Callers: Contatti + /lascia-un-feedback. API: POST /api/contatti.
+ * User: convert feedback form to brutal editorial + deploy.
+ */
 import { useState } from "react";
 
 type FormState = "idle" | "loading" | "success" | "error";
@@ -11,6 +15,19 @@ type ContactFormProps = {
   submitLabel?: string;
 };
 
+const lightInput =
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+const darkInput =
+  "w-full border border-white/15 bg-slate-950/40 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-cyan-400";
+const lightLabel =
+  "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45";
+const darkLabel =
+  "mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-white/45";
+const lightButton =
+  "brutal-cta-ink w-full bg-[var(--ink)] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
+const darkButton =
+  "brutal-cta-ink w-full bg-cyan-500 px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60";
+
 export default function ContactForm({
   tone = "dark",
   initialService = "",
@@ -20,9 +37,8 @@ export default function ContactForm({
   const [state, setState] = useState<FormState>("idle");
   const [message, setMessage] = useState("");
   const isDark = tone === "dark";
-  const inputClass = isDark
-    ? "w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
-    : "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500";
+  const inputClass = isDark ? darkInput : lightInput;
+  const labelClass = isDark ? darkLabel : lightLabel;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,28 +83,19 @@ export default function ContactForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className={isDark ? "space-y-2 text-sm text-slate-200" : "space-y-2 text-sm text-slate-700"}>
-          Nome e cognome
-          <input
-            name="name"
-            required
-            className={inputClass}
-          />
+        <label className="block">
+          <span className={labelClass}>Nome e cognome</span>
+          <input name="name" required className={inputClass} />
         </label>
-        <label className={isDark ? "space-y-2 text-sm text-slate-200" : "space-y-2 text-sm text-slate-700"}>
-          Email
-          <input
-            type="email"
-            name="email"
-            required
-            className={inputClass}
-          />
+        <label className="block">
+          <span className={labelClass}>Email</span>
+          <input type="email" name="email" required className={inputClass} />
         </label>
       </div>
-      <label className={isDark ? "space-y-2 text-sm text-slate-200" : "space-y-2 text-sm text-slate-700"}>
-        Servizio di interesse
+      <label className="block">
+        <span className={labelClass}>Servizio di interesse</span>
         <select name="service" className={inputClass} defaultValue={initialService}>
           <option value="">Seleziona un servizio</option>
           <option>Feedback privato</option>
@@ -122,24 +129,20 @@ export default function ContactForm({
           <option>Gestionali su misura</option>
         </select>
       </label>
-      <label className={isDark ? "space-y-2 text-sm text-slate-200" : "space-y-2 text-sm text-slate-700"}>
-        Messaggio
+      <label className="block">
+        <span className={labelClass}>Messaggio</span>
         <textarea
           name="message"
           required
           rows={5}
           defaultValue={initialMessage}
-          className={inputClass}
+          className={`${inputClass} min-h-28 resize-y`}
         />
       </label>
       <button
         type="submit"
         disabled={state === "loading"}
-        className={
-          isDark
-            ? "w-full rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-cyan-500/70"
-            : "w-full rounded-full bg-cyan-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-cyan-600/70"
-        }
+        className={isDark ? darkButton : lightButton}
       >
         {state === "loading" ? "Invio in corso..." : submitLabel}
       </button>
@@ -149,11 +152,11 @@ export default function ContactForm({
           className={
             state === "success"
               ? isDark
-                ? "text-sm text-emerald-300"
-                : "text-sm text-emerald-700"
+                ? "border border-emerald-400/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300"
+                : "border border-emerald-700/25 bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
               : isDark
-                ? "text-sm text-rose-300"
-                : "text-sm text-rose-700"
+                ? "border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300"
+                : "border border-red-700/25 bg-red-50 px-3 py-2 text-sm text-red-900"
           }
         >
           {message}

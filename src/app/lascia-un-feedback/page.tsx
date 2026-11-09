@@ -71,12 +71,19 @@ export default function LasciaUnFeedbackPage() {
             </div>
           </section>
 
-          <section className="space-y-4 border border-[var(--ink)]/15 bg-white p-6 md:p-8">
-            <h2 className="text-xl font-semibold text-[var(--ink)]">Feedback privato</h2>
-            <p className="text-sm leading-relaxed text-[var(--ink)]/65">
-              Preferisci dirci qualcosa senza pubblicarlo? Compila il form: arriva in agenzia
-              come un messaggio di contatto.
-            </p>
+          <section className="space-y-5 border border-[var(--ink)]/15 bg-[var(--paper)] p-6 md:p-8">
+            <div className="space-y-2 border-b border-[var(--ink)]/10 pb-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ink)]/40">
+                Privato
+              </p>
+              <h2 className="display-type text-2xl text-[var(--ink)] md:text-3xl">
+                Feedback privato
+              </h2>
+              <p className="text-sm leading-relaxed text-[var(--ink)]/65">
+                Preferisci dirci qualcosa senza pubblicarlo? Compila il form: arriva in agenzia
+                come un messaggio di contatto.
+              </p>
+            </div>
             <ContactForm
               tone="light"
               initialService="Feedback privato"
