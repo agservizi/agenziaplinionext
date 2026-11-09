@@ -1,11 +1,13 @@
+/**
+ * Callers: /deposito-bagagli/i-miei-depositi page.
+ * API: GET /api/deposito-bagagli/deposits?email=
+ * User: "/deposito-bagagli/i-miei-depositi e /fermo-deposito/i-miei-pacchi non sono in brutal editorial"
+ */
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import Container from "@/components/Container";
-
-/* ─── Types ────────────────────────────────────────────────────────── */
+import { motion, useReducedMotion } from "framer-motion";
 
 type DepositStatus =
   | "PRENOTATO"
@@ -25,22 +27,7 @@ type DepositSummary = {
 
 type FetchState = "idle" | "loading" | "done" | "error";
 
-/* ─── Constants ────────────────────────────────────────────────────── */
-
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
-
-const STATUS_BADGE: Record<DepositStatus, string> = {
-  PRENOTATO:
-    "bg-[#5E0ED7]/15 text-purple-300 ring-1 ring-[#5E0ED7]/40",
-  CHECK_IN:
-    "bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/40",
-  COMPLETATO:
-    "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40",
-  ANNULLATO:
-    "bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/40",
-  NO_SHOW:
-    "bg-slate-500/15 text-slate-400 ring-1 ring-slate-500/40",
-};
 
 const STATUS_LABEL: Record<DepositStatus, string> = {
   PRENOTATO: "Prenotato",
@@ -51,40 +38,13 @@ const STATUS_LABEL: Record<DepositStatus, string> = {
 };
 
 const INPUT_CLASS =
-  "w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 placeholder:text-slate-500";
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
 
-/* ─── Animation wrappers ───────────────────────────────────────────── */
-
-function FadeUp({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const reduced = useReducedMotion();
-  return (
-    <motion.div
-      ref={ref}
-      initial={reduced ? false : { opacity: 0, y: 36 }}
-      animate={isInView || reduced ? { opacity: 1, y: 0 } : undefined}
-      transition={{ duration: 0.75, ease: EASE, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* ─── Component ────────────────────────────────────────────────────── */
+const CTA_CLASS =
+  "brutal-cta-ink inline-flex shrink-0 items-center justify-center bg-[var(--ink)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
 
 export default function DepositsListClient() {
   const reduced = useReducedMotion();
-
   const [email, setEmail] = useState("");
   const [fetchState, setFetchState] = useState<FetchState>("idle");
   const [deposits, setDeposits] = useState<DepositSummary[]>([]);
@@ -105,74 +65,89 @@ export default function DepositsListClient() {
         limit: String(limit),
       });
       const res = await fetch(`/api/deposito-bagagli/deposits?${params}`);
-      const json = await res.json();
-
-      if (!res.ok || json.success === false) {
-        throw new Error(
-          json.error?.message ?? "Impossibile recuperare i depositi.",
-        );
+      const raw = await res.text();
+      let json: Record<string, unknown> = {};
+      try {
+        json = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+      } catch {
+        throw new Error(raw.slice(0, 140) || "Impossibile recuperare i depositi.");
       }
 
-      const wrapper = json.data ?? json;
+      if (!res.ok || json.success === false) {
+        const err = json.error as { message?: string } | undefined;
+        throw new Error(err?.message ?? "Impossibile recuperare i depositi.");
+      }
+
+      const wrapper = (json.data ?? json) as Record<string, unknown>;
       const list = Array.isArray(wrapper)
         ? wrapper
-        : wrapper.deposits ?? wrapper.items ?? wrapper.results ?? [];
-      const mapped: DepositSummary[] = list.map((d: Record<string, unknown>) => ({
-        depositCode: (d.depositCode ?? d.code ?? d.deposit_code ?? "") as string,
-        bookingDate: (d.bookingDate ?? d.booking_date ?? d.date ?? "") as string,
+        : ((wrapper.deposits ?? wrapper.items ?? wrapper.results ?? []) as Record<
+            string,
+            unknown
+          >[]);
+      const mapped: DepositSummary[] = list.map((d) => ({
+        depositCode: String(d.depositCode ?? d.code ?? d.deposit_code ?? ""),
+        bookingDate: String(d.bookingDate ?? d.booking_date ?? d.date ?? ""),
         bagCount: Number(d.bagCount ?? d.bag_count ?? d.bags ?? 0),
         status: (d.status ?? "PRENOTATO") as DepositStatus,
         totalAmount: Number(d.totalAmount ?? d.total_amount ?? d.total ?? 0),
-        currency: (d.currency ?? "EUR") as string,
+        currency: String(d.currency ?? "EUR"),
       }));
       setDeposits(mapped);
-      const meta = json.meta ?? wrapper.meta;
+      const meta = (json.meta ?? wrapper.meta) as { total?: number } | undefined;
       setTotal(meta?.total ?? mapped.length);
       setPage(pageNum);
       setFetchState("done");
     } catch (err) {
       setFetchState("error");
       setErrorMsg(
-        err instanceof Error
-          ? err.message
-          : "Si e verificato un errore. Riprova.",
+        err instanceof Error ? err.message : "Si e verificato un errore. Riprova.",
       );
     }
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    fetchDeposits(1);
+    void fetchDeposits(1);
   }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <main className="min-h-screen bg-slate-950 pb-24 pt-32">
-      <Container className="mb-12 text-center">
-        <FadeUp>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">
-            I miei depositi
-          </h1>
-        </FadeUp>
-        <FadeUp delay={0.1}>
-          <p className="mx-auto mt-4 max-w-lg text-base text-slate-400">
-            Inserisci la tua email per visualizzare le prenotazioni di deposito
-            bagagli.
-          </p>
-        </FadeUp>
-      </Container>
+    <div className="bg-[var(--paper)] text-[var(--ink)]">
+      <section className="border-b border-[var(--ink)]/10 px-5 py-8 md:px-8">
+        <motion.p
+          initial={reduced ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40"
+        >
+          Deposito bagagli
+        </motion.p>
+        <motion.h1
+          initial={reduced ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ease: EASE, duration: 0.55 }}
+          className="display-type mt-3 text-[clamp(1.8rem,3.5vw,2.8rem)]"
+        >
+          I miei depositi
+        </motion.h1>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--ink)]/55">
+          Inserisci la tua email per vedere le prenotazioni e lo stato di ogni deposito.
+        </p>
+        <Link
+          href="/deposito-bagagli"
+          className="mt-4 inline-block text-[11px] font-bold uppercase tracking-[0.14em] text-[#5E0ED7] hover:underline"
+        >
+          Prenota un nuovo deposito
+        </Link>
+      </section>
 
-      {/* ── Search form ───────────────────────────────────────────── */}
-      <Container>
-        <FadeUp delay={0.15}>
-          <form
-            onSubmit={handleSubmit}
-            className="mx-auto flex max-w-md gap-3"
-          >
-            <label className="sr-only" htmlFor="deposit-email">
-              Indirizzo email
-            </label>
+      <section className="px-5 py-8 md:px-8">
+        <form onSubmit={handleSubmit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
+          <label className="block flex-1">
+            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
+              Email
+            </span>
             <input
               id="deposit-email"
               type="email"
@@ -180,132 +155,112 @@ export default function DepositsListClient() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={INPUT_CLASS}
-              placeholder="La tua email"
+              placeholder="tua@email.it"
               aria-label="Indirizzo email"
             />
-            <button
-              type="submit"
-              disabled={fetchState === "loading"}
-              className="shrink-0 rounded-full bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-cyan-500/40"
-            >
+          </label>
+          <div className="flex items-end">
+            <button type="submit" disabled={fetchState === "loading"} className={CTA_CLASS}>
               {fetchState === "loading" ? "Ricerca..." : "Cerca"}
             </button>
-          </form>
-        </FadeUp>
-      </Container>
+          </div>
+        </form>
 
-      {/* ── Error ─────────────────────────────────────────────────── */}
-      {errorMsg && (
-        <Container className="mt-8">
-          <p
-            role="alert"
-            className="mx-auto max-w-md text-center text-sm text-rose-300"
-          >
+        {errorMsg ? (
+          <p role="alert" className="mt-5 text-sm font-medium text-red-600">
             {errorMsg}
           </p>
-        </Container>
-      )}
+        ) : null}
 
-      {/* ── Results ───────────────────────────────────────────────── */}
-      {fetchState === "done" && (
-        <Container className="mt-12">
-          {deposits.length === 0 ? (
-            <p className="text-center text-sm text-slate-500">
-              Nessun deposito trovato per questa email.
-            </p>
-          ) : (
-            <div className="mx-auto max-w-3xl space-y-4">
-              {deposits.map((d, i) => (
-                <motion.div
-                  key={d.depositCode}
-                  initial={reduced ? false : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.45,
-                    ease: EASE,
-                    delay: i * 0.06,
-                  }}
-                >
-                  <Link
-                    href={`/deposito-bagagli/deposito/${encodeURIComponent(d.depositCode)}`}
-                    className="group block rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-cyan-500/30 hover:bg-white/[0.07]"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-lg font-bold text-white">
-                          {d.depositCode}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-400">
-                          {new Date(d.bookingDate).toLocaleDateString("it-IT", {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                          })}{" "}
-                          &middot; {d.bagCount}{" "}
-                          {d.bagCount === 1 ? "borsa" : "borse"}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${STATUS_BADGE[d.status] ?? STATUS_BADGE.PRENOTATO}`}
-                        >
-                          {STATUS_LABEL[d.status] ?? d.status}
-                        </span>
-                        {d.totalAmount != null && (
-                          <span className="text-sm font-semibold text-white">
-                            {d.totalAmount
-                              .toFixed(2)
-                              .replace(".", ",")}{" "}
-                            {d.currency ?? "EUR"}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-6">
-                  <button
-                    disabled={page <= 1}
-                    onClick={() => fetchDeposits(page - 1)}
-                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label="Pagina precedente"
-                  >
-                    Precedente
-                  </button>
-                  <span className="text-sm text-slate-400">
-                    Pagina {page} di {totalPages}
+        {fetchState === "done" ? (
+          <div className="mt-8">
+            {deposits.length === 0 ? (
+              <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_92%,white)] p-5 text-sm text-[var(--ink)]/55">
+                Nessun deposito trovato per questa email.
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 flex items-end justify-between gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
+                    Risultati
+                  </p>
+                  <span className="border border-[var(--ink)]/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+                    {total} depositi
                   </span>
-                  <button
-                    disabled={page >= totalPages}
-                    onClick={() => fetchDeposits(page + 1)}
-                    className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label="Pagina successiva"
-                  >
-                    Successiva
-                  </button>
                 </div>
-              )}
-            </div>
-          )}
-        </Container>
-      )}
+                <div className="border border-[var(--ink)]/12">
+                  {deposits.map((d, i) => (
+                    <motion.div
+                      key={d.depositCode}
+                      initial={reduced ? false : { opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, ease: EASE, delay: i * 0.04 }}
+                      className="border-t border-[var(--ink)]/10 first:border-t-0"
+                    >
+                      <Link
+                        href={`/deposito-bagagli/deposito/${encodeURIComponent(d.depositCode)}`}
+                        className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 transition hover:bg-[color-mix(in_srgb,var(--paper)_90%,white)]"
+                      >
+                        <div>
+                          <p className="text-base font-semibold text-[var(--ink)]">
+                            {d.depositCode}
+                          </p>
+                          <p className="mt-1 text-sm text-[var(--ink)]/55">
+                            {d.bookingDate
+                              ? new Date(d.bookingDate).toLocaleDateString("it-IT", {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric",
+                                })
+                              : "Data n/d"}{" "}
+                            · {d.bagCount} {d.bagCount === 1 ? "borsa" : "borse"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="border border-[var(--ink)]/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/60">
+                            {STATUS_LABEL[d.status] ?? d.status}
+                          </span>
+                          {d.totalAmount != null ? (
+                            <span className="text-sm font-semibold text-[var(--ink)]">
+                              {d.totalAmount.toFixed(2).replace(".", ",")} {d.currency || "EUR"}
+                            </span>
+                          ) : null}
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
 
-      {/* ── Back link ─────────────────────────────────────────────── */}
-      <Container className="mt-12 text-center">
-        <FadeUp delay={0.1}>
-          <Link
-            href="/deposito-bagagli"
-            className="text-sm text-cyan-400 underline decoration-cyan-400/30 underline-offset-4 transition hover:text-cyan-300"
-          >
-            Prenota un nuovo deposito
-          </Link>
-        </FadeUp>
-      </Container>
-    </main>
+                {totalPages > 1 ? (
+                  <div className="mt-6 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      disabled={page <= 1}
+                      onClick={() => void fetchDeposits(page - 1)}
+                      className="border border-[var(--ink)]/15 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/70 transition hover:border-[#5E0ED7] hover:text-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Pagina precedente"
+                    >
+                      Precedente
+                    </button>
+                    <span className="text-sm text-[var(--ink)]/45">
+                      Pagina {page} di {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={page >= totalPages}
+                      onClick={() => void fetchDeposits(page + 1)}
+                      className="border border-[var(--ink)]/15 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/70 transition hover:border-[#5E0ED7] hover:text-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Pagina successiva"
+                    >
+                      Successiva
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
+      </section>
+    </div>
   );
 }

@@ -17,7 +17,7 @@ export function generateMetadata() {
 export default function IMieiDepositiPage() {
   return (
     <>
-      <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+      <Suspense fallback={<div className="min-h-screen bg-[var(--paper)]" />}>
         <DepositsListClient />
       </Suspense>
       <BreadcrumbJsonLd

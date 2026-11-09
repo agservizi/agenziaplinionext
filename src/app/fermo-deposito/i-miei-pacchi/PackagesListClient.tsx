@@ -1,10 +1,13 @@
+/**
+ * Callers: /fermo-deposito/i-miei-pacchi page.
+ * API: GET /api/locker-point/packages?email|phone|code=
+ * User: "/deposito-bagagli/i-miei-depositi e /fermo-deposito/i-miei-pacchi non sono in brutal editorial"
+ */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import Container from "@/components/Container";
-import { FadeUp } from "@/components/motion/FadeUp";
 
 type PackageStatus =
   | "PRENOTATO"
@@ -26,16 +29,11 @@ type FetchState = "idle" | "loading" | "done" | "error";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const STATUS_BADGE: Record<PackageStatus, string> = {
-  PRENOTATO: "bg-[#5E0ED7]/15 text-purple-300 ring-1 ring-[#5E0ED7]/40",
-  IN_GIACENZA: "bg-cyan-500/15 text-cyan-300 ring-1 ring-cyan-500/40",
-  CONSEGNATO: "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/40",
-  ANNULLATO: "bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/40",
-  NO_SHOW: "bg-slate-500/15 text-slate-400 ring-1 ring-slate-500/40",
-};
-
 const INPUT_CLASS =
-  "w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 placeholder:text-slate-500";
+  "w-full border border-[var(--ink)]/15 bg-[color-mix(in_srgb,var(--paper)_88%,white)] px-3.5 py-2.5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink)]/35 focus:border-[#5E0ED7]";
+
+const CTA_CLASS =
+  "brutal-cta-ink inline-flex w-full items-center justify-center bg-[var(--ink)] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#5E0ED7] disabled:cursor-not-allowed disabled:opacity-60";
 
 export default function PackagesListClient() {
   const reduced = useReducedMotion();
@@ -64,23 +62,33 @@ export default function PackagesListClient() {
       }
 
       const res = await fetch(`/api/locker-point/packages?${params}`);
-      const json = await res.json();
-
-      if (!res.ok || json.success === false) {
-        throw new Error(json.error?.message ?? "Impossibile recuperare i pacchi.");
+      const raw = await res.text();
+      let json: Record<string, unknown> = {};
+      try {
+        json = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+      } catch {
+        throw new Error(raw.slice(0, 140) || "Impossibile recuperare i pacchi.");
       }
 
-      const wrapper = json.data ?? json;
+      if (!res.ok || json.success === false) {
+        const err = json.error as { message?: string } | undefined;
+        throw new Error(err?.message ?? "Impossibile recuperare i pacchi.");
+      }
+
+      const wrapper = (json.data ?? json) as Record<string, unknown>;
       const list = Array.isArray(wrapper)
         ? wrapper
-        : wrapper.packages ?? wrapper.items ?? wrapper.results ?? [];
+        : ((wrapper.packages ?? wrapper.items ?? wrapper.results ?? []) as Record<
+            string,
+            unknown
+          >[]);
 
       if (mode === "code" && list.length === 0 && wrapper.code) {
-        window.location.href = `/fermo-deposito/pacco/${encodeURIComponent(wrapper.code)}`;
+        window.location.href = `/fermo-deposito/pacco/${encodeURIComponent(String(wrapper.code))}`;
         return;
       }
 
-      const mapped: PackageSummary[] = list.map((p: Record<string, unknown>) => ({
+      const mapped: PackageSummary[] = list.map((p) => ({
         code: String(p.code ?? ""),
         expectedPickupDate: String(p.expectedPickupDate ?? ""),
         status: (p.status ?? "PRENOTATO") as PackageStatus,
@@ -97,47 +105,66 @@ export default function PackagesListClient() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 pb-24 pt-32">
-      <Container className="mb-12 text-center">
-        <FadeUp>
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">I miei pacchi</h1>
-        </FadeUp>
-        <FadeUp delay={0.1}>
-          <p className="mx-auto mt-4 max-w-lg text-base text-slate-400">
-            Cerca per email, telefono o codice LP per vedere le prenotazioni fermo deposito.
-          </p>
-        </FadeUp>
-      </Container>
+    <div className="bg-[var(--paper)] text-[var(--ink)]">
+      <section className="border-b border-[var(--ink)]/10 px-5 py-8 md:px-8">
+        <motion.p
+          initial={reduced ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--ink)]/40"
+        >
+          Fermo deposito
+        </motion.p>
+        <motion.h1
+          initial={reduced ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ease: EASE, duration: 0.55 }}
+          className="display-type mt-3 text-[clamp(1.8rem,3.5vw,2.8rem)]"
+        >
+          I miei pacchi
+        </motion.h1>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--ink)]/55">
+          Cerca per email, telefono o codice LP e vedi stato e ritiro previsto.
+        </p>
+        <Link
+          href="/fermo-deposito"
+          className="mt-4 inline-block text-[11px] font-bold uppercase tracking-[0.14em] text-[#5E0ED7] hover:underline"
+        >
+          Nuova prenotazione
+        </Link>
+      </section>
 
-      <Container>
-        <FadeUp delay={0.15}>
-          <div className="mx-auto mb-6 flex max-w-md justify-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMode("email")}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                mode === "email"
-                  ? "bg-cyan-500 text-slate-950"
-                  : "border border-white/10 text-slate-400 hover:text-white"
-              }`}
-            >
-              Email / telefono
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("code")}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                mode === "code"
-                  ? "bg-cyan-500 text-slate-950"
-                  : "border border-white/10 text-slate-400 hover:text-white"
-              }`}
-            >
-              Codice LP
-            </button>
-          </div>
+      <section className="px-5 py-8 md:px-8">
+        <div className="mb-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setMode("email")}
+            className={`border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+              mode === "email"
+                ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                : "border-[var(--ink)]/15 text-[var(--ink)]/55 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+            }`}
+          >
+            Email / telefono
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("code")}
+            className={`border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.14em] transition ${
+              mode === "code"
+                ? "border-[var(--ink)] bg-[var(--ink)] text-white"
+                : "border-[var(--ink)]/15 text-[var(--ink)]/55 hover:border-[#5E0ED7] hover:text-[#5E0ED7]"
+            }`}
+          >
+            Codice LP
+          </button>
+        </div>
 
-          <form onSubmit={fetchPackages} className="mx-auto max-w-md space-y-3">
-            {mode === "code" ? (
+        <form onSubmit={fetchPackages} className="max-w-xl space-y-3">
+          {mode === "code" ? (
+            <label className="block">
+              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
+                Codice pacco
+              </span>
               <input
                 type="text"
                 required
@@ -147,84 +174,105 @@ export default function PackagesListClient() {
                 placeholder="LP-XXXXXX"
                 aria-label="Codice pacco"
               />
-            ) : (
-              <>
+            </label>
+          ) : (
+            <>
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
+                  Email
+                </span>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={INPUT_CLASS}
-                  placeholder="La tua email"
+                  placeholder="tua@email.it"
                   aria-label="Email"
                 />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ink)]/45">
+                  Telefono
+                </span>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className={INPUT_CLASS}
-                  placeholder="Telefono (opzionale)"
+                  placeholder="Opzionale"
                   aria-label="Telefono"
                 />
-              </>
-            )}
-            <button
-              type="submit"
-              disabled={fetchState === "loading"}
-              className="w-full rounded-full bg-cyan-500 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-50"
-            >
-              {fetchState === "loading" ? "Ricerca..." : "Cerca"}
-            </button>
-          </form>
-        </FadeUp>
-      </Container>
+              </label>
+            </>
+          )}
+          <button type="submit" disabled={fetchState === "loading"} className={CTA_CLASS}>
+            {fetchState === "loading" ? "Ricerca..." : "Cerca"}
+          </button>
+        </form>
 
-      {errorMsg && (
-        <Container className="mt-8">
-          <p role="alert" className="text-center text-sm text-rose-300">
+        {errorMsg ? (
+          <p role="alert" className="mt-5 text-sm font-medium text-red-600">
             {errorMsg}
           </p>
-        </Container>
-      )}
+        ) : null}
 
-      {fetchState === "done" && (
-        <Container className="mt-12">
-          {packages.length === 0 ? (
-            <p className="text-center text-sm text-slate-500">Nessun pacco trovato.</p>
-          ) : (
-            <div className="mx-auto max-w-3xl space-y-4">
-              {packages.map((p, i) => (
-                <motion.div
-                  key={p.code}
-                  initial={reduced ? false : { opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
-                >
-                  <Link
-                    href={`/fermo-deposito/pacco/${encodeURIComponent(p.code)}`}
-                    className="block rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:border-cyan-500/30 hover:bg-white/[0.07]"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <span className="text-lg font-bold text-cyan-400">{p.code}</span>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_BADGE[p.status]}`}
+        {fetchState === "done" ? (
+          <div className="mt-8">
+            {packages.length === 0 ? (
+              <div className="border border-[var(--ink)]/12 bg-[color-mix(in_srgb,var(--paper)_92%,white)] p-5 text-sm text-[var(--ink)]/55">
+                Nessun pacco trovato.
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 flex items-end justify-between gap-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ink)]/40">
+                    Risultati
+                  </p>
+                  <span className="border border-[var(--ink)]/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ink)]/45">
+                    {packages.length} pacchi
+                  </span>
+                </div>
+                <div className="border border-[var(--ink)]/12">
+                  {packages.map((p, i) => (
+                    <motion.div
+                      key={p.code}
+                      initial={reduced ? false : { opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, ease: EASE, delay: i * 0.04 }}
+                      className="border-t border-[var(--ink)]/10 first:border-t-0"
+                    >
+                      <Link
+                        href={`/fermo-deposito/pacco/${encodeURIComponent(p.code)}`}
+                        className="block px-4 py-4 transition hover:bg-[color-mix(in_srgb,var(--paper)_90%,white)]"
                       >
-                        {p.statusLabel}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-400">{p.recipientName}</p>
-                    {p.expectedPickupDate && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        Ritiro previsto:{" "}
-                        {new Date(p.expectedPickupDate + "T12:00:00").toLocaleDateString("it-IT")}
-                      </p>
-                    )}
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </Container>
-      )}
-    </main>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <span className="text-base font-semibold text-[var(--ink)]">
+                            {p.code}
+                          </span>
+                          <span className="border border-[var(--ink)]/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--ink)]/60">
+                            {p.statusLabel}
+                          </span>
+                        </div>
+                        {p.recipientName ? (
+                          <p className="mt-2 text-sm text-[var(--ink)]/55">{p.recipientName}</p>
+                        ) : null}
+                        {p.expectedPickupDate ? (
+                          <p className="mt-1 text-xs text-[var(--ink)]/45">
+                            Ritiro previsto:{" "}
+                            {new Date(p.expectedPickupDate + "T12:00:00").toLocaleDateString(
+                              "it-IT",
+                            )}
+                          </p>
+                        ) : null}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : null}
+      </section>
+    </div>
   );
 }
