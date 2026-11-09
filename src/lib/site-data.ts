@@ -88,7 +88,6 @@ export const serviceCategories: ServiceCategory[] = [
     items: [
       { title: "Iliad Space", description: "Mobile e fibra, ti spieghiamo le differenze." },
       { title: "Fastweb", description: "Fibra e mobile, verifica copertura inclusa." },
-      { title: "Very Mobile", description: "Poche complicazioni, prezzo fisso." },
       { title: "Ho. Mobile", description: "Attivazione e portabilita in sede." },
       { title: "Digi Mobile", description: "Piani e attivazioni con assistenza." },
     ],
@@ -102,6 +101,8 @@ export const serviceCategories: ServiceCategory[] = [
       { title: "Enel Energia", description: "Luce e gas, ti seguiamo nel cambio." },
       { title: "A2A Energia", description: "Confrontiamo i costi con la tua bolletta." },
       { title: "Fastweb Energia", description: "Luce e gas con gestione da app." },
+      { title: "Plenitude", description: "Luce e gas, con confronto sulla tua bolletta." },
+      { title: "Sentra Energia", description: "Attivazione e cambio fornitore assistito." },
     ],
   },
   {
@@ -143,3 +144,30 @@ export const serviceCategories: ServiceCategory[] = [
     ],
   },
 ];
+
+
+
+export function getMarqueeItems(): string[] {
+  return [
+    "Bollettini",
+    "PagoPA",
+    "SPID",
+    "PEC",
+    "Firma digitale",
+    "BRT",
+    "SEND",
+    "Luce e gas",
+    "Telefonia",
+    "CAF",
+    "Deposito bagagli",
+    "Fermo deposito",
+  ];
+}
+
+export function getOpeningHours() {
+  return [
+    { day: "Lun – Ven", hours: "08:45–13:20 / 16:20–19:00" },
+    { day: "Sabato", hours: "09:20–12:30" },
+    { day: "Domenica", hours: "Chiuso" },
+  ];
+}
